@@ -11,7 +11,7 @@ Cloudinary offers comprehensive APIs and administration capabilities and is easy
 
 Cloudinary provides URL and HTTP based APIs that can be easily integrated with any Web development framework. 
 
-For Android, Cloudinary provides a library for simplifying the integration even further.
+For Android, Cloudinary provides a library for simplifying the integration even further. The library requires Android 2.3 or higher.
 
 ## Setup ######################################################################
 
