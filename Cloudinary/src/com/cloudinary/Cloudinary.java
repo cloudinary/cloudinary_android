@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -79,8 +82,16 @@ public class Cloudinary {
 	}
 
 	public String signedPreloadedImage(Map result) {
+		try {
+			return signedPreloadedImage(new JSONObject(result));
+		} catch (JSONException e) {
+			throw new IllegalArgumentException("Bad result map");
+		}
+	}
+
+	public String signedPreloadedImage(JSONObject result) throws JSONException {
 		return result.get("resource_type") + "/upload/v" + result.get("version") + "/" + result.get("public_id")
-				+ (result.containsKey("format") ? "." + result.get("format") : "") + "#" + result.get("signature");
+			+ (result.has("format") ? "." + result.get("format") : "") + "#" + result.get("signature");
 	}
 
 	public String apiSignRequest(Map<String, Object> paramsToSign, String apiSecret) {
