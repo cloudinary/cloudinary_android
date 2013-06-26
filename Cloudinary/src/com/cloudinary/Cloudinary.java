@@ -30,27 +30,83 @@ public class Cloudinary {
 	public final static String AKAMAI_SHARED_CDN = "cloudinary-a.akamaihd.net";
 	public final static String SHARED_CDN = AKAMAI_SHARED_CDN;
 
-	private final Map config = new HashMap();
+	public final Configuration config;
 
+	public static class Configuration {
+		public String cloudName;
+		public String apiKey;
+		public String apiSecret;
+		public String secureDistribution;
+		public String cname;
+		public String uploadPrefix;
+		public boolean secure = false;
+		public boolean privateCdn = false;
+		public boolean cdnSubdomain = false;
+		public boolean shorten = false;		
+
+		public Configuration() {
+		}
+		
+		public Configuration(String cloudName) {
+			this.cloudName = cloudName;
+		}
+
+		public Configuration(Configuration other) {
+			this.cloudName = other.cloudName;
+			this.apiKey = other.apiKey;
+			this.apiSecret = other.apiSecret;
+			this.secureDistribution = other.secureDistribution;
+			this.cname = other.cname;
+			this.uploadPrefix = other.uploadPrefix;
+			this.secure = other.secure;
+			this.privateCdn = other.privateCdn;
+			this.cdnSubdomain = other.cdnSubdomain;
+			this.shorten = other.shorten;
+		}
+
+		public Configuration(Map config) {
+			update(config);
+		}
+		
+		public void update(Map config) {
+			this.cloudName = (String) config.get("cloud_name");
+			this.apiKey = (String) config.get("api_key");
+			this.apiSecret = (String) config.get("api_secret");
+			this.secureDistribution = (String) config.get("secure_distribution");
+			this.cname = (String) config.get("cname");
+			this.secure = asBoolean(config.get("secure"), false);
+			this.privateCdn = asBoolean(config.get("private_cdn"), false);
+			this.cdnSubdomain = asBoolean(config.get("cdn_subdomain"), false);
+			this.shorten = asBoolean(config.get("shorten"), false);			
+			this.uploadPrefix = (String) config.get("upload_prefix");
+		}
+	}
+	
 	public Cloudinary(Map config) {
-		this.config.putAll(config);
+		this.config = new Configuration(config);
+	}
+
+	public Cloudinary(Configuration config) {
+		this.config = new Configuration(config);
 	}
 
 	public Cloudinary(String cloudinaryUrl) {
-		initFromUrl(cloudinaryUrl);
+		this.config = new Configuration(parseConfigUrl(cloudinaryUrl));
 	}
 
 	public Cloudinary(Context context) {
+		this.config = new Configuration();
 		try {
 			PackageManager packageManager = context.getPackageManager();
 			ApplicationInfo info = packageManager.getApplicationInfo( context.getPackageName(), PackageManager.GET_META_DATA);
 			if (info == null|| info.metaData == null) return;
 			String cloudinaryUrl = (String) info.metaData.get("CLOUDINARY_URL");
 			if (cloudinaryUrl == null) return;
-			initFromUrl(cloudinaryUrl);
+			this.config.update(parseConfigUrl(cloudinaryUrl));
 		} catch (NameNotFoundException e) {
 			// No metadata found
 		}
+		
 	}
 
 	public Url url() {
@@ -62,8 +118,8 @@ public class Cloudinary {
 	}
 
 	public String cloudinaryApiUrl(String action, Map options) {
-		String cloudinary = asString(options.get("upload_prefix"), asString(this.config.get("upload_prefix"), "https://api.cloudinary.com"));
-		String cloud_name = asString(options.get("cloud_name"), asString(this.config.get("cloud_name")));
+		String cloudinary = asString(options.get("upload_prefix"), asString(this.config.uploadPrefix, "https://api.cloudinary.com"));
+		String cloud_name = asString(options.get("cloud_name"), asString(this.config.cloudName));
 		if (cloud_name == null)
 			throw new IllegalArgumentException("Must supply cloud_name in tag or in configuration");
 		String resource_type = asString(options.get("resource_type"), "image");
@@ -116,10 +172,10 @@ public class Cloudinary {
 	}
 
 	public String privateDownload(String publicId, String format, Map<String, Object> options) throws URISyntaxException {
-		String apiKey = Cloudinary.asString(options.get("api_key"), this.getStringConfig("api_key"));
+		String apiKey = Cloudinary.asString(options.get("api_key"), this.config.apiKey);
 		if (apiKey == null)
 			throw new IllegalArgumentException("Must supply api_key");
-		String apiSecret = Cloudinary.asString(options.get("api_secret"), this.getStringConfig("api_secret"));
+		String apiSecret = Cloudinary.asString(options.get("api_secret"), this.config.apiSecret);
 		if (apiSecret == null)
 			throw new IllegalArgumentException("Must supply api_secret");
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -143,40 +199,26 @@ public class Cloudinary {
 		return builder.toString();
 	}
 
-	protected void initFromUrl(String cloudinaryUrl) {
+	protected Map parseConfigUrl(String cloudinaryUrl) {
+		Map params = new HashMap();
 		URI cloudinaryUri = URI.create(cloudinaryUrl);
-		setConfig("cloud_name", cloudinaryUri.getHost());
+		params.put("cloud_name", cloudinaryUri.getHost());
 		String[] creds = cloudinaryUri.getUserInfo().split(":");
-		setConfig("api_key", creds[0]);
-		setConfig("api_secret", creds[1]);
-		setConfig("private_cdn", !TextUtils.isEmpty(cloudinaryUri.getPath()));
-		setConfig("secure_distribution", cloudinaryUri.getPath());
+		params.put("api_key", creds[0]);
+		params.put("api_secret", creds[1]);
+		params.put("private_cdn", !TextUtils.isEmpty(cloudinaryUri.getPath()));
+		params.put("secure_distribution", cloudinaryUri.getPath());
 		if (cloudinaryUri.getQuery() != null) {
 			for (String param : cloudinaryUri.getQuery().split("&")) {
 				String[] keyValue = param.split("=");
 				try {
-					setConfig(keyValue[0], URLDecoder.decode(keyValue[1], "ASCII"));
+					params.put(keyValue[0], URLDecoder.decode(keyValue[1], "ASCII"));
 				} catch (UnsupportedEncodingException e) {
 					throw new RuntimeException("Unexpected exception", e);
 				}
 			}
 		}
-	}
-
-	public boolean getBooleanConfig(String key, boolean default_value) {
-		return asBoolean(this.config.get(key), default_value);
-	}
-
-	public String getStringConfig(String key, String default_value) {
-		return asString(this.config.get(key), default_value);
-	}
-
-	public String getStringConfig(String key) {
-		return asString(this.config.get(key));
-	}
-
-	public void setConfig(String key, Object value) {
-		this.config.put(key, value);
+		return params;
 	}
 
 	public static String asString(Object value) {

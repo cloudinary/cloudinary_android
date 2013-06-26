@@ -23,7 +23,7 @@ public class UploaderTest extends InstrumentationTestCase {
 		this.cloudinary = new Cloudinary(getInstrumentation().getContext());
 		if (first) {
 			first = false;
-			if (cloudinary.getStringConfig("api_secret") == null) {
+			if (cloudinary.config.apiSecret == null) {
 				Log.e("UploaderTest", "Please CLOUDINARY_URL in AndroidManifest for Upload test to run");
 			}
 		}
@@ -33,23 +33,23 @@ public class UploaderTest extends InstrumentationTestCase {
 		return getInstrumentation().getContext().getAssets().open("images/"+filename);
 	}
 	public void testUpload() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.emptyMap());
 		assertEquals(result.getLong("width"), 241L);
 		assertEquals(result.getLong("height"), 51L);
 		Map<String, Object> to_sign = new HashMap<String, Object>();
 		to_sign.put("public_id", result.getString("public_id"));
 		to_sign.put("version", Cloudinary.asString(result.get("version")));
-		String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.getStringConfig("api_secret"));
+		String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
 		assertEquals(result.get("signature"), expected_signature);
 	}
 
 	public void testUploadExternalSignature() throws Exception {
-		String apiSecret = cloudinary.getStringConfig("api_secret");
+		String apiSecret = cloudinary.config.apiSecret;
 		if (apiSecret == null) return;
 		Map<String,String> config = new HashMap<String,String>();
-		config.put("api_key", cloudinary.getStringConfig("api_key"));
-		config.put("cloud_name", cloudinary.getStringConfig("cloud_name"));
+		config.put("api_key", cloudinary.config.apiKey);
+		config.put("cloud_name", cloudinary.config.cloudName);
 		
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("timestamp", Long.valueOf(System.currentTimeMillis() / 1000L).toString());
@@ -66,7 +66,7 @@ public class UploaderTest extends InstrumentationTestCase {
 	}
 
 	public void testRename() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.emptyMap());
 
 		cloudinary.uploader().rename(result.getString("public_id"), result.get("public_id") + "2", Cloudinary.emptyMap());
@@ -84,7 +84,7 @@ public class UploaderTest extends InstrumentationTestCase {
 	}
 
 	public void testExplicit() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		JSONObject result = cloudinary.uploader()
 				.explicit(
 						"cloudinary",
@@ -96,26 +96,26 @@ public class UploaderTest extends InstrumentationTestCase {
 	}
 
 	public void testEager() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		cloudinary.uploader().upload(getImageStream("logo.png"),
 				Cloudinary.asMap("eager", Collections.singletonList(new Transformation().crop("scale").width(2.0))));
 	}
 
 	public void testHeaders() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("headers", new String[] { "Link: 1" }));
 		cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("headers", Cloudinary.asMap("Link", "1")));
 	}
 
 	public void testText() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		JSONObject result = cloudinary.uploader().text("hello world", Cloudinary.emptyMap());
 		assertTrue(result.getInt("width") > 1);
 		assertTrue(result.getInt("height") > 1);
 	}
 
 	public void testSprite() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		cloudinary.uploader().upload(getImageStream("logo.png"),
 				Cloudinary.asMap("tags", "sprite_test_tag", "public_id", "sprite_test_tag_1"));
 		cloudinary.uploader().upload(getImageStream("logo.png"),
@@ -130,7 +130,7 @@ public class UploaderTest extends InstrumentationTestCase {
 	}
 
 	public void testMulti() throws Exception {
-		if (cloudinary.getStringConfig("api_secret") == null) return;
+		if (cloudinary.config.apiSecret == null) return;
 		cloudinary.uploader().upload(getImageStream("logo.png"),
 				Cloudinary.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_1"));
 		cloudinary.uploader().upload(getImageStream("logo.png"),

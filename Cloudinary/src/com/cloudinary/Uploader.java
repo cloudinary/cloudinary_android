@@ -24,7 +24,7 @@ public class Uploader {
 	public Uploader(Cloudinary cloudinary) {
 		this.cloudinary = cloudinary;
 	}
-	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "eager_async", "invalidate"};
+	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "eager_async", "invalidate", "discard_original_filename"};
 
 	public Map<String, Object> buildUploadParams(Map options) {
         if (options == null) options = Cloudinary.emptyMap();
@@ -191,7 +191,7 @@ public class Uploader {
 	public JSONObject callApi(String action, Map<String, Object> params, Map options, Object file) throws IOException {
         if (options == null) options = Cloudinary.emptyMap();
 		boolean returnError = Cloudinary.asBoolean(options.get("return_error"), false);
-		String apiKey = Cloudinary.asString(options.get("api_key"), this.cloudinary.getStringConfig("api_key"));
+		String apiKey = Cloudinary.asString(options.get("api_key"), this.cloudinary.config.apiKey);
 		if (apiKey == null)
 			throw new IllegalArgumentException("Must supply api_key");
 
@@ -200,7 +200,7 @@ public class Uploader {
 			params.put("signature", options.get("signature"));
 			params.put("api_key", apiKey);
 	    } else {	    
-			String apiSecret = Cloudinary.asString(options.get("api_secret"), this.cloudinary.getStringConfig("api_secret"));
+			String apiSecret = Cloudinary.asString(options.get("api_secret"), this.cloudinary.config.apiSecret);
 			if (apiSecret == null)
 				throw new IllegalArgumentException("Must supply api_secret");
 			params.put("timestamp", Long.valueOf(System.currentTimeMillis() / 1000L).toString());

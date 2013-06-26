@@ -5,16 +5,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.CRC32;
 
+import com.cloudinary.Cloudinary.Configuration;
+
 import android.text.TextUtils;
 
 public class Url {
-	String cloudName;
-	boolean secure;
-	boolean privateCdn;
-	String secureDistribution;
-	boolean cdnSubdomain;
-	boolean shorten;
-	String cname;
+	private final Configuration config;
 	String type = "upload";
 	String resourceType = "image";
 	String format = null;
@@ -22,13 +18,7 @@ public class Url {
 	Transformation transformation = null;
 
 	public Url(Cloudinary cloudinary) {
-		this.cloudName = cloudinary.getStringConfig("cloud_name");
-		this.secureDistribution = cloudinary.getStringConfig("secure_distribution");
-		this.cname = cloudinary.getStringConfig("cname");
-		this.secure = cloudinary.getBooleanConfig("secure", false);
-		this.privateCdn = cloudinary.getBooleanConfig("private_cdn", false);
-		this.cdnSubdomain = cloudinary.getBooleanConfig("cdn_subdomain", false);
-		this.shorten = cloudinary.getBooleanConfig("shorten", false);
+		this.config = new Configuration(cloudinary.config);
 	}
 
 	public Url type(String type) {
@@ -51,17 +41,17 @@ public class Url {
 	}
 
 	public Url cloudName(String cloudName) {
-		this.cloudName = cloudName;
+		this.config.cloudName = cloudName;
 		return this;
 	}
 
 	public Url secureDistribution(String secureDistribution) {
-		this.secureDistribution = secureDistribution;
+		this.config.secureDistribution = secureDistribution;
 		return this;
 	}
 
 	public Url cname(String cname) {
-		this.cname = cname;
+		this.config.cname = cname;
 		return this;
 	}
 
@@ -76,22 +66,22 @@ public class Url {
 	}
 
 	public Url secure(boolean secure) {
-		this.secure = secure;
+		this.config.secure = secure;
 		return this;
 	}
 
 	public Url privateCdn(boolean privateCdn) {
-		this.privateCdn = privateCdn;
+		this.config.privateCdn = privateCdn;
 		return this;
 	}
 
 	public Url cdnSubdomain(boolean cdnSubdomain) {
-		this.cdnSubdomain = cdnSubdomain;
+		this.config.cdnSubdomain = cdnSubdomain;
 		return this;
 	}
 
 	public Url shorten(boolean shorten) {
-		this.shorten = shorten;
+		this.config.shorten = shorten;
 		return this;
 	}
 
@@ -107,7 +97,7 @@ public class Url {
 			this.format = null;
 		}
 		String transformationStr = transformation().generate();
-		if (TextUtils.isEmpty(this.cloudName)) {
+		if (TextUtils.isEmpty(this.config.cloudName)) {
 			throw new IllegalArgumentException("Must supply cloud_name in tag or in configuration");
 		}
 
@@ -123,23 +113,23 @@ public class Url {
 		} else if (format != null) {
 			source = source + "." + format;
 		}
-		if (secure && TextUtils.isEmpty(secureDistribution)) {
-			secureDistribution = Cloudinary.SHARED_CDN;
+		if (config.secure && TextUtils.isEmpty(config.secureDistribution)) {
+			config.secureDistribution = Cloudinary.SHARED_CDN;
 		}
 		String prefix;
-		if (secure) {
-			prefix = "https://" + secureDistribution;
+		if (config.secure) {
+			prefix = "https://" + config.secureDistribution;
 		} else {
 			CRC32 crc32 = new CRC32();
 			crc32.update(source.getBytes());
-			String subdomain = cdnSubdomain ? "a" + ((crc32.getValue() % 5 + 5) % 5 + 1) + "." : "";
-			String host = cname != null ? cname : (privateCdn ? cloudName + "-" : "") + "res.cloudinary.com";
+			String subdomain = config.cdnSubdomain ? "a" + ((crc32.getValue() % 5 + 5) % 5 + 1) + "." : "";
+			String host = config.cname != null ? config.cname : (config.privateCdn ? config.cloudName + "-" : "") + "res.cloudinary.com";
 			prefix = "http://" + subdomain + host;
 		}
-		if (!privateCdn || (secure && Cloudinary.AKAMAI_SHARED_CDN.equals(secureDistribution)))
-			prefix = prefix + "/" + cloudName;
+		if (!config.privateCdn || (config.secure && Cloudinary.AKAMAI_SHARED_CDN.equals(config.secureDistribution)))
+			prefix = prefix + "/" + config.cloudName;
 
-		if (shorten && resourceType.equals("image") && type.equals("upload")) {
+		if (config.shorten && resourceType.equals("image") && type.equals("upload")) {
 			resourceType = "iu";
 			type = "";
 		}
