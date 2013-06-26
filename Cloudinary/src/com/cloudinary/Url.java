@@ -3,6 +3,8 @@ package com.cloudinary;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 
 import com.cloudinary.Cloudinary.Configuration;
@@ -11,6 +13,8 @@ import android.text.TextUtils;
 
 public class Url {
 	private final Configuration config;
+	boolean shorten;
+	String publicId = null;
 	String type = "upload";
 	String resourceType = "image";
 	String format = null;
@@ -19,6 +23,49 @@ public class Url {
 
 	public Url(Cloudinary cloudinary) {
 		this.config = new Configuration(cloudinary.config);
+	}
+
+	private static Pattern identifierPattern = Pattern.compile(
+			"^(?:([^/]+)/)??(?:([^/]+)/)??(?:v(\\d+)/)?" + 
+			"(?:([^#/]+?)(?:\\.([^.#/]+))?)(?:#([^/]+))?$");
+	/**
+	 * Parses a cloudinary identifier of the form:
+	 * [<resource_type>/][<image_type>/][v<version>/]<public_id>[.<format>][#<signature>]
+	 */
+	public Url fromIdentifier(String identifier) {
+		Matcher matcher = identifierPattern.matcher(identifier);
+		if (!matcher.matches()) {
+			throw new RuntimeException(String.format("Couldn't parse identifier %s", identifier));
+		}
+
+		String resourceType = matcher.group(1);
+		if (resourceType != null) {
+			resourceType(resourceType);
+		}
+
+		String type = matcher.group(2);
+		if (type != null) {
+			type(type);
+		}
+
+		String version = matcher.group(3);
+		if (version != null) {
+			version(version);
+		}
+
+		String publicId = matcher.group(4);
+		if (publicId != null) {
+			publicId(publicId);
+		}
+
+		String format = matcher.group(5);
+		if (format != null) {
+			format(format);
+		}
+
+		// Signature (group 6) is not used
+
+		return this;
 	}
 
 	public Url type(String type) {
@@ -32,6 +79,11 @@ public class Url {
 	
 	public Url resourceType(String resourceType) {
 		this.resourceType = resourceType;
+		return this;
+	}
+
+	public Url publicId(Object publicId) {
+		this.publicId = Cloudinary.asString(publicId);
 		return this;
 	}
 
@@ -91,6 +143,10 @@ public class Url {
 		return this.transformation;
 	}
 
+	public String generate() {
+		return generate(null);
+	}
+
 	public String generate(String source) {
 		if (type.equals("fetch") && !TextUtils.isEmpty(format)) {
 			transformation().fetchFormat(format);
@@ -101,8 +157,12 @@ public class Url {
 			throw new IllegalArgumentException("Must supply cloud_name in tag or in configuration");
 		}
 
-		if (source == null)
-			return null;
+		if (source == null) {
+			if (publicId == null) {
+				return null;
+			}
+			source = publicId;
+		}
 		String original_source = source;
 
 		if (source.toLowerCase(Locale.US).matches("^https?:/.*")) {

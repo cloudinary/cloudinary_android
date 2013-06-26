@@ -213,8 +213,8 @@ public class Uploader {
 
 		// Remove blank parameters
 		for (Map.Entry<String, Object> param : params.entrySet()) {
-			if (param.getValue() instanceof String) { 
-				String value = (String) param.getValue();
+			if (param.getValue() instanceof String || param.getValue() instanceof Integer) { 
+				String value = Cloudinary.asString(param.getValue());
 				if (!TextUtils.isEmpty(value)) {
 					multipart.addFormField(param.getKey(), value);
 				}

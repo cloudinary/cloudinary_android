@@ -198,9 +198,9 @@ Additional resources are available at:
 
 ## Support
 
-You can [open an issue through GitHub](https://github.com/cloudinary/cloudinary_java/issues).
+You can [open an issue through GitHub](https://github.com/cloudinary/cloudinary_android/issues).
 
-Contact us at [info@cloudinary.com](mailto:info@cloudinary.com)
+Contact us at [support@cloudinary.com](mailto:support@cloudinary.com)
 
 Or via Twitter: [@cloudinary](https://twitter.com/#!/cloudinary)
 
