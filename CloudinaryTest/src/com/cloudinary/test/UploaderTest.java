@@ -44,6 +44,30 @@ public class UploaderTest extends InstrumentationTestCase {
 		assertEquals(result.get("signature"), expected_signature);
 	}
 
+	public void testUploadUrl() throws Exception {
+		if (cloudinary.config.apiSecret == null) return;
+		JSONObject result = cloudinary.uploader().upload("http://cloudinary.com/images/logo.png", Cloudinary.emptyMap());
+        assertEquals(result.getLong("width"), 241L);
+        assertEquals(result.getLong("height"), 51L);
+        Map<String, Object> to_sign = new HashMap<String, Object>();
+        to_sign.put("public_id", (String) result.get("public_id"));
+        to_sign.put("version", Cloudinary.asString(result.get("version")));
+		String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        assertEquals(result.get("signature"), expected_signature);
+    }
+
+	public void testUploadDataUri() throws Exception {
+		if (cloudinary.config.apiSecret == null) return;
+    	JSONObject result = cloudinary.uploader().upload("data:image/png;base64,iVBORw0KGgoAA\nAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l\nEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\nP9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", Cloudinary.emptyMap());
+        assertEquals(result.getLong("width"), 16L);
+        assertEquals(result.getLong("height"), 16L);
+        Map<String, Object> to_sign = new HashMap<String, Object>();
+        to_sign.put("public_id", (String) result.get("public_id"));
+        to_sign.put("version", Cloudinary.asString(result.get("version")));
+		String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        assertEquals(result.get("signature"), expected_signature);
+    }
+
 	public void testUploadExternalSignature() throws Exception {
 		String apiSecret = cloudinary.config.apiSecret;
 		if (apiSecret == null) return;
