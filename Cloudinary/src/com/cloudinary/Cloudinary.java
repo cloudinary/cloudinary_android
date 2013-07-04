@@ -214,9 +214,11 @@ public class Cloudinary {
 		Map params = new HashMap();
 		URI cloudinaryUri = URI.create(cloudinaryUrl);
 		params.put("cloud_name", cloudinaryUri.getHost());
-		String[] creds = cloudinaryUri.getUserInfo().split(":");
-		params.put("api_key", creds[0]);
-		params.put("api_secret", creds[1]);
+		if (cloudinaryUri.getUserInfo() != null) {
+			String[] creds = cloudinaryUri.getUserInfo().split(":");
+			params.put("api_key", creds[0]);
+			params.put("api_secret", creds[1]);
+		}
 		params.put("private_cdn", !TextUtils.isEmpty(cloudinaryUri.getPath()));
 		params.put("secure_distribution", cloudinaryUri.getPath());
 		if (cloudinaryUri.getQuery() != null) {
