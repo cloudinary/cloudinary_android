@@ -15,7 +15,7 @@ For Android, Cloudinary provides a library for simplifying the integration even 
 
 ## Setup ######################################################################
 
-Download cloudinaryandroid-1.0.0.jar from [here](http://res.cloudinary.com/cloudinary/raw/upload/cloudinaryandroid-1.0.0.jar) and put it in your libs folder.
+Download cloudinaryandroid-1.0.1.jar from [here](http://res.cloudinary.com/cloudinary/raw/upload/cloudinaryandroid-1.0.1.jar) and put it in your libs folder.
 
 ## Try it right away
 
