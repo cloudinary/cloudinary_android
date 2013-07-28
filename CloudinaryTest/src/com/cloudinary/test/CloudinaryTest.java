@@ -29,7 +29,7 @@ public class CloudinaryTest extends AndroidTestCase {
 	public void testSecureDistribution() {
 		// should use default secure distribution if secure=TRUE
 		String result = cloudinary.url().secure(true).generate("test");
-		assertEquals("https://cloudinary-a.akamaihd.net/test123/image/upload/test", result);
+		assertEquals("https://res.cloudinary.com/test123/image/upload/test", result);
 	}
 
 
@@ -53,7 +53,7 @@ public class CloudinaryTest extends AndroidTestCase {
 		cloudinary.config.secure = true;
 		cloudinary.config.privateCdn = true;
 		String result = cloudinary.url().generate("test");
-		assertEquals("https://cloudinary-a.akamaihd.net/test123/image/upload/test", result);
+		assertEquals("https://test123-res.cloudinary.com/image/upload/test", result);
 	}
 
 
