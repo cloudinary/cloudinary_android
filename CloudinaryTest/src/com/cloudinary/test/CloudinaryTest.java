@@ -1,5 +1,7 @@
 package com.cloudinary.test;
 
+import java.util.Map;
+
 import android.test.AndroidTestCase;
 
 import com.cloudinary.Cloudinary;
@@ -334,6 +336,21 @@ public class CloudinaryTest extends AndroidTestCase {
 		String result = cloudinary.url().shorten(true).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/iu/test", result);
 	}	
+	
+    @SuppressWarnings("unchecked")
+    public void testEscapePublicId() {
+        // should escape public_ids
+        Map<String, String> tests = Cloudinary.asMap(
+            "a b", "a%20b",
+            "a+b", "a%2Bb",
+            "a%20b", "a%20b",
+            "a-b", "a-b",
+            "a??b", "a%3F%3Fb");
+        for (Map.Entry<String, String> entry : tests.entrySet()) {
+            String result = cloudinary.url().generate(entry.getKey());        	
+            assertEquals("http://res.cloudinary.com/test123/image/upload/" + entry.getValue(), result);			
+		}
+    }
 	
 	public void testRecommendedIdentifierFormat() {
 	    String imageIdentifier = "image:upload:dfhjghjkdisudgfds7iyf.jpg";
