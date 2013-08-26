@@ -34,9 +34,11 @@ public class UploaderTest extends InstrumentationTestCase {
 	}
 	public void testUpload() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("colors", true));
 		assertEquals(result.getLong("width"), 241L);
 		assertEquals(result.getLong("height"), 51L);
+		assertNotNull(result.get("colors"));
+		assertNotNull(result.get("predominant"));
 		Map<String, Object> to_sign = new HashMap<String, Object>();
 		to_sign.put("public_id", result.getString("public_id"));
 		to_sign.put("version", Cloudinary.asString(result.get("version")));
