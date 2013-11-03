@@ -1,5 +1,7 @@
 package com.cloudinary.test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -170,4 +172,28 @@ public class UploaderTest extends InstrumentationTestCase {
 		assertTrue((result.getString("url")).contains("w_111"));
 		assertTrue((result.getString("url")).endsWith(".pdf"));
 	}
+
+	public void testUniqueFilename() throws Exception {
+
+		File f = new File(getInstrumentation().getContext().getCacheDir()
+				+ "/logo.png");
+
+		InputStream is = getImageStream("logo.png");
+		int size = is.available();
+		byte[] buffer = new byte[size];
+		is.read(buffer);
+		is.close();
+
+		FileOutputStream fos = new FileOutputStream(f);
+		fos.write(buffer);
+		fos.close();
+
+		JSONObject result = cloudinary.uploader().upload(f,
+				Cloudinary.asMap("use_filename", true));
+		assertTrue(result.getString("public_id").matches("logo_[a-z0-9]{6}"));
+		result = cloudinary.uploader().upload(f,
+				Cloudinary.asMap("use_filename", true, "unique_filename", false));
+		assertEquals(result.getString("public_id"), "logo");
+	}
+
 }

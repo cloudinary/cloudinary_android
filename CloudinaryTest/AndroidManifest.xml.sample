@@ -8,7 +8,9 @@
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.cloudinary" />
+        android:targetPackage="com.cloudinary.test" />
+        
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
         <uses-library android:name="android.test.runner" />
