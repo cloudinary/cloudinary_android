@@ -24,7 +24,7 @@ public class Uploader {
 	public Uploader(Cloudinary cloudinary) {
 		this.cloudinary = cloudinary;
 	}
-	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "unique_filename", "eager_async", "invalidate", "discard_original_filename"};
+	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "unique_filename", "eager_async", "invalidate", "discard_original_filename", "overwrite"};
 
 	public Map<String, Object> buildUploadParams(Map options) {
         if (options == null) options = Cloudinary.emptyMap();
@@ -52,6 +52,11 @@ public class Uploader {
 		params.put("proxy", (String) options.get("proxy"));
 		params.put("folder", (String) options.get("folder"));
 		params.put("tags", TextUtils.join(",", Cloudinary.asArray(options.get("tags"))));
+		if (options.get("face_coordinates") != null) {
+			params.put("face_coordinates", options.get("face_coordinates").toString());
+		}
+		params.put("allowed_formats", TextUtils.join(",", Cloudinary.asArray(options.get("allowed_formats"))));
+		params.put("context", Cloudinary.encodeMap(options.get("context")));
 		return params;
 	}
 

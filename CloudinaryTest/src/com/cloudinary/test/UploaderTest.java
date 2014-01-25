@@ -8,12 +8,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.graphics.Rect;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Coordinates;
 import com.cloudinary.Transformation;
 
 public class UploaderTest extends InstrumentationTestCase {
@@ -195,5 +198,38 @@ public class UploaderTest extends InstrumentationTestCase {
 				Cloudinary.asMap("use_filename", true, "unique_filename", false));
 		assertEquals(result.getString("public_id"), "logo");
 	}
+
+    public void testFaceCoordinates() throws Exception {
+	    	//should allow sending face coordinates
+	    	Coordinates coordinates = new Coordinates();
+	    	Rect rect1 = new Rect(121,31,231,182);
+	    	Rect rect2 = new Rect(120,30,229,270);
+	    	coordinates.addRect(rect1);
+	    	coordinates.addRect(rect2);
+	    	JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("face_coordinates", coordinates, "faces", true));
+	    	JSONArray resultFaces = result.getJSONArray("faces");
+	    	assertEquals(2, resultFaces.length());
+	    	
+	    	JSONArray resultCoordinates = resultFaces.getJSONArray(0); 
+	    	
+	    	assertEquals(rect1.left, resultCoordinates.getInt(0));
+	    	assertEquals(rect1.top, resultCoordinates.getInt(1));
+	    	assertEquals(rect1.width(), resultCoordinates.getInt(2));
+	    	assertEquals(rect1.height(), resultCoordinates.getInt(3));
+	    	
+	     resultCoordinates = resultFaces.getJSONArray(1); 
+	    	
+	    	assertEquals(rect2.left, resultCoordinates.getInt(0));
+	    	assertEquals(rect2.top, resultCoordinates.getInt(1));
+	    	assertEquals(rect2.width(), resultCoordinates.getInt(2));
+	    	assertEquals(rect2.height(), resultCoordinates.getInt(3));
+
+    }
+
+    public void testContext() throws Exception {
+	    	//should allow sending context
+	    	Map context = Cloudinary.asMap("caption", "some caption", "alt", "alternative");
+	    cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("context", context));
+    }
 
 }
