@@ -34,13 +34,11 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("https://res.cloudinary.com/test123/image/upload/test", result);
 	}
 
-
 	public void testSecureDistributionOverwrite() {
 		// should allow overwriting secure distribution if secure=TRUE
 		String result = cloudinary.url().secure(true).secureDistribution("something.else.com").generate("test");
 		assertEquals("https://something.else.com/test123/image/upload/test", result);
 	}
-
 
 	public void testSecureDistibution() {
 		// should take secure distribution from config if secure=TRUE
@@ -49,25 +47,24 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("https://config.secure.distribution.com/test123/image/upload/test", result);
 	}
 
-
 	public void testSecureAkamai() {
-		// should default to akamai if secure is given with private_cdn and no secure_distribution
+		// should default to akamai if secure is given with private_cdn and no
+		// secure_distribution
 		cloudinary.config.secure = true;
 		cloudinary.config.privateCdn = true;
 		String result = cloudinary.url().generate("test");
 		assertEquals("https://test123-res.cloudinary.com/image/upload/test", result);
 	}
 
-
 	public void testSecureNonAkamai() {
-		// should not add cloud_name if private_cdn and secure non akamai secure_distribution
+		// should not add cloud_name if private_cdn and secure non akamai
+		// secure_distribution
 		cloudinary.config.secure = true;
 		cloudinary.config.privateCdn = true;
 		cloudinary.config.secureDistribution = "something.cloudfront.net";
 		String result = cloudinary.url().generate("test");
 		assertEquals("https://something.cloudfront.net/image/upload/test", result);
 	}
-
 
 	public void testHttpPrivateCdn() {
 		// should not add cloud_name if private_cdn and not secure
@@ -76,13 +73,11 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://test123-res.cloudinary.com/image/upload/test", result);
 	}
 
-
 	public void testFormat() {
 		// should use format from options
 		String result = cloudinary.url().format("jpg").generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/test.jpg", result);
 	}
-
 
 	public void testCrop() {
 		Transformation transformation = new Transformation().width(100).height(101);
@@ -95,14 +90,12 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_crop,h_101,w_100/test", result);
 	}
 
-
 	public void testVariousOptions() {
 		// should use x, y, radius, prefix, gravity and quality from options
 		Transformation transformation = new Transformation().x(1).y(2).radius(3).gravity("center").quality(0.4).prefix("a");
 		String result = cloudinary.url().transformation(transformation).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/g_center,p_a,q_0.4,r_3,x_1,y_2/test", result);
 	}
-
 
 	public void testTransformationSimple() {
 		// should support named transformation
@@ -111,14 +104,12 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://res.cloudinary.com/test123/image/upload/t_blip/test", result);
 	}
 
-
 	public void testTransformationArray() {
 		// should support array of named transformations
 		Transformation transformation = new Transformation().named("blip", "blop");
 		String result = cloudinary.url().transformation(transformation).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/t_blip.blop/test", result);
 	}
-
 
 	public void testBaseTransformations() {
 		// should support base transformation
@@ -127,7 +118,6 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("100", transformation.getHtmlWidth().toString());
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_fill,x_100,y_100/c_crop,w_100/test", result);
 	}
-
 
 	public void testBaseTransformationArray() {
 		// should support array of base transformations
@@ -138,7 +128,6 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_fill,w_200,x_100,y_100/r_10/c_crop,w_100/test", result);
 	}
 
-
 	public void testNoEmptyTransformation() {
 		// should not include empty transformations
 		Transformation transformation = new Transformation().chain().x(100).y(100).crop("fill").chain();
@@ -146,20 +135,17 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_fill,x_100,y_100/test", result);
 	}
 
-
 	public void testType() {
 		// should use type from options
 		String result = cloudinary.url().type("facebook").generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/facebook/test", result);
 	}
 
-
 	public void testResourceType() {
 		// should use resource_type from options
 		String result = cloudinary.url().resourcType("raw").generate("test");
 		assertEquals("http://res.cloudinary.com/test123/raw/upload/test", result);
 	}
-
 
 	public void testIgnoreHttp() {
 		// should ignore http links only if type is not given or is asset
@@ -171,13 +157,11 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://res.cloudinary.com/test123/image/fetch/http://test", result);
 	}
 
-
 	public void testFetch() {
 		// should escape fetch urls
 		String result = cloudinary.url().type("fetch").generate("http://blah.com/hello?a=b");
 		assertEquals("http://res.cloudinary.com/test123/image/fetch/http://blah.com/hello%3Fa%3Db", result);
 	}
-
 
 	public void testCname() {
 		// should support extenal cname
@@ -185,20 +169,17 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://hello.com/test123/image/upload/test", result);
 	}
 
-
 	public void testCnameSubdomain() {
 		// should support extenal cname with cdn_subdomain on
 		String result = cloudinary.url().cname("hello.com").cdnSubdomain(true).generate("test");
 		assertEquals("http://a2.hello.com/test123/image/upload/test", result);
 	}
 
-
 	public void testHttpEscape() {
 		// should escape http urls
 		String result = cloudinary.url().type("youtube").generate("http://www.youtube.com/watch?v=d9NF2edxy-M");
 		assertEquals("http://res.cloudinary.com/test123/image/youtube/http://www.youtube.com/watch%3Fv%3Dd9NF2edxy-M", result);
 	}
-
 
 	public void testBackground() {
 		// should support background
@@ -210,14 +191,12 @@ public class CloudinaryTest extends AndroidTestCase {
 		assertEquals("http://res.cloudinary.com/test123/image/upload/b_rgb:112233/test", result);
 	}
 
-
 	public void testDefaultImage() {
 		// should support default_image
 		Transformation transformation = new Transformation().defaultImage("default");
 		String result = cloudinary.url().transformation(transformation).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/d_default/test", result);
 	}
-
 
 	public void testAngle() {
 		// should support angle
@@ -310,11 +289,13 @@ public class CloudinaryTest extends AndroidTestCase {
 		result = cloudinary.url().transformation(transformation).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/fl_abc.def/test", result);
 	}
-	
+
 	public void testImageTag() {
 		Transformation transformation = new Transformation().width(100).height(101).crop("crop");
 		String result = cloudinary.url().transformation(transformation).imageTag("test", Cloudinary.asMap("alt", "my image"));
-		assertEquals("<img src='http://res.cloudinary.com/test123/image/upload/c_crop,h_101,w_100/test' alt='my image' height='101' width='100'/>", result);
+		assertEquals(
+				"<img src='http://res.cloudinary.com/test123/image/upload/c_crop,h_101,w_100/test' alt='my image' height='101' width='100'/>",
+				result);
 	}
 
 	public void testFolders() {
@@ -335,35 +316,46 @@ public class CloudinaryTest extends AndroidTestCase {
 		// should allow to shorted image/upload urls
 		String result = cloudinary.url().shorten(true).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/iu/test", result);
-	}	
-	
-    @SuppressWarnings("unchecked")
-    public void testEscapePublicId() {
-        // should escape public_ids
-        Map<String, String> tests = Cloudinary.asMap(
-            "a b", "a%20b",
-            "a+b", "a%2Bb",
-            "a%20b", "a%20b",
-            "a-b", "a-b",
-            "a??b", "a%3F%3Fb");
-        for (Map.Entry<String, String> entry : tests.entrySet()) {
-            String result = cloudinary.url().generate(entry.getKey());        	
-            assertEquals("http://res.cloudinary.com/test123/image/upload/" + entry.getValue(), result);			
-		}
-    }
-	
-	public void testRecommendedIdentifierFormat() {
-	    String imageIdentifier = "image:upload:dfhjghjkdisudgfds7iyf.jpg";
-	    String[] components = imageIdentifier.split(":");
-
-	    String url = cloudinary.url().resourceType(components[0]).type(components[1]).generate(components[2]);
-	    assertEquals("http://res.cloudinary.com/test123/image/upload/dfhjghjkdisudgfds7iyf.jpg", url);
-
-	    String rawIdentifier = "raw:upload:cguysfdsfuydsfyuds31.doc";
-	    components = rawIdentifier.split(":");
-
-	    url = cloudinary.url().resourceType(components[0]).type(components[1]).generate(components[2]);
-	    assertEquals("http://res.cloudinary.com/test123/raw/upload/cguysfdsfuydsfyuds31.doc", url);
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public void testEscapePublicId() {
+		// should escape public_ids
+		Map<String, String> tests = Cloudinary.asMap("a b", "a%20b", "a+b", "a%2Bb", "a%20b", "a%20b", "a-b", "a-b", "a??b", "a%3F%3Fb");
+		for (Map.Entry<String, String> entry : tests.entrySet()) {
+			String result = cloudinary.url().generate(entry.getKey());
+			assertEquals("http://res.cloudinary.com/test123/image/upload/" + entry.getValue(), result);
+		}
+	}
+
+	public void testRecommendedIdentifierFormat() {
+		String imageIdentifier = "image:upload:dfhjghjkdisudgfds7iyf.jpg";
+		String[] components = imageIdentifier.split(":");
+
+		String url = cloudinary.url().resourceType(components[0]).type(components[1]).generate(components[2]);
+		assertEquals("http://res.cloudinary.com/test123/image/upload/dfhjghjkdisudgfds7iyf.jpg", url);
+
+		String rawIdentifier = "raw:upload:cguysfdsfuydsfyuds31.doc";
+		components = rawIdentifier.split(":");
+
+		url = cloudinary.url().resourceType(components[0]).type(components[1]).generate(components[2]);
+		assertEquals("http://res.cloudinary.com/test123/raw/upload/cguysfdsfuydsfyuds31.doc", url);
+	}
+
+	public void testSignedUrl() {
+		// should correctly sign a url
+		String expected = "http://res.cloudinary.com/test123/image/upload/s--MaRXzoEC--/c_crop,h_20,w_10/v1234/image.jpg";
+		String actual = cloudinary.url().version(1234).transformation(new Transformation().crop("crop").width(10).height(20)).signed(true)
+				.generate("image.jpg");
+		assertEquals(expected, actual);
+
+		expected = "http://res.cloudinary.com/test123/image/upload/s--ZlgFLQcO--/v1234/image.jpg";
+		actual = cloudinary.url().version(1234).signed(true).generate("image.jpg");
+		assertEquals(expected, actual);
+
+		expected = "http://res.cloudinary.com/test123/image/upload/s--Ai4Znfl3--/c_crop,h_20,w_10/image.jpg";
+		actual = cloudinary.url().transformation(new Transformation().crop("crop").width(10).height(20)).signed(true).generate("image.jpg");
+		assertEquals(expected, actual);
+	}
+
 }

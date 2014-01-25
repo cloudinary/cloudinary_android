@@ -2,6 +2,8 @@ package com.cloudinary;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -9,9 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 
-import com.cloudinary.Cloudinary.Configuration;
-
 import android.text.TextUtils;
+import android.util.Base64;
+
+import com.cloudinary.Cloudinary.Configuration;
 
 public class Url {
 	private final Configuration config;
@@ -22,6 +25,7 @@ public class Url {
 	String format = null;
 	String version = null;
 	Transformation transformation = null;
+	boolean signUrl;
 
 	public Url(Cloudinary cloudinary) {
 		this.config = new Configuration(cloudinary.config);
@@ -145,6 +149,11 @@ public class Url {
 		return this.transformation;
 	}
 
+	public Url signed(boolean signUrl) {
+		this.signUrl = signUrl;
+		return this;
+	}
+
 	public String generate() {
 		return generate(null);
 	}
@@ -211,8 +220,23 @@ public class Url {
 		else
 			version = "v" + version;
 
-		return TextUtils.join("/", new String[] { prefix, resourceType, type, transformationStr, version, source }).replaceAll(
-				"([^:])\\/+", "$1/");
+		String rest = TextUtils.join("/", new String[] {transformationStr, version, source });
+		rest = rest.replaceAll("^/+", "").replaceAll("([^:])\\/+", "$1/");
+		
+		if (signUrl) {
+			MessageDigest md = null;
+	        try {
+	            md = MessageDigest.getInstance("SHA-1");
+	        }
+	        catch(NoSuchAlgorithmException e) {
+	            throw new RuntimeException("Unexpected exception", e);
+	        }
+	        byte[] digest = md.digest((rest + this.config.apiSecret).getBytes());
+	        String signature = Base64.encodeToString(digest, Base64.NO_PADDING | Base64.URL_SAFE);
+			rest = "s--" + signature.substring(0, 8) + "--/" + rest;
+		}
+		
+		return TextUtils.join("/", new String[] { prefix, resourceType, type, rest }).replaceAll("([^:])\\/+", "$1/");
 	}
 	
 	@SuppressWarnings("unchecked")
