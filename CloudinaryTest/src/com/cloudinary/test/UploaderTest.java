@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -34,12 +35,12 @@ public class UploaderTest extends InstrumentationTestCase {
 		}
 	}
 
-	protected InputStream getImageStream(String filename) throws IOException {
-		return getInstrumentation().getContext().getAssets().open("images/"+filename);
+	protected InputStream getAssetStream(String filename) throws IOException {
+		return getInstrumentation().getContext().getAssets().open(filename);
 	}
 	public void testUpload() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("colors", true));
+		JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.asMap("colors", true));
 		assertEquals(result.getLong("width"), 241L);
 		assertEquals(result.getLong("height"), 51L);
 		assertNotNull(result.get("colors"));
@@ -86,7 +87,7 @@ public class UploaderTest extends InstrumentationTestCase {
 		params.put("timestamp", Long.valueOf(System.currentTimeMillis() / 1000L).toString());
 		params.put("signature", this.cloudinary.apiSignRequest(params, apiSecret));
 		Cloudinary emptyCloudinary = new Cloudinary(config);
-		JSONObject result = emptyCloudinary.uploader().upload(getImageStream("logo.png"), params);
+		JSONObject result = emptyCloudinary.uploader().upload(getAssetStream("images/logo.png"), params);
 		assertEquals(result.getLong("width"), 241L);
 		assertEquals(result.getLong("height"), 51L);
 		Map<String, Object> to_sign = new HashMap<String, Object>();
@@ -98,11 +99,11 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testRename() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.emptyMap());
 
 		cloudinary.uploader().rename(result.getString("public_id"), result.get("public_id") + "2", Cloudinary.emptyMap());
 
-		JSONObject result2 = cloudinary.uploader().upload(getImageStream("favicon.ico"), Cloudinary.emptyMap());
+		JSONObject result2 = cloudinary.uploader().upload(getAssetStream("images/favicon.ico"), Cloudinary.emptyMap());
 		boolean error_found = false;
 		try {
 			cloudinary.uploader().rename((String) result2.get("public_id"), result.get("public_id") + "2", Cloudinary.emptyMap());
@@ -128,14 +129,14 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testEager() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		cloudinary.uploader().upload(getImageStream("logo.png"),
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("eager", Collections.singletonList(new Transformation().crop("scale").width(2.0))));
 	}
 
 	public void testHeaders() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("headers", new String[] { "Link: 1" }));
-		cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("headers", Cloudinary.asMap("Link", "1")));
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.asMap("headers", new String[] { "Link: 1" }));
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.asMap("headers", Cloudinary.asMap("Link", "1")));
 	}
 
 	public void testText() throws Exception {
@@ -147,9 +148,9 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testSprite() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		cloudinary.uploader().upload(getImageStream("logo.png"),
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("tags", "sprite_test_tag", "public_id", "sprite_test_tag_1"));
-		cloudinary.uploader().upload(getImageStream("logo.png"),
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("tags", "sprite_test_tag", "public_id", "sprite_test_tag_2"));
 		JSONObject result = cloudinary.uploader().generate_sprite("sprite_test_tag", Cloudinary.emptyMap());
 		assertEquals(2, result.getJSONObject("image_infos").length());
@@ -162,9 +163,9 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testMulti() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		cloudinary.uploader().upload(getImageStream("logo.png"),
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_1"));
-		cloudinary.uploader().upload(getImageStream("logo.png"),
+		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_2"));
 		JSONObject result = cloudinary.uploader().multi("multi_test_tag", Cloudinary.emptyMap());
 		assertTrue((result.getString("url")).endsWith(".gif"));
@@ -181,7 +182,7 @@ public class UploaderTest extends InstrumentationTestCase {
 		File f = new File(getInstrumentation().getContext().getCacheDir()
 				+ "/logo.png");
 
-		InputStream is = getImageStream("logo.png");
+		InputStream is = getAssetStream("images/logo.png");
 		int size = is.available();
 		byte[] buffer = new byte[size];
 		is.read(buffer);
@@ -206,7 +207,7 @@ public class UploaderTest extends InstrumentationTestCase {
 	    	Rect rect2 = new Rect(120,30,229,270);
 	    	coordinates.addRect(rect1);
 	    	coordinates.addRect(rect2);
-	    	JSONObject result = cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("face_coordinates", coordinates, "faces", true));
+	    	JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.asMap("face_coordinates", coordinates, "faces", true));
 	    	JSONArray resultFaces = result.getJSONArray("faces");
 	    	assertEquals(2, resultFaces.length());
 	    	
@@ -229,7 +230,74 @@ public class UploaderTest extends InstrumentationTestCase {
     public void testContext() throws Exception {
 	    	//should allow sending context
 	    	Map context = Cloudinary.asMap("caption", "some caption", "alt", "alternative");
-	    cloudinary.uploader().upload(getImageStream("logo.png"), Cloudinary.asMap("context", context));
+	    cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.asMap("context", context));
     }
 
+    
+    public void testModerationRequest() throws Exception {
+    	//should support requesting manual moderation
+    	JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("moderation", "manual"));
+    	assertEquals("manual", result.getJSONArray("moderation").getJSONObject(0).getString("kind"));
+    	assertEquals("pending", result.getJSONArray("moderation").getJSONObject(0).getString("status"));
+    }
+    
+    
+    public void testOcrRequest() {
+    	//should support requesting ocr info
+    	try {
+    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("ocr", "illegal"));
+    	} catch(Exception e) {
+        	assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+        }
+    }
+    
+    
+    public void testRawConvertRequest() {
+    	//should support requesting raw conversion
+    	try {
+    		cloudinary.uploader().upload(getAssetStream("docx.docx"),  Cloudinary.asMap("raw_convert", "illegal", "resource_type", "raw"));
+    	} catch(Exception e) {
+    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+        }
+    }
+    
+    
+    public void testCategorizationRequest() {
+    	//should support requesting categorization
+    	try {
+    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("categorization", "illegal"));
+    	} catch(Exception e) {
+    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+        }
+    }
+    
+    
+    public void testDetectionRequest() {
+    	//should support requesting detection
+    	try {
+    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("detection", "illegal"));
+    	} catch(Exception e) {
+    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+        }
+    }
+    
+    
+    public void testSimilaritySearchRequest() {
+    	//should support requesting similarity search
+    	try {
+    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("similarity_search", "illegal"));
+    	} catch(Exception e) {
+    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+        }
+    }
+    
+    
+    public void testAutoTaggingRequest() {
+    	//should support requesting auto tagging
+    	try {
+    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("auto_tagging", 0.5f));
+    	} catch(Exception e) {
+    		assertTrue(e.getMessage().matches("^Must use(.*)"));
+        }
+    }    
 }

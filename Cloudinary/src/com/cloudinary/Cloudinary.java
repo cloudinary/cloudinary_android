@@ -307,4 +307,14 @@ public class Cloudinary {
 			return arg.toString();
 		}
 	}
+
+	public static Float asFloat(Object value) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Float) {
+			return (Float) value;
+		} else {
+			return Float.parseFloat(value.toString());
+		}
+	}
 }

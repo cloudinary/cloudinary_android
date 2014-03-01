@@ -46,17 +46,14 @@ public class Uploader {
 				params.put(attr, value.toString());			
 		}
 		params.put("eager", buildEager((List<Transformation>) options.get("eager")));
-		params.put("headers", buildCustomHeaders(options.get("headers")));
 		params.put("notification_url", (String) options.get("notification_url"));
 		params.put("eager_notification_url", (String) options.get("eager_notification_url"));
 		params.put("proxy", (String) options.get("proxy"));
 		params.put("folder", (String) options.get("folder"));
-		params.put("tags", TextUtils.join(",", Cloudinary.asArray(options.get("tags"))));
-		if (options.get("face_coordinates") != null) {
-			params.put("face_coordinates", options.get("face_coordinates").toString());
-		}
 		params.put("allowed_formats", TextUtils.join(",", Cloudinary.asArray(options.get("allowed_formats"))));
-		params.put("context", Cloudinary.encodeMap(options.get("context")));
+		params.put("moderation", options.get("moderation"));
+		
+		Util.processWriteParameters(options, params);
 		return params;
 	}
 
@@ -92,7 +89,7 @@ public class Uploader {
 		params.put("callback", (String) options.get("callback"));
 		params.put("type", (String) options.get("type"));
 		params.put("eager", buildEager((List<Transformation>) options.get("eager")));
-		params.put("headers", buildCustomHeaders(options.get("headers")));
+		params.put("headers", Util.buildCustomHeaders(options.get("headers")));
 		params.put("tags", TextUtils.join(",", Cloudinary.asArray(options.get("tags"))));
 		return callApi("explicit", params, options, null);
 	}
@@ -309,22 +306,5 @@ public class Uploader {
 			eager.add(TextUtils.join("/", single_eager));
 		}
 		return TextUtils.join("|", eager);
-	}
-
-	protected String buildCustomHeaders(Object headers) {
-		if (headers == null) {
-			return null;
-		} else if (headers instanceof String) {
-			return (String) headers;
-		} else if (headers instanceof Object[]) {
-			return TextUtils.join("\n", (Object[]) headers) + "\n";
-		} else {
-			Map<String, String> headersMap = (Map<String, String>) headers;
-			StringBuilder builder = new StringBuilder();
-			for (Map.Entry<String, String> header : headersMap.entrySet()) {
-				builder.append(header.getKey()).append(": ").append(header.getValue()).append("\n");
-			}
-			return builder.toString();
-		}
 	}
 }
