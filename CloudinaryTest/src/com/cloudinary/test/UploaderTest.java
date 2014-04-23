@@ -52,6 +52,18 @@ public class UploaderTest extends InstrumentationTestCase {
 		assertEquals(result.get("signature"), expected_signature);
 	}
 
+	public void testUnsignedUpload() throws Exception {
+		if (cloudinary.config.apiSecret == null) return;
+		JSONObject result = cloudinary.uploader().unsignedUpload(getAssetStream("images/logo.png"), "sample_preset_dhfjhriu", Cloudinary.emptyMap());
+		assertEquals(result.getLong("width"), 241L);
+		assertEquals(result.getLong("height"), 51L);
+		Map<String, Object> to_sign = new HashMap<String, Object>();
+		to_sign.put("public_id", result.getString("public_id"));
+		to_sign.put("version", Cloudinary.asString(result.get("version")));
+		String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+		assertEquals(result.get("signature"), expected_signature);
+	}
+
 	public void testUploadUrl() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
 		JSONObject result = cloudinary.uploader().upload("http://cloudinary.com/images/logo.png", Cloudinary.emptyMap());
@@ -239,59 +251,35 @@ public class UploaderTest extends InstrumentationTestCase {
     	JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("moderation", "manual"));
     	assertEquals("manual", result.getJSONArray("moderation").getJSONObject(0).getString("kind"));
     	assertEquals("pending", result.getJSONArray("moderation").getJSONObject(0).getString("status"));
-    }
-    
-    
-    public void testOcrRequest() {
-    	//should support requesting ocr info
-    	try {
-    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("ocr", "illegal"));
-    	} catch(Exception e) {
-        	assertTrue(e.getMessage().matches("^Illegal value(.*)"));
-        }
-    }
-    
+    }    
     
     public void testRawConvertRequest() {
     	//should support requesting raw conversion
     	try {
     		cloudinary.uploader().upload(getAssetStream("docx.docx"),  Cloudinary.asMap("raw_convert", "illegal", "resource_type", "raw"));
     	} catch(Exception e) {
-    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+    		assertTrue(e.getMessage().matches(".*illegal is not a valid.*"));
         }
-    }
-    
+    }    
     
     public void testCategorizationRequest() {
     	//should support requesting categorization
     	try {
     		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("categorization", "illegal"));
     	} catch(Exception e) {
-    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+    		assertTrue(e.getMessage().matches(".*illegal is not a valid.*"));
         }
-    }
-    
+    }    
     
     public void testDetectionRequest() {
     	//should support requesting detection
     	try {
     		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("detection", "illegal"));
     	} catch(Exception e) {
-    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
+    		assertTrue(e.getMessage().matches(".*illegal is not a valid.*"));
         }
     }
-    
-    
-    public void testSimilaritySearchRequest() {
-    	//should support requesting similarity search
-    	try {
-    		cloudinary.uploader().upload(getAssetStream("images/logo.png"),  Cloudinary.asMap("similarity_search", "illegal"));
-    	} catch(Exception e) {
-    		assertTrue(e.getMessage().matches("^Illegal value(.*)"));
-        }
-    }
-    
-    
+        
     public void testAutoTaggingRequest() {
     	//should support requesting auto tagging
     	try {

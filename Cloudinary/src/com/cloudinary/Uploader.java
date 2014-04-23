@@ -24,7 +24,7 @@ public class Uploader {
 	public Uploader(Cloudinary cloudinary) {
 		this.cloudinary = cloudinary;
 	}
-	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "unique_filename", "eager_async", "invalidate", "discard_original_filename", "overwrite"};
+	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "unique_filename", "eager_async", "invalidate", "discard_original_filename", "overwrite", "phash"};
 
 	public Map<String, Object> buildUploadParams(Map options) {
         if (options == null) options = Cloudinary.emptyMap();
@@ -44,6 +44,7 @@ public class Uploader {
 		params.put("folder", (String) options.get("folder"));
 		params.put("allowed_formats", TextUtils.join(",", Cloudinary.asArray(options.get("allowed_formats"))));
 		params.put("moderation", options.get("moderation"));
+		params.put("upload_preset", (String) options.get("upload_preset"));
 		if (options.get("signature") == null) {
 			params.put("eager", buildEager((List<Transformation>) options.get("eager")));
 			Object transformation = options.get("transformation");
@@ -76,6 +77,14 @@ public class Uploader {
         if (options == null) options = Cloudinary.emptyMap();
 		Map<String, Object> params = buildUploadParams(options);
 		return callApi("upload", params, options, file);
+	}
+
+	public JSONObject unsignedUpload(Object file, String uploadPreset, Map options) throws IOException {        
+		if (options == null) options = Cloudinary.emptyMap();
+		options = new HashMap(options);
+		options.put("upload_preset", uploadPreset);
+		options.put("unsigned", true);
+		return upload(file, options);
 	}
 
 	public JSONObject destroy(String publicId, Map options) throws IOException {
@@ -214,7 +223,9 @@ public class Uploader {
 		if (apiKey == null)
 			throw new IllegalArgumentException("Must supply api_key");
 
-	    if (options.containsKey("signature") && options.containsKey("timestamp")) {
+	    if (Boolean.TRUE.equals(options.get("unsigned"))) {
+			params.put("api_key", apiKey);	    	
+	    } else if (options.containsKey("signature") && options.containsKey("timestamp")) {
 			params.put("timestamp", options.get("timestamp"));
 			params.put("signature", options.get("signature"));
 			params.put("api_key", apiKey);
