@@ -224,7 +224,7 @@ public class Uploader {
 			throw new IllegalArgumentException("Must supply api_key");
 
 	    if (Boolean.TRUE.equals(options.get("unsigned"))) {
-			params.put("api_key", apiKey);	    	
+			// Nothing to do
 	    } else if (options.containsKey("signature") && options.containsKey("timestamp")) {
 			params.put("timestamp", options.get("timestamp"));
 			params.put("signature", options.get("signature"));
