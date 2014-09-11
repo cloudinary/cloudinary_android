@@ -220,10 +220,11 @@ public class Uploader {
         if (options == null) options = Cloudinary.emptyMap();
 		boolean returnError = Cloudinary.asBoolean(options.get("return_error"), false);
 		String apiKey = Cloudinary.asString(options.get("api_key"), this.cloudinary.config.apiKey);
-		if (apiKey == null)
+		boolean unsigned = Boolean.TRUE.equals(options.get("unsigned"));
+		if (!unsigned && apiKey == null)
 			throw new IllegalArgumentException("Must supply api_key");
 
-	    if (Boolean.TRUE.equals(options.get("unsigned"))) {
+	    if (unsigned) {
 			// Nothing to do
 	    } else if (options.containsKey("signature") && options.containsKey("timestamp")) {
 			params.put("timestamp", options.get("timestamp"));
