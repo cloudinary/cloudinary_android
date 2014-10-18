@@ -159,7 +159,7 @@ public class Cloudinary {
 			 * Should be set to true for Advanced plan's users that have a private CDN distribution.
 			 */
 			public Builder setPrivateCdn(boolean privateCdn) {
-				this.conf.privateCdn privateCdn;
+				this.conf.privateCdn = privateCdn;
 				return this;
 			}
 
