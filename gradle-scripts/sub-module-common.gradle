@@ -1,0 +1,5 @@
+/***
+ * Shared script for every root project except the topmost root
+ */
+loadExtraProperties '../gradle.properties'
+generateAndLoadLocalGradleProperties '../'

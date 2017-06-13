@@ -1,0 +1,122 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // filter in the api credentials before building but without changing original source files - to make sure the
+    // credentials are not checked into source control. This is used by the tests only, the credentials
+    // are taken from the CLOUDINARY_URL environment variable.
+    testVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.processManifest.doLast {
+                filterManifest("${buildDir}/intermediates/manifest/${variant.dirName}/AndroidManifest.xml", System.getenv('CLOUDINARY_URL'))
+            }
+        }
+    }
+}
+
+dependencies {
+    compile "com.cloudinary:cloudinary-core:${cloudinaryLibsVersion}"
+    compile "com.android.support:support-core-utils:${androidSupportVersion}"
+    compile 'com.evernote:android-job:1.1.8'
+    testCompile 'junit:junit:4.12'
+    testCompile "com.cloudinary:cloudinary-test-common:${cloudinaryLibsVersion}"
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    androidTestCompile "com.android.support:support-annotations:${androidSupportVersion}"
+    androidTestCompile "com.android.support.test:runner:0.5"
+    androidTestCompile "com.android.support.test:rules:0.5"
+    androidTestCompile "org.hamcrest:hamcrest-library:1.3"
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: publishRepo) {
+                authentication(userName: project.hasProperty("ossrhUsername") ? project.ext["ossrhUsername"] : "", password: project.hasProperty("ossrhPassword") ? project.ext["ossrhPassword"] : "")
+            }
+
+            snapshotRepository(url: snapshotRepo) {
+                authentication(userName: project.hasProperty("ossrhUsername") ? project.ext["ossrhUsername"] : "", password: project.hasProperty("ossrhPassword") ? project.ext["ossrhPassword"] : "")
+            }
+
+            pom.project {
+                groupId publishGroupId
+                artifactId 'cloudinary-android'
+                name 'Cloudinary Android Library'
+                description publishDescription
+                packaging 'aar'
+                version version
+
+                url githubUrl
+
+                scm {
+                    connection scmConnection
+                    developerConnection scmDeveloperConnection
+                    url scmUrl
+                }
+
+                licenses {
+                    license {
+                        name licenseName
+                        url licenseUrl
+                    }
+                }
+
+                developers {
+                    developer {
+                        id developerId
+                        name developerName
+                        email developerEmail
+                    }
+                }
+            }
+
+            pom.whenConfigured { pom ->
+                pom.dependencies.forEach { dep ->
+                    if (dep.getVersion() == "unspecified") {
+                        dep.setGroupId(publishGroupId)
+                        dep.setVersion(version)
+                    }
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { var -> classpath += var.javaCompiler.classpath }
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}

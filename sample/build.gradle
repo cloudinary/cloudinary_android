@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+    defaultConfig {
+        applicationId "com.cloudinary.android.sample"
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // filter in the api credentials before building but without changing original source files - to make sure the
+    // credentials are not checked into source control. The url (without api secret!) is taken from a gradle property
+    // defined in gradle-local.properties in the project root.
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.processManifest.doLast {
+                filterManifest("${buildDir}/intermediates/manifests/full/${variant.dirName}/AndroidManifest.xml", project.property("cloudinary.url"))
+            }
+        }
+    }
+}
+
+dependencies {
+    compile project(':lib')
+    compile "com.android.support:appcompat-v7:${androidSupportVersion}"
+    compile "com.android.support.constraint:constraint-layout:1.0.2"
+    compile "com.android.support:recyclerview-v7:${androidSupportVersion}"
+    compile "com.android.support:design:${androidSupportVersion}"
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    })
+
+    testCompile 'junit:junit:4.12'
+}

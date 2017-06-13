@@ -1,0 +1,66 @@
+/***
+ * Shared script for every root project, including the topmost root.
+ */
+allprojects {
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    buildscript {
+        repositories {
+            jcenter()
+        }
+
+        dependencies {
+            classpath 'com.android.tools.build:gradle:2.3.3'
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+
+    project.ext.set("publishGroupId", group)
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0'
+}
+
+ext.filterManifest = {manifestPath, newValue ->
+    def manifestFile = new File(manifestPath)
+    def content = manifestFile.getText()
+    def updatedContent = content.replaceAll("cloudinary_do_not_modify", newValue)
+    manifestFile.write(updatedContent)
+}
+
+ext.loadExtraProperties = {fileName ->
+    def props = new Properties()
+    props.load(new FileInputStream(fileName))
+
+    props.each { key, val ->
+        project.ext[key] = val
+    }
+}
+
+ext.generateAndLoadLocalGradleProperties = { rootPath ->
+    // Create default local gradle properties (ignored by git)
+    def file = new File(rootPath + 'gradle-local.properties')
+    if (file.createNewFile()) {
+        file.text = '# Fill in your cloudinary url from cloudinary.com/console.  *** IMPORTANT - This should be the url WITHOUT the api secret.\ncloudinary.url=fill_in_your_cloudinary_url'
+    }
+    loadExtraProperties file.absoluteFile
+}
+subprojects {
+    tasks.withType(Test) {
+        maxParallelForks = Runtime.runtime.availableProcessors()
+        testLogging.showStandardStreams = true
+    }
+}
