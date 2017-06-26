@@ -1,7 +1,6 @@
 package com.cloudinary.android.sample.rest;
 
-import android.support.v4.util.Pair;
-
+import com.cloudinary.android.Signature;
 import com.cloudinary.android.SignatureProvider;
 import com.cloudinary.android.sample.rest.model.JsonMap;
 import com.cloudinary.android.sample.rest.model.SignResult;
@@ -43,18 +42,13 @@ public class BackendServerSignatureProvider implements SignatureProvider {
     }
 
     @Override
-    public Pair<String, Long> provideSignature(Map options) {
+    public Signature provideSignature(Map options) {
         JsonMap map = new JsonMap();
         for (Object key : options.keySet()) {
             map.put((String) key, options.get(key));
         }
 
-        SignResult result = signUpload(map);
-
-        if (result != null) {
-            return new Pair<>(result.getSignature(), result.getTimestamp());
-        }
-
-        return null;
+        SignResult res = signUpload(map);
+        return new Signature(res.getSignature(), res.getApiKey(), res.getTimestamp());
     }
 }

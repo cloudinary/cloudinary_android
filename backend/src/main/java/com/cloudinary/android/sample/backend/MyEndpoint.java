@@ -37,6 +37,6 @@ public class MyEndpoint {
         // *** IMPORTANT *** Do not type your api secret here directly to avoid checking it into source control.
         Cloudinary cloudinary = new Cloudinary();
         String signature = cloudinary.apiSignRequest(toSign, cloudinary.config.apiSecret);
-        return new SignResult(signature, timestamp);
+        return new SignResult(signature, cloudinary.config.apiKey, timestamp);
     }
 }

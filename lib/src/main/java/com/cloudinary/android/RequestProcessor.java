@@ -2,7 +2,6 @@ package com.cloudinary.android;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.v4.util.Pair;
 
 import com.cloudinary.ProgressCallback;
 import com.cloudinary.android.payload.NotFoundException;
@@ -158,9 +157,10 @@ class RequestProcessor implements RequestProcessorInterface {
             SignatureProvider signatureProvider = CldAndroid.get().getSignatureProvider();
             if (signatureProvider != null) {
                 try {
-                    Pair<String, Long> signature = signatureProvider.provideSignature(options);
-                    options.put("signature", signature.first);
-                    options.put("timestamp", signature.second);
+                    Signature signature = signatureProvider.provideSignature(options);
+                    options.put("signature", signature.getSignature());
+                    options.put("timestamp", signature.getTimestamp());
+                    options.put("api_key", signature.getApiKey());
                 } catch (Exception e) {
                     throw new ErrorRetrievingSignatureException("Could not retrieve signature from the given provider: " + signatureProvider.getClass().getSimpleName(), e);
                 }

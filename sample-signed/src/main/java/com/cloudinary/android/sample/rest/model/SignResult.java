@@ -20,7 +20,7 @@ package com.cloudinary.android.sample.rest.model;
 
 /**
  * Model definition for SignResult.
- * <p>
+ *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the myApi. For a detailed explanation see:
  * <a href="https://developers.google.com/api-client-library/java/google-http-java-client/json">https://developers.google.com/api-client-library/java/google-http-java-client/json</a>
@@ -35,6 +35,12 @@ public final class SignResult extends com.google.api.client.json.GenericJson {
      * The value may be {@code null}.
      */
     @com.google.api.client.util.Key
+    private java.lang.String apiKey;
+
+    /**
+     * The value may be {@code null}.
+     */
+    @com.google.api.client.util.Key
     private java.lang.String signature;
 
     /**
@@ -43,6 +49,21 @@ public final class SignResult extends com.google.api.client.json.GenericJson {
     @com.google.api.client.util.Key
     @com.google.api.client.json.JsonString
     private java.lang.Long timestamp;
+
+    /**
+     * @return value or {@code null} for none
+     */
+    public java.lang.String getApiKey() {
+        return apiKey;
+    }
+
+    /**
+     * @param apiKey apiKey or {@code null} for none
+     */
+    public SignResult setApiKey(java.lang.String apiKey) {
+        this.apiKey = apiKey;
+        return this;
+    }
 
     /**
      * @return value or {@code null} for none
@@ -75,13 +96,13 @@ public final class SignResult extends com.google.api.client.json.GenericJson {
     }
 
     @Override
-    public SignResult set(String fieldName, Object value) {
-        return (SignResult) super.set(fieldName, value);
+    public com.cloudinary.android.sample.backend.myApi.model.SignResult set(String fieldName, Object value) {
+        return (com.cloudinary.android.sample.backend.myApi.model.SignResult) super.set(fieldName, value);
     }
 
     @Override
-    public SignResult clone() {
-        return (SignResult) super.clone();
+    public com.cloudinary.android.sample.backend.myApi.model.SignResult clone() {
+        return (com.cloudinary.android.sample.backend.myApi.model.SignResult) super.clone();
     }
 
 }
