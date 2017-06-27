@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Url;
 import com.cloudinary.android.payload.ByteArrayPayload;
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.LocalUriPayload;
@@ -87,9 +88,35 @@ public class CldAndroid {
     }
 
     /***
-     * Setup the library with the required parameters. This must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
      * @param context Android context for initializations. Does not get cached.
-     * @param provider A signature provider. Needed if using signed uploads without api secret.
+     */
+    public static void init(@NonNull Context context) {
+        init(context, null, null);
+    }
+
+    /***
+     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * @param context Android context for initializations. Does not get cached.
+     * @param config Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
+     */
+    public static void init(@NonNull Context context, @Nullable Map config) {
+        init(context, null, config);
+    }
+
+    /***
+     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * @param context Android context for initializations. Does not get cached.
+     * @param provider A signature provider. Needed if using signed uploads.
+     */
+    public static void init(@NonNull Context context, @Nullable SignatureProvider provider) {
+        init(context, provider, null);
+    }
+
+    /***
+     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * @param context Android context for initializations. Does not get cached.
+     * @param provider A signature provider. Needed if using signed uploads.
      * @param config Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
      */
     public static void init(@NonNull Context context, @Nullable SignatureProvider provider, @Nullable Map config) {
@@ -142,6 +169,13 @@ public class CldAndroid {
 
     public Cloudinary getCloudinary() {
         return cloudinary;
+    }
+
+    /***
+     * Get a Cloudinary Url object used to construct urls to access and transform pre-uploaded resources.
+     */
+    public Url url() {
+        return cloudinary.url();
     }
 
     /***
