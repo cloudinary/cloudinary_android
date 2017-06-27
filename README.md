@@ -12,6 +12,10 @@ Cloudinary offers comprehensive APIs and administration capabilities and is easy
 Cloudinary provides URL and HTTP based APIs that can be easily integrated with any Web development framework.
 
 For Android, Cloudinary provides a library for simplifying the integration even further. The library requires Android 2.3 or higher.
+## Gradle Integration
+Add the following dependency to your build.gradle:
+
+`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.13.0'`
 
 ## Manual Setup ######################################################################
 Download cloudinary-core-1.2.2.jar from [here](http://search.maven.org/remotecontent?filepath=com/cloudinary/cloudinary-core/1.2.2/cloudinary-core-1.2.2.jar) and cloudinary-android-1.2.2.jar from [here](http://search.maven.org/remotecontent?filepath=com/cloudinary/cloudinary-android/1.2.2/cloudinary-android-1.2.2.jar) and put them in your libs folder.
@@ -65,40 +69,31 @@ For more details, see our documentation for embedding [Facebook](http://cloudina
 
 ### Configuration
 
-Each request for building a URL of a remote cloud resource must have the `cloud_name` parameter set.
-Each request to our secure APIs (e.g., image uploads, eager sprite generation) must have the `api_key` and `api_secret` parameters set.
-See [API, URLs and access identifiers](http://cloudinary.com/documentation/api_and_access_identifiers) for more details.
+Each request for building a URL of a remote cloud resource must have the `cloud_name` parameter set. 
+Setting the `cloud_name` parameter can be done either when initializing the library, or by using the CLOUDINARY_URL meta-data property in `AndroidManifest.xml`.
 
-Setting the `cloud_name`, `api_key` and `api_secret` parameters can be done either directly in each call to a Cloudinary method,
-by when initializing the Cloudinary object, or by using the CLOUDINARY_URL meta-data property.
+The entry point of the library is the `CldAndroid` object. `CldAndroid.init()` must be called before using the library, preferably in `Application.onCreate()`.
+Here's an example of setting the configuration parameters programmatically in your `Applicaion.onCreate(`:
+    
+     Map config = new HashMap();
+     config.put("cloud_name", "myCloudName");
+     CldAndroid.init(this, config);
+    
+Alternatively, When using the meta-data property, no configuration is required:
+    
+    CldAndroid.init(this);
 
-The entry point of the library is the Cloudinary object.
-
-Here's an example of setting the configuration parameters programatically:
-
-    Map config = new HashMap();
-    config.put("cloud_name", "n07t21i7");
-    config.put("api_key", "123456789012345");
-    config.put("api_secret", "abcdeghijklmnopqrstuvwxyz12");
-    Cloudinary cloudinary = new Cloudinary(config);
-
-Another example of setting the configuration parameters by providing the CLOUDINARY_URL value to the constructor:
-
-    Cloudinary cloudinary = new Cloudinary("cloudinary://123456789012345:abcdeghijklmnopqrstuvwxyz12@n07t21i7");
-
-Giving the context will allow Cloudinary to configure from the application's meta-data.
-
-    Cloudinary cloudinary = new Cloudinary(Utils.cloudinaryUrlFromContext(getContext()));
-
-Then add a meta-data property to your application section in the AndroidManifest.xml
+The added property `AndroidManifest.xml`. Note: You should only include the `cloud_name` in the value, the api secret and key should be left out of the application.
 
     <manifest>
         ...
         <application>
             ...
-            <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://123456789012345:abcdeghijklmnopqrstuvwxyz12@n07t21i7"/>
+            <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://@myCloudName"/>
         </application>
     <manifest>
+
+
 
 ### Embedding and transforming images
 
@@ -106,60 +101,73 @@ Any image uploaded to Cloudinary can be transformed and embedded using powerful 
 
 The following example generates the url for accessing an uploaded `sample` image while transforming it to fill a 100x150 rectangle:
 
-    cloudinary.url().transformation(new Transformation().width(100).height(150).crop("fill")).generate("sample.jpg")
+    CldAndroid.get().url().transformation(new Transformation().width(100).height(150).crop("fill")).generate("sample.jpg")
 
 Another example, emedding a smaller version of an uploaded image while generating a 90x90 face detection based thumbnail: 
 
-    cloudinary.url().transformation(new Transformation().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
+    CldAndroid.get().url().transformation(new Transformation().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
 
 You can provide either a Facebook name or a numeric ID of a Facebook profile or a fan page.  
              
 Embedding a Facebook profile to match your graphic design is very simple:
 
-    cloudinary.url().type("facebook").transformation(new Transformation().width(130).height(130).crop("fill").gravity("north_west")).generate("billclinton.jpg")
+    CldAndroid.get().url().type("facebook").transformation(new Transformation().width(130).height(130).crop("fill").gravity("north_west")).generate("billclinton.jpg")
                            
 Same goes for Twitter:
 
-    cloudinary.url().type("twitter_name").generate("billclinton.jpg")
+    CldAndroid.get().url().type("twitter_name").generate("billclinton.jpg")
 
-### Upload
+### Uploading
 
-Assuming you have your Cloudinary configuration parameters defined (`cloud_name`, `api_key`, `api_secret`), uploading to Cloudinary is very simple.
+The entry point for upload operations is the `CldAndroid.get().upload()` call. All upload operations are dispatched to a background queue, with 
+a set of fully customizable rules and limits letting you choose when each upload request should actually run. Requests are automatically rescheduled to be
+retried later if a recoverable error is encountered (e.g. network disconnections, timeouts).
+
+The upload results are dispatched asynchronously using `UploadCallback`. Global callbacks can be defined, as well as specific callbacks per request.
+Note: In order to receive global callbacks even when the app is already shut down, or in the background, the `ListenerService` class can be extended and registered in the manifest (see the class for further instructions). 
+
+The following examples uploads a `File`  using the default settings, a request upload callback, and an upload preset (more about upload presets below):
     
-The following example uploads a local JPG available as an InputStream to the cloud: 
-    
-    cloudinary.uploader().upload(inputStream, ObjectUtils.emptyMap())
-        
-The uploaded image is assigned a randomly generated public ID. The image is immediately available for download through a CDN:
+    String requestId = CldAndroid.get().upload(imageFile).unsigned("sample_preset").callback(callback).dispatch();
+   
+The returned `requestId` is used to identify the request in global callbacks and to cancel the request if needed. The callback should be any implementation of `UploadCallback`.
 
-    cloudinary.url().generate("abcfrmo8zul1mafopawefg.jpg")
-        
+The uploaded image is assigned a randomly generated public I. As soon as `onSuccess` is called, the image is immediately available for download through a CDN:
+
+    CldAndroid.get().url().generate("abcfrmo8zul1mafopawefg.jpg")
+      
     http://res.cloudinary.com/demo/image/upload/abcfrmo8zul1mafopawefg.jpg
 
-You can also specify your own public ID:    
+You can also specify your own public ID:
     
-    cloudinary.uploader().upload("http://www.example.com/image.jpg", ObjectUtils.asMap("public_id", "sample_remote"))
+    String requestId = CldAndroid.get().upload(uri).unsigned("sample_preset").option("public_id", "sample_remote").dispatch();
 
-    cloudinary.url().generate("sample_remote.jpg")
+Using `RequestUploadPolicy`, an upload request can be configured to run under specific circumstance, or within a chosen time window:
 
-    http://res.cloudinary.com/demo/image/upload/sample_remote.jpg
+The following examples uploads local Uri resource, configured to run immediately (the default), with a maximum of 7 retries, and only on an unmetered network (e.g. wifi):
 
-### Safe mobile uploading
+    String requestId = CldAndroid.get().upload(uri)
+        .unsigned("sample_app_preset")
+        .constrain(TimeWindow.immediate())
+        .policy(new RequestUploadPolicy.Builder().maxRetries(7).networkPolicy(RequestUploadPolicy.NetworkType.UNMETERED).build())
+        .dispatch();
 
-Android applications might prefer to avoid keeping the sensitive `api_secret` on the mobile device. It is recommended to generate the upload authentication signature on the server side.
-This way the `api_secret` is stored only on the much safer server-side.
+For security reasons, mobile applications cannot contain the full account credentials, and so they cannot freely upload resources to the cloud.
+Cloudinary provides two different mechanisms to enable end-users to upload resources without providing full credentials.
+
+##### 1. Unsigned uploads using [Upload Presets.](http://cloudinary.com/blog/centralized_control_for_image_upload_image_size_format_thumbnail_generation_tagging_and_more) 
+You can create an upload preset in your Cloudinary account console, defining rules that limit the formats, transformations, dimensions and more.
+Once the preset is defined, it's name is supplied when calling upload. An upload call will only succeed if the preset name is used and the resource is within the preset's pre-defined limits.
+
+The following example uploads a local resource, available as a Uri, assuming a preset named 'sample_preset' already exists in the account:
+
+    String requestId = CldAndroid.get().upload(uri).unsigned("sample_preset").dispatch();
+
+##### 2. Signed uploads with server-based signature
+Another way to allow uploading without credentials is using signed uploads. 
+It is recommended to generate the upload authentication signature on the server side, where it's safe to store the `api_secret`.
 
 Cloudinary's Android SDK allows providing server-generated signature and any additional parameters that were generated on the server side (instead of signing using `api_secret` locally).
-
-The following example intializes Cloudinary without any authentication parameters:
-
-    Map config = new HashMap();
-    config.put("cloud_name", "n07t21i7");
-    Cloudinary mobileCloudinary = new Cloudinary(config);
-
-Alternatively replace your CLOUDINARY_URL meta-data property as follows:
-
-    <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://n07t21i7"/>
 
 Your server can use any Cloudinary libraries (Ruby on Rails, PHP, Python & Django, Java, Perl, .Net, etc.) for generating the signature. The following JSON in an example of a response of an upload authorization request to your server:
 
@@ -170,32 +178,17 @@ Your server can use any Cloudinary libraries (Ruby on Rails, PHP, Python & Djang
 	  "api_key": "123456789012345"
 	}
 
-The following code uploads an image to Cloudinary with the parameters generated safely on the server side (e.g., from a JSON as in the example above):
+When initializing `CldAndroid`, a `SignatureProvider` can be sent. Whenever an upload requires signing, the library will call the provider's `provideSignature()` method, 
+where you should implement the call to your server's signing endpoint. This callback runs on a background a thread so there's no need to handle threading:
 
-    cloudinary.uploader().upload(inputStream, ObjectUtils.asMap("public_id", publicId, "signature", signature, "timestamp", timestamp, "api_key", api_key))
-
-You might want to reference uploaded Cloudinary images and raw files using an identifier string of the following format:
-
-    resource_type:type:identifier.format
-
-The following example generates a Cloudinary URL based on an idenfier of the format mentioned above:
-
-    String imageIdentifier = "image:upload:dfhjghjkdisudgfds7iyf.jpg";
-    String[] components = imageIdentifier.split(":");
-
-    String url = cloudinary.url().resourceType(components[0]).type(components[1]).generate(components[2]);
-
-	// http://res.cloudinary.com/n07t21i7/image/upload/dfhjghjkdisudgfds7iyf.jpg
-
-Same can work for raw file uploads:
-
-    String rawIdentifier = "raw:upload:cguysfdsfuydsfyuds31.doc";
-    String[] components = rawIdentifier.split(":");
-
-    String url = cloudinary.url().resourceType(components[0]).type(components[1]).generate(components[2]);
-
-	// http://res.cloudinary.com/n07t21i7/raw/upload/cguysfdsfuydsfyuds31.doc
+    CldAndroid.init(this, new SignatureProvider() {
+        @Override
+        public Signature provideSignature(Map options) {
+            // call server signature endpoint
+        }
+    }, null);
         
+
 ## Additional resources ##########################################################
 
 Additional resources are available at:
