@@ -44,13 +44,13 @@ public class UploadRequest<T extends Payload> {
      * Setup a callback to get notified on upload events.
      * @return This request for chaining.
      */
-    public synchronized UploadRequest callback(UploadCallback callback) {
+    public synchronized UploadRequest<T> callback(UploadCallback callback) {
         assertNotDispatched();
         this.callback = new DelegateCallback(callback);
         return this;
     }
 
-    public synchronized UploadRequest unsigned(String uploadPreset) {
+    public synchronized UploadRequest<T> unsigned(String uploadPreset) {
         assertNotDispatched();
         verifyOptionsExist();
         options.put("unsigned", true);
@@ -62,7 +62,7 @@ public class UploadRequest<T extends Payload> {
      * Constrain this request to run within a specific {@link TimeWindow}.
      * @return This request for chaining.
      */
-    public synchronized UploadRequest constrain(TimeWindow timeWindow) {
+    public synchronized UploadRequest<T> constrain(TimeWindow timeWindow) {
         assertNotDispatched();
         this.timeWindow = timeWindow;
         return this;
@@ -72,7 +72,7 @@ public class UploadRequest<T extends Payload> {
      * Set a map of options for this request. Note: This replaces any existing options.
      * @return This request for chaining.
      */
-    public synchronized UploadRequest options(Map<String, Object> options) {
+    public synchronized UploadRequest<T> options(Map<String, Object> options) {
         this.options = options;
         return this;
     }
@@ -83,7 +83,7 @@ public class UploadRequest<T extends Payload> {
      * @param value Option value.
      * @return This request for chaining.
      */
-    public synchronized UploadRequest option(String name, Object value) {
+    public synchronized UploadRequest<T> option(String name, Object value) {
         assertNotDispatched();
         verifyOptionsExist();
         options.put(name, value);
@@ -95,7 +95,7 @@ public class UploadRequest<T extends Payload> {
      * @param policy The requestUploadPolicy to set. See {@link RequestUploadPolicy.Builder}
      * @return This request for chaining.
      */
-    public synchronized UploadRequest policy(RequestUploadPolicy policy) {
+    public synchronized UploadRequest<T> policy(RequestUploadPolicy policy) {
         assertNotDispatched();
         this.requestUploadPolicy = policy;
         return this;

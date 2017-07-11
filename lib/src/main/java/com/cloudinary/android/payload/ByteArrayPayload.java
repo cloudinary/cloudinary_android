@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Base64;
 
+import java.util.Arrays;
+
 /***
  * This class is used to handle uploading of images/videos as byte arrays
  */
@@ -45,5 +47,20 @@ public class ByteArrayPayload extends Payload<byte[]> {
 
     void fromUri(String uri) {
         data = decode(Uri.parse(uri).getHost());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Payload<?> payload = (Payload<?>) o;
+
+        return data != null ? Arrays.equals(data, (byte[]) payload.data) : payload.data == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return data != null ? Arrays.hashCode(data) : 0;
     }
 }

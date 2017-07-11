@@ -42,4 +42,20 @@ public abstract class Payload<T> {
      * @param uri Uri that contains the payload data and type
      */
     abstract void fromUri(String uri);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Payload<?> payload = (Payload<?>) o;
+
+        return data != null ? data.equals(payload.data) : payload.data == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return data != null ? data.hashCode() : 0;
+    }
 }

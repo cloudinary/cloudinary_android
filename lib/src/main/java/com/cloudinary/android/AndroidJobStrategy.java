@@ -16,7 +16,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     private static final String JOB_TAG = "CLD";
     private static final String TAG = AndroidJobStrategy.class.getSimpleName();
 
-    private static JobRequest adapt(UploadRequest request) {
+    static JobRequest adapt(UploadRequest request) {
         PersistableBundleCompat extras = new PersistableBundleCompat();
         request.populateParamsFromFields(new AndroidJobParamsAdaptable(extras));
 

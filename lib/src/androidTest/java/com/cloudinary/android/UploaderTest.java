@@ -33,11 +33,8 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
-public class UploaderTest {
+public class UploaderTest extends AbstractTest {
 
-
-    public static final String TEST_IMAGE = "images/old_logo.png";
-    public static final String TEST_PRESET = "cloudinary_java_test";
     private static Cloudinary cloudinary;
 
     @BeforeClass
@@ -47,19 +44,6 @@ public class UploaderTest {
 
         if (cloudinary.config.apiSecret == null) {
             Log.e("UploaderTest", "Please CLOUDINARY_URL in AndroidManifest for Upload test to run");
-        }
-    }
-
-
-    protected InputStream getAssetStream(String filename) throws IOException {
-        return InstrumentationRegistry.getContext().getAssets().open(filename);
-    }
-
-    private long getAssetFileSize(String filename) {
-        try {
-            return InstrumentationRegistry.getContext().getAssets().openFd(filename).getLength();
-        } catch (IOException e) {
-            return -1;
         }
     }
 
