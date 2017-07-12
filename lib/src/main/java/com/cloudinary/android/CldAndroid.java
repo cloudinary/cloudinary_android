@@ -79,7 +79,7 @@ public class CldAndroid {
             }
 
             @Override
-            public void onReschedule(String requestId) {
+            public void onReschedule(String requestId, String errorMessage) {
                 queueRoomFreed();
             }
         };
@@ -300,7 +300,7 @@ public class CldAndroid {
      * Process a single request, this runs after verifying all the policies and conditions are met. For internal use.
      * @param context Android context.
      */
-    RequestResultStatus processRequest(Context context, ParamsAdaptable params) {
+    UploadStatus processRequest(Context context, ParamsAdaptable params) {
         return requestProcessor.processRequest(context, params);
     }
 

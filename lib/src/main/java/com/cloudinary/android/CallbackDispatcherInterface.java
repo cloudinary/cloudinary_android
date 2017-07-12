@@ -39,8 +39,9 @@ interface CallbackDispatcherInterface {
      * Send a broadcast when a request finishes with any result
      * @param appContext Android Application context.
      * @param requestId The request id the send broadcast for.
+     * @param uploadStatus The status of the finished request.
      */
-    void wakeListenerServiceWithRequestFinished(Context appContext, String requestId, RequestResultStatus requestResultStatus);
+    void wakeListenerServiceWithRequestFinished(Context appContext, String requestId, UploadStatus uploadStatus);
 
     /***
      * Dispatch event when a request starts.
@@ -77,8 +78,9 @@ interface CallbackDispatcherInterface {
      * no action is required in response to this event.
      * @param context Android context.
      * @param requestId Id of the request getting rescheduled.
+     * @param error Description of the error that caused the rescheduling.
      */
-    void dispatchReschedule(Context context, String requestId);
+    void dispatchReschedule(Context context, String requestId, String error);
 
     /***
      * Fetch a pending upload result (either successful or not), in case the app wasn't awake when the upload finished it can be fetched here.

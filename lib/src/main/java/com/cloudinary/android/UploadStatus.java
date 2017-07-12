@@ -3,7 +3,7 @@ package com.cloudinary.android;
 /***
  * Upload request result
  */
-public enum RequestResultStatus {
+public enum UploadStatus {
     /***
      * The request encountered an unrecoverable error and will not retry.
      */

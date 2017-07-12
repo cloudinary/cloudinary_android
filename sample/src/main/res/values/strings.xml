@@ -1,12 +1,23 @@
 <resources>
-    <string name="app_name">Cloudinary Sample App</string>
+    <string name="app_name">Cloudinary Demo</string>
     <string name="action_settings">Settings</string>
-    <string name="clear">Clear images</string>
+    <string name="clear">Clear resources</string>
     <string name="upload_successfully">Image uploaded successfully.</string>
     <string name="upload_error">Error: %s</string>
-    <string name="upload_image">Upload image</string>
+    <string name="upload_image">Upload resource</string>
     <string name="upload">Upload missing</string>
     <string name="auto_upload">Auto-Upload</string>
     <string name="auto_upload_on">Auto-Upload on</string>
     <string name="auto_upload_off">Auto-Upload off</string>
+    <string name="uploaded_label">You haven\'t uploaded\nanything yet</string>
+    <string name="queued_label">Queued uploads will appear here</string>
+    <string name="failed_label">Hooray, no failed uploads!</string>
+    <string name="uploaded_button_label">WHAT DO I DO NOW?</string>
+    <string name="tab_title_failed">Failed</string>
+    <string name="tab_title_progress">In Progress</string>
+    <string name="tab_title_uploaded">Uploaded</string>
+    <string name="effect_desc_face_sat_round">- Crop focusing on automatically detected faces\n- Retain original aspect ratio\n- Apply more saturation\n- Add rounded corners</string>
+    <string name="effect_desc_face_sharpen">- Crop focusing on automatically detected faces\n- Sharpen the image</string>
+    <string name="effect_desc_wide_blue">- Crop the image to a different aspect ratio, focusing on auto-detected faces\n- Increase the intensity of the blue channel</string>
+    <string name="effect_desc_narrow_sepia">- Crop focusing on automatically detected faces\n- Apply a sepia effect</string>
 </resources>

@@ -11,6 +11,8 @@ import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.utils.Rectangle;
 
+import junit.framework.Assert;
+
 import org.cloudinary.json.JSONArray;
 import org.cloudinary.json.JSONObject;
 import org.junit.BeforeClass;
@@ -450,6 +452,59 @@ public class UploaderTest extends AbstractTest {
         assertEquals("image", resource.getString("resource_type"));
         assertEquals(1400L, resource.getLong("width"));
         assertEquals(1400L, resource.getLong("height"));
+    }
+
+    @Test
+    public void testUploadLargeResume() throws Exception {
+        // support uploading large files
+
+        File temp = File.createTempFile("cldupload.test.", "");
+        FileOutputStream out = new FileOutputStream(temp);
+        int[] header = new int[]{0x42, 0x4D, 0x4A, 0xB9, 0x59, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8A, 0x00, 0x00, 0x00, 0x7C, 0x00, 0x00, 0x00, 0x78, 0x05, 0x00, 0x00, 0x78, 0x05, 0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0xB8, 0x59, 0x00, 0x61, 0x0F, 0x00, 0x00, 0x61, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x42, 0x47, 0x52, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0xB8, 0x1E, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66, 0x66, 0xFC, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC4, 0xF5, 0x28, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        byte[] byteHeader = new byte[138];
+        for (int i = 0; i <= 137; i++) byteHeader[i] = (byte) header[i];
+        byte[] piece = new byte[10];
+        Arrays.fill(piece, (byte) 0xff);
+        out.write(byteHeader);
+        for (int i = 1; i <= 2 * 588000; i++) {
+            out.write(piece);
+        }
+        out.close();
+        int expectedSize = 2 * 5880000 + 138;
+        Assert.assertEquals(expectedSize, temp.length());
+
+        String uniqueUploadId = cloudinary.randomPublicId();
+
+        // fail right after 1 chunk:
+        final int bufferSize = 5243000;
+        try {
+            cloudinary.uploader().uploadLarge(temp, ObjectUtils.asMap("resource_type", "raw"), bufferSize, 0, uniqueUploadId, new ProgressCallback() {
+                @Override
+                public void onProgress(long bytesUploaded, long totalBytes) {
+                    if (bytesUploaded > bufferSize) {
+                        throw new RuntimeException();
+                    }
+                }
+            });
+        } catch (Exception ignored) {
+        }
+
+        // fail again after second chunk (starting after 1 chunk):
+        try {
+            cloudinary.uploader().uploadLarge(temp, ObjectUtils.asMap("resource_type", "raw"), bufferSize, bufferSize, uniqueUploadId, new ProgressCallback() {
+                @Override
+                public void onProgress(long bytesUploaded, long totalBytes) {
+                    if (bytesUploaded > 2 * bufferSize) {
+                        throw new RuntimeException();
+                    }
+                }
+            });
+        } catch (Exception ignored) {
+        }
+
+        // finish it up - start upload from 3rd chunk (so skip 2 * buffer size):
+        Map resource = cloudinary.uploader().uploadLarge(temp, ObjectUtils.asMap("resource_type", "raw"), bufferSize, 2 * bufferSize, uniqueUploadId, null);
+        assertEquals(expectedSize, resource.get("bytes"));
     }
 
     @Test

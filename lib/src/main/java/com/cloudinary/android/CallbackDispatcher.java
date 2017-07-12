@@ -62,7 +62,7 @@ class CallbackDispatcher implements CallbackDispatcherInterface {
                         callbackMessage.callback.onProgress(requestId, callbackMessage.bytes, callbackMessage.totalBytes);
                         break;
                     case RESCHEDULE_MESSAGE:
-                        callbackMessage.callback.onReschedule(requestId);
+                        callbackMessage.callback.onReschedule(requestId, callbackMessage.errorMessage);
                         break;
                     case SUCCESS_MESSAGE:
                         callbackMessage.callback.onSuccess(requestId, callbackMessage.resultData);
@@ -140,7 +140,7 @@ class CallbackDispatcher implements CallbackDispatcherInterface {
     }
 
     @Override
-    public void wakeListenerServiceWithRequestFinished(Context appContext, String requestId, RequestResultStatus requestResultStatus) {
+    public void wakeListenerServiceWithRequestFinished(Context appContext, String requestId, UploadStatus uploadStatus) {
         Logger.d(TAG, String.format("wakeListenerServiceWithRequestFinished, listenerClass: %s, alreadyRegistered: %s", listenerServiceClass, isListenerServiceAlreadyRegistered));
 
         // if the service is already 'awake' it will receive events via callback. If we send the intent the event will be received twice.
@@ -148,7 +148,7 @@ class CallbackDispatcher implements CallbackDispatcherInterface {
             appContext.startService(new Intent(appContext, listenerServiceClass)
                     .setAction(CldAndroid.ACTION_REQUEST_FINISHED)
                     .putExtra(CldAndroid.INTENT_EXTRA_REQUEST_ID, requestId)
-                    .putExtra(CldAndroid.INTENT_EXTRA_REQUEST_RESULT_STATUS, requestResultStatus));
+                    .putExtra(CldAndroid.INTENT_EXTRA_REQUEST_RESULT_STATUS, uploadStatus));
         }
     }
 
@@ -174,8 +174,10 @@ class CallbackDispatcher implements CallbackDispatcherInterface {
     }
 
     @Override
-    public void dispatchReschedule(Context context, String requestId) {
-        dispatchMessage(requestId, RESCHEDULE_MESSAGE, CallbackMessage.obtain());
+    public void dispatchReschedule(Context context, String requestId, String error) {
+        CallbackMessage callbackMessage = CallbackMessage.obtain();
+        callbackMessage.errorMessage = error;
+        dispatchMessage(requestId, RESCHEDULE_MESSAGE, callbackMessage);
     }
 
     @Override

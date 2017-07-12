@@ -9,5 +9,5 @@ interface RequestProcessorInterface {
      * @param context Android context.
      * @param params Collection of params, usually populated by {@link UploadRequest#populateParamsFromFields(ParamsAdaptable)}
      */
-    RequestResultStatus processRequest(Context context, ParamsAdaptable params);
+    UploadStatus processRequest(Context context, ParamsAdaptable params);
 }

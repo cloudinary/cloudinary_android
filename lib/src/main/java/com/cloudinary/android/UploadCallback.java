@@ -39,7 +39,8 @@ public interface UploadCallback {
      * Called when a request fails with a recoverable error and is rescheduled to a later time.
      * This is useful to update UI (e.g hide progress notifications), otherwise this callback can be ignored.
      * @param requestId Id of the request sending this callback.
+     * @param errorMessage Error description - The reason for reschedule (e.g. socket timeout).
      */
-    void onReschedule(String requestId);
+    void onReschedule(String requestId, String errorMessage);
 }
 

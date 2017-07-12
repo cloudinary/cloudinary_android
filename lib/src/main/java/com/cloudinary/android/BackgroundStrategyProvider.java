@@ -1,6 +1,6 @@
 package com.cloudinary.android;
 
-public class BackgroundStrategyProvider {
+class BackgroundStrategyProvider {
     static BackgroundRequestStrategy provideStrategy(){
         return new AndroidJobStrategy();
     }

@@ -8,7 +8,11 @@ public interface ParamsAdaptable {
     void putString(String key, String value);
     void putInt (String key, int value);
 
+    void putLong(String key, long value);
+
     String getString(String key, String defaultValue);
 
     int getInt(String key, int defaultValue);
+
+    long getLong(String key, long defaultValue);
 }

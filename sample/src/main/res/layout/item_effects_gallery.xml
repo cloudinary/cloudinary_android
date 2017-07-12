@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/effect_item_margin"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:id="@+id/selected_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignEnd="@+id/image_view"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/image_view"
+        android:background="@color/colorAccent"
+        android:visibility="gone" />
+</RelativeLayout>

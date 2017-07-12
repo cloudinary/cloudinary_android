@@ -31,7 +31,7 @@ public class CallbackDispatcherTest {
         dispatcher.dispatchProgress("a", 10, 100);
         dispatcher.dispatchSuccess(appContext, "a", Collections.singletonMap("test1", "result1"));
         dispatcher.dispatchError(appContext, "a", "Error!");
-        dispatcher.dispatchReschedule(appContext, "a");
+        dispatcher.dispatchReschedule(appContext, "a", "Error?");
 
         // callbacks are posted to dedicated thread, give it time to propagate
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
@@ -137,7 +137,7 @@ public class CallbackDispatcherTest {
         }
 
         @Override
-        public void onReschedule(String requestId) {
+        public void onReschedule(String requestId, String errorMessage) {
             this.reschedule++;
         }
     }

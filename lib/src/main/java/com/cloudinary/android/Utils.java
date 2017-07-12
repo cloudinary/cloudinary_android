@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Point;
-import android.view.WindowManager;
 
 public class Utils {
     public static String cloudinaryUrlFromContext(Context context) {
@@ -20,12 +18,5 @@ public class Utils {
             // No metadata found
         }
         return url;
-    }
-
-    public static int getScreenWidth(Context context) {
-        WindowManager window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Point point = new Point();
-        window.getDefaultDisplay().getSize(point);
-        return point.x;
     }
 }

@@ -11,23 +11,25 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 
 import com.cloudinary.android.CldAndroid;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
-import com.cloudinary.android.sample.model.Image;
-import com.cloudinary.android.sample.persist.ImageRepository;
-import com.cloudinary.android.sample.widget.GridDividerItemDecoration;
+import com.cloudinary.android.sample.model.Resource;
+import com.cloudinary.android.sample.persist.ResourceRepo;
 import com.cloudinary.utils.StringUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.PicassoTools;
@@ -35,15 +37,17 @@ import com.squareup.picasso.PicassoTools;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MainGalleryAdapter.ImageClickedListener {
+public class MainActivity extends AppCompatActivity implements ResourcesAdapter.ImageClickedListener, DeleteImageDialogFragment.ImageDeleteRequested {
+    public static final int PAGE_COUNT = 3;
     private static final int CHOOSE_IMAGE_REQUEST_CODE = 1000;
-    private static final int SPAN = 2;
-
     private FloatingActionButton fab;
-    private RecyclerView recyclerView;
-    private int thumbSize = 400; // some default for initialization.
     private BroadcastReceiver receiver;
-    private int dividerSize;
+    private ViewPager pager;
+    private PagerAdapter pagerAdapter;
+
+    private static String makeFragmentName(int viewId, long id) {
+        return "android:switcher:" + viewId + ":" + id;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,73 +64,52 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
             }
         });
 
-        recyclerView = (RecyclerView) findViewById(R.id.mainGallery);
-        recyclerView.setHasFixedSize(true);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, SPAN);
-        recyclerView.setLayoutManager(layoutManager);
 
-        dividerSize = getResources().getDimensionPixelSize(R.dimen.grid_divider_width);
-        recyclerView.addItemDecoration(new GridDividerItemDecoration(SPAN, dividerSize));
-        recyclerView.setAdapter(new MainGalleryAdapter(this, ImageRepository.getInstance().listImages(), thumbSize, this));
+        // Instantiate a ViewPager and a PagerAdapter.
+        pager = (ViewPager) findViewById(R.id.pager);
+        pager.setOffscreenPageLimit(2);
+        pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(pagerAdapter);
 
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        tabLayout.setupWithViewPager(pager);
+        registerLocalReceiver();
         onNewIntent(getIntent());
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         unregisterLocalReceiver();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (recyclerView.getWidth() > 0) {
-            initThumbSizeAndLoadData();
-        } else {
-            recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    initThumbSizeAndLoadData();
-                    return true;
-                }
-            });
-        }
-    }
-
-    private void initThumbSizeAndLoadData() {
-        thumbSize = recyclerView.getWidth() / SPAN - dividerSize / 2;
-        recyclerView.setAdapter(new MainGalleryAdapter(MainActivity.this, new ArrayList<Image>(), thumbSize, MainActivity.this));
-        // fetch data after we know the size so we can request the exact size from Cloudinary
-        loadData();
     }
 
     private void unregisterLocalReceiver() {
         if (receiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         }
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        registerLocalReceiver();
     }
 
     private void registerLocalReceiver() {
-        IntentFilter filter = new IntentFilter(CloudinaryService.ACTION_UPLOAD_SUCCESS);
-        filter.addAction(CloudinaryService.ACTION_UPLOAD_ERROR);
+        IntentFilter filter = new IntentFilter(CloudinaryService.ACTION_RESOURCE_MODIFIED);
+        filter.addAction(CloudinaryService.ACTION_UPLOAD_PROGRESS);
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (CloudinaryService.ACTION_UPLOAD_ERROR.equals(intent.getAction())) {
-                    showSnackBar("Error uploading image: " + intent.getStringExtra("error"));
-                } else if (CloudinaryService.ACTION_UPLOAD_SUCCESS.equals(intent.getAction())) {
-                    showSnackBar(getString(R.string.upload_successfully));
-                    loadData();
+                if (CloudinaryService.ACTION_RESOURCE_MODIFIED.equals(intent.getAction())) {
+                    Resource resource = (Resource) intent.getSerializableExtra("resource");
+                    for (AbstractPagerFragment fragment : getPages()) {
+                        ResourcesAdapter adapter = (ResourcesAdapter) fragment.getRecyclerView().getAdapter();
+                        adapter.resourceUpdated(resource);
+                    }
+                } else if (CloudinaryService.ACTION_UPLOAD_PROGRESS.equals(intent.getAction())) {
+                    String requestId = intent.getStringExtra("requestId");
+                    long bytes = intent.getLongExtra("bytes", 0);
+                    long totalBytes = intent.getLongExtra("totalBytes", 0);
+                    for (AbstractPagerFragment fragment : getPages()) {
+                        ResourcesAdapter adapter = (ResourcesAdapter) fragment.getRecyclerView().getAdapter();
+                        adapter.progressUpdated(requestId, bytes, totalBytes);
+                    }
+
                 }
             }
         };
@@ -138,8 +121,10 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (intent != null && Intent.ACTION_SEND.equals(intent.getAction())) {
-            uploadImageFromIntentUri(intent);
+        if (intent != null) {
+            if (Intent.ACTION_SEND.equals(intent.getAction()) || Intent.ACTION_SEND_MULTIPLE.equals(intent.getAction())) {
+                uploadImageFromIntentUri(intent);
+            }
         }
     }
 
@@ -155,7 +140,9 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
         switch (item.getItemId()) {
             case R.id.menu_clear:
                 clearLocalImages();
-                loadData();
+                for (AbstractPagerFragment fragment : getPages()) {
+                    fragment.clearData();
+                }
                 return true;
             case R.id.menu_upload:
                 syncCloudinary();
@@ -166,16 +153,16 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
     }
 
     private void clearLocalImages() {
-        ImageRepository.getInstance().clear();
+        ResourceRepo.getInstance().clear();
         CldAndroid.get().cancelAllRequests();
         PicassoTools.clearCache(Picasso.with(this));
     }
 
     private void syncCloudinary() {
-        List<Image> images = ImageRepository.getInstance().listImages();
-        for (Image image : images) {
-            if (StringUtils.isBlank(image.getCloudinaryPublicId())) {
-                uploadImage(image);
+        List<Resource> resources = ResourceRepo.getInstance().listAll();
+        for (Resource resource : resources) {
+            if (StringUtils.isBlank(resource.getCloudinaryPublicId())) {
+                uploadImage(resource);
             }
         }
     }
@@ -186,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
         if (resultCode == RESULT_OK) {
             if (requestCode == ImageActivity.UPLOAD_IMAGE_REQUEST_CODE) {
                 // if the user chose to upload right now we want to schedule an immediate upload:
-                uploadImage((Image) data.getSerializableExtra(ImageActivity.IMAGE_INTENT_EXTRA));
+                uploadImage((Resource) data.getSerializableExtra(ImageActivity.IMAGE_INTENT_EXTRA));
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
                 uploadImageFromIntentUri(data);
             }
@@ -214,38 +201,33 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
             getContentResolver().takePersistableUriPermission(uri, flags);
         }
 
-        Image image = new Image(uri.toString());
-        uploadImage(image);
-        addImage(image);
+        Resource resource = new Resource(uri.toString());
+        uploadImage(resource);
     }
 
-    private void uploadImage(Image image) {
-        if (StringUtils.isNotBlank(image.getRequestId())) {
-            // cancel previous upload requests for this image:
-            CldAndroid.get().cancelRequest(image.getRequestId());
+    private void uploadImage(Resource resource) {
+        if (StringUtils.isNotBlank(resource.getRequestId())) {
+            // cancel previous upload requests for this resource:
+            CldAndroid.get().cancelRequest(resource.getRequestId());
         }
 
-        String requestId = CloudinaryHelper.uploadImage(image.getLocalUri());
-        image.setRequestId(requestId);
-        ImageRepository.getInstance().uploadQueued(image);
+        String requestId = CloudinaryHelper.uploadImage(resource.getLocalUri());
+        resource.setRequestId(requestId);
+        resource.setResourceType("image");
+        ResourceRepo.getInstance().resourceQueued(resource);
     }
 
-    public void onImageClicked(Image image) {
-        startActivityForResult(new Intent(this, ImageActivity.class).putExtra(ImageActivity.IMAGE_INTENT_EXTRA, image), ImageActivity.UPLOAD_IMAGE_REQUEST_CODE);
+    public void onImageClicked(Resource resource) {
+        startActivityForResult(new Intent(this, ImageActivity.class).putExtra(ImageActivity.IMAGE_INTENT_EXTRA, resource), ImageActivity.UPLOAD_IMAGE_REQUEST_CODE);
     }
 
-    private void addImage(Image image) {
-        MainGalleryAdapter adapter = (MainGalleryAdapter) recyclerView.getAdapter();
-        adapter.addImage(image);
-        recyclerView.smoothScrollToPosition(0);
+    @Override
+    public void onDeleteClicked(Resource resource) {
+        DeleteImageDialogFragment.newInstance(resource.getLocalUri()).show(getFragmentManager(), "DELETE_DIALOG");
     }
 
     private void showSnackBar(String message) {
         Snackbar.make(fab, message, Snackbar.LENGTH_LONG).show();
-    }
-
-    private void loadData() {
-        ((MainGalleryAdapter) recyclerView.getAdapter()).replaceImages(ImageRepository.getInstance().listImages());
     }
 
     private void openMediaChooser() {
@@ -253,6 +235,82 @@ public class MainActivity extends AppCompatActivity implements MainGalleryAdapte
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setType("image/*");
+//        intent.setType("video/*");
         startActivityForResult(intent, CHOOSE_IMAGE_REQUEST_CODE);
+    }
+
+    @Override
+    public void deleteResource(String id) {
+        List<AbstractPagerFragment> pages = getPages();
+        for (AbstractPagerFragment page : pages) {
+            RecyclerView recyclerView = page.getRecyclerView();
+            ResourcesAdapter adapter = (ResourcesAdapter) recyclerView.getAdapter();
+            Resource resource = adapter.removeResource(id);
+            if (resource != null) {
+                ResourceRepo.getInstance().delete(id);
+                // delete remotely if possible
+                CloudinaryHelper.deleteByToken(resource.getDeleteToken(), new CloudinaryHelper.DeleteCallback() {
+                    @Override
+                    public void onSuccess() {
+                        showSnackBar("Remote resource deleted successfully.");
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        showSnackBar("Remote resource could not be deleted: " + error);
+                    }
+                });
+            }
+        }
+    }
+
+    public List<AbstractPagerFragment> getPages() {
+        List<AbstractPagerFragment> pages = new ArrayList<>();
+        for (int i = 0; i < PAGE_COUNT; i++) {
+            pages.add((AbstractPagerFragment) getSupportFragmentManager().findFragmentByTag(makeFragmentName(pager.getId(), i)));
+        }
+
+        return pages;
+    }
+
+    private final class PagerAdapter extends FragmentPagerAdapter {
+        public PagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0:
+                    return UploadedPageFragment.newInstance();
+                case 1:
+                    return QueuedPagerFragment.newInstance();
+                case 2:
+                    return FailedPagerFragment.newInstance();
+            }
+
+            // should never happen
+            return UploadedPageFragment.newInstance();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return getString(R.string.tab_title_uploaded);
+                case 1:
+                    return getString(R.string.tab_title_progress);
+                case 2:
+                    return getString(R.string.tab_title_failed);
+            }
+            return "tab " + position;
+        }
+
+        @Override
+        public int getCount() {
+            return PAGE_COUNT;
+        }
+
+
     }
 }

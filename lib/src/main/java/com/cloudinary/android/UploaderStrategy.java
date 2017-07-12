@@ -1,20 +1,35 @@
 package com.cloudinary.android;
 
-import com.cloudinary.strategies.AbstractUploaderStrategy;
 import com.cloudinary.ProgressCallback;
+import com.cloudinary.strategies.AbstractUploaderStrategy;
 import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.utils.StringUtils;
+
 import org.cloudinary.json.JSONException;
 import org.cloudinary.json.JSONObject;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.cloudinary.android.MultipartUtility.*;
+import static com.cloudinary.android.MultipartUtility.MultipartCallback;
 
 public class UploaderStrategy extends AbstractUploaderStrategy {
+
+    protected static String readFully(InputStream in) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length = 0;
+        while ((length = in.read(buffer)) != -1) {
+            baos.write(buffer, 0, length);
+        }
+        return new String(baos.toByteArray());
+    }
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -25,9 +40,7 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
         }
         boolean returnError = ObjectUtils.asBoolean(options.get("return_error"), false);
 
-        if (Boolean.TRUE.equals(options.get("unsigned"))) {
-            // Nothing to do
-        } else {
+        if (requiresSigning(action, options)) {
             String apiKey = ObjectUtils.asString(options.get("api_key"), this.cloudinary().config.apiKey);
             if (apiKey == null)
                 throw new IllegalArgumentException("Must supply api_key");
@@ -43,9 +56,11 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
                 params.put("signature", this.cloudinary().apiSignRequest(params, apiSecret));
                 params.put("api_key", apiKey);
             }
+        } else {
+            // Nothing to do
         }
 
-        String apiUrl = this.cloudinary().cloudinaryApiUrl(action, options);
+        String apiUrl = buildUploadUrl(action, options);
         MultipartCallback multipartCallback;
         if (progressCallback == null) {
             multipartCallback = null;
@@ -98,7 +113,7 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
                 // Closing more than once has no effect so we can call it safely without having to check state
                 multipart.close();
             }
-            }
+        }
 
         int code;
         try {
@@ -151,15 +166,5 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
         }
 
         return actualLength;
-    }
-
-    protected static String readFully(InputStream in) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length = 0;
-        while ((length = in.read(buffer)) != -1) {
-            baos.write(buffer, 0, length);
-        }
-        return new String(baos.toByteArray());
     }
 }

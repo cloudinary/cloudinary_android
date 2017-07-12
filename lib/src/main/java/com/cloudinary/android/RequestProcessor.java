@@ -3,6 +3,7 @@ package com.cloudinary.android;
 import android.content.Context;
 import android.content.res.Resources;
 
+import com.cloudinary.Cloudinary;
 import com.cloudinary.ProgressCallback;
 import com.cloudinary.android.payload.NotFoundException;
 import com.cloudinary.android.payload.Payload;
@@ -15,6 +16,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.cloudinary.Uploader.BUFFER_SIZE;
+import static com.cloudinary.android.UploadStatus.FAILURE;
+import static com.cloudinary.android.UploadStatus.RESCHEDULE;
+import static com.cloudinary.android.UploadStatus.SUCCESS;
+
 class RequestProcessor implements RequestProcessorInterface {
     private static final String TAG = "RequestProcessor";
     private final CallbackDispatcherInterface callbackDispatcher;
@@ -24,7 +30,7 @@ class RequestProcessor implements RequestProcessorInterface {
         this.callbackDispatcher = callbackDispatcher;
     }
 
-    public RequestResultStatus processRequest(Context context, ParamsAdaptable params) {
+    public UploadStatus processRequest(Context context, ParamsAdaptable params) {
 
         final String requestId = params.getString("requestId", null);
         final String uri = params.getString("uri", null);
@@ -36,13 +42,13 @@ class RequestProcessor implements RequestProcessorInterface {
 
         if (errorCount > maxErrorRetries) {
             Logger.d(TAG, String.format("Failing request %s, too many errors: %d, max: %d", requestId, errorCount, maxErrorRetries));
-            return RequestResultStatus.FAILURE;
+            return FAILURE;
         }
 
         callbackDispatcher.dispatchStart(requestId);
         callbackDispatcher.wakeListenerServiceWithRequestStart(context, requestId);
 
-        RequestResultStatus requestResultStatus;
+        UploadStatus requestResultStatus;
         final Context appContext = context.getApplicationContext();
 
         Map resultData = null;
@@ -60,12 +66,12 @@ class RequestProcessor implements RequestProcessorInterface {
         String error = null;
 
         if (!optionsLoadedSuccessfully) {
-            requestResultStatus = RequestResultStatus.FAILURE;
+            requestResultStatus = FAILURE;
             error = "Cloud not load request options.";
             Logger.d(TAG, String.format("Failing request %s, cannot load options.", requestId));
         } else {
             if (StringUtils.isBlank(uri)) {
-                requestResultStatus = RequestResultStatus.FAILURE;
+                requestResultStatus = FAILURE;
                 error = "Request Uri is empty.";
                 Logger.d(TAG, String.format("Failing request %s, Uri is empty.", requestId));
             } else {
@@ -73,37 +79,37 @@ class RequestProcessor implements RequestProcessorInterface {
                 if (payload == null) {
                     Logger.d(TAG, String.format("Failing request %s, payload cannot be loaded.", requestId));
                     error = "Request payload could not be loaded.";
-                    requestResultStatus = RequestResultStatus.FAILURE;
+                    requestResultStatus = FAILURE;
                 } else {
                     int maxConcurrentRequests = CldAndroid.get().getGlobalUploadPolicy().getMaxConcurrentRequests();
                     int runningJobsCount = runningJobs.get();
                     if (runningJobsCount >= maxConcurrentRequests) {
                         Logger.d(TAG, String.format("Rescheduling request %s, too many running jobs: %d, max: %d", requestId, runningJobsCount, maxConcurrentRequests));
-                        return RequestResultStatus.RESCHEDULE;
+                        return RESCHEDULE;
                     } else {
                         try {
-                            resultData = doProcess(requestId, appContext, options, payload);
-                            requestResultStatus = RequestResultStatus.SUCCESS;
+                            resultData = doProcess(requestId, appContext, options, params, payload);
+                            requestResultStatus = SUCCESS;
                         } catch (NotFoundException e) {
                             Logger.e(TAG, String.format("NotFoundException for request %s.", requestId), e);
-                            requestResultStatus = RequestResultStatus.FAILURE;
+                            requestResultStatus = FAILURE;
                             error = "The requested file does not exist.";
                         } catch (Resources.NotFoundException e) {
                             Logger.e(TAG, String.format("Resources.NotFoundException for request %s.", requestId), e);
-                            requestResultStatus = RequestResultStatus.FAILURE;
+                            requestResultStatus = FAILURE;
                             error = "The requested file does not exist.";
                         } catch (FileNotFoundException e) {
                             Logger.e(TAG, String.format("FileNotFoundException for request %s.", requestId), e);
-                            requestResultStatus = RequestResultStatus.FAILURE;
+                            requestResultStatus = FAILURE;
                             error = "The requested file does not exist.";
                         } catch (IOException e) {
                             Logger.e(TAG, String.format("IOException for request %s.", requestId), e);
                             error = String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage());
-                            requestResultStatus = RequestResultStatus.RESCHEDULE;
+                            requestResultStatus = RESCHEDULE;
                         } catch (Exception e) {
                             Logger.e(TAG, String.format("Unexpected exception for request %s.", requestId), e);
                             error = String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage());
-                            requestResultStatus = RequestResultStatus.FAILURE;
+                            requestResultStatus = FAILURE;
                         } finally {
                             runningJobs.decrementAndGet();
                         }
@@ -113,7 +119,7 @@ class RequestProcessor implements RequestProcessorInterface {
         }
 
         if (requestResultStatus.isFinal()) {
-            if (requestResultStatus == RequestResultStatus.SUCCESS) {
+            if (requestResultStatus == SUCCESS) {
                 callbackDispatcher.dispatchSuccess(context, requestId, resultData);
             } else {
                 callbackDispatcher.dispatchError(context, requestId, StringUtils.isEmpty(error) ? "Unknown error." : error);
@@ -124,7 +130,7 @@ class RequestProcessor implements RequestProcessorInterface {
             callbackDispatcher.wakeListenerServiceWithRequestFinished(context, requestId, requestResultStatus);
 
         } else {
-            callbackDispatcher.dispatchReschedule(context, requestId);
+            callbackDispatcher.dispatchReschedule(context, requestId, error);
         }
 
         Logger.i(TAG, String.format("Finished processing request %s, result: ", requestId, requestResultStatus));
@@ -132,25 +138,22 @@ class RequestProcessor implements RequestProcessorInterface {
         return requestResultStatus;
     }
 
-    private Map doProcess(final String requestId, Context appContext, Map<String, Object> options, Payload payload) throws NotFoundException, IOException {
+    private Map doProcess(final String requestId, Context appContext, Map<String, Object> options, ParamsAdaptable params, Payload payload) throws NotFoundException, IOException {
         Logger.d(TAG, String.format("Starting upload for request %s", requestId));
         runningJobs.incrementAndGet();
         final long actualTotalBytes = payload.getLength(appContext);
-
-        ProgressCallback progressCallback = new ProgressCallback() {
-            // calculate step size for progress - prevent flooding the user with callbacks.
-            long chunkSize = actualTotalBytes > 0 ? actualTotalBytes / 100 : 500 * 1024 * 1024;
-            int totalNotified = 0;
-
-            @Override
-            public void onProgress(long bytes, long totalBytes) {
-                // throttle progress callbacks
-                if (totalNotified + chunkSize < bytes || totalBytes == actualTotalBytes) {
-                    totalNotified += chunkSize;
-                    callbackDispatcher.dispatchProgress(requestId, bytes, actualTotalBytes);
-                }
-            }
-        };
+        final long offset = params.getLong("offset", 0);
+        final int bufferSize;
+        final String uploadUniqueId;
+        int defaultBufferSize = options.containsKey("chunk_size") ? (int) options.get("chunk_size") : BUFFER_SIZE;
+        if (offset > 0) {
+            // this is a RESUME operation, buffer size needs to be consistent with previous parts:
+            bufferSize = params.getInt("original_buffer_size", defaultBufferSize);
+            uploadUniqueId = params.getString("original_upload_id", null);
+        } else {
+            bufferSize = ObjectUtils.asInteger(options.get("chunk_size"), defaultBufferSize);
+            uploadUniqueId = new Cloudinary().randomPublicId();
+        }
 
         // check credentials/signature
         if (!CldAndroid.get().hasCredentials()) {
@@ -167,6 +170,44 @@ class RequestProcessor implements RequestProcessorInterface {
             }
         }
 
-        return CldAndroid.get().getCloudinary().uploader().uploadLarge(payload.prepare(appContext), options, progressCallback);
+        final ProcessorCallback processorCallback = new ProcessorCallback(actualTotalBytes, offset, callbackDispatcher, requestId);
+
+        try {
+            return CldAndroid.get().getCloudinary().uploader().uploadLarge(payload.prepare(appContext), options, bufferSize, offset, uploadUniqueId, processorCallback);
+        } finally {
+            // save data into persisted request params to enable resuming later on
+            params.putInt("original_buffer_size", bufferSize);
+            params.putLong("offset", processorCallback.bytesUploaded - processorCallback.bytesUploaded % bufferSize);
+            params.putString("original_upload_id", uploadUniqueId);
+        }
+    }
+
+    private static final class ProcessorCallback implements ProgressCallback {
+        final long notifyThrottlingStepSize;
+        private final CallbackDispatcherInterface dispatcher;
+        long bytesNotified;
+        long bytesUploaded;
+        long totalBytes;
+        String requestId;
+
+        ProcessorCallback(long totalBytes, long offset, CallbackDispatcherInterface dispatcher, final String requestId) {
+            // calculate step size for progress - prevent flooding the user with callbacks.
+            this.notifyThrottlingStepSize = totalBytes > 0 ? totalBytes / 100 : 500 * 1024 * 1024;
+            this.totalBytes = totalBytes;
+            this.bytesNotified = offset;
+            this.bytesUploaded = offset;
+            this.dispatcher = dispatcher;
+            this.requestId = requestId;
+        }
+
+        @Override
+        public void onProgress(long bytes, long totalBytes) {
+            // throttle progress callbacks
+            this.bytesUploaded = bytes;
+            if (bytesNotified + notifyThrottlingStepSize < bytes || totalBytes == this.totalBytes) {
+                bytesNotified += notifyThrottlingStepSize;
+                dispatcher.dispatchProgress(requestId, bytes, this.totalBytes);
+            }
+        }
     }
 }

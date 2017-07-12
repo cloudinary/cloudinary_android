@@ -58,7 +58,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     }
 
     @NonNull
-    private static Job.Result adaptResult(RequestResultStatus res) {
+    private static Job.Result adaptResult(UploadStatus res) {
         switch (res) {
             case FAILURE:
                 return Job.Result.FAILURE;
@@ -177,7 +177,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
             wl.acquire();
             try {
                 // call the generic processor:
-                RequestResultStatus result = CldAndroid.get().processRequest(getContext(), new AndroidJobParamsAdaptable(params.getExtras()));
+                UploadStatus result = CldAndroid.get().processRequest(getContext(), new AndroidJobParamsAdaptable(params.getExtras()));
                 return adaptResult(result);
             } finally {
                 wl.release();
@@ -190,7 +190,6 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         private AndroidJobParamsAdaptable(PersistableBundleCompat bundle) {
             this.bundle = bundle;
-
         }
 
         @Override
@@ -204,6 +203,11 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         }
 
         @Override
+        public void putLong(String key, long value) {
+            this.bundle.putLong(key, value);
+        }
+
+        @Override
         public String getString(String key, String defaultValue) {
             return bundle.getString(key, defaultValue);
         }
@@ -211,6 +215,11 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         @Override
         public int getInt(String key, int defaultValue) {
             return bundle.getInt(key, defaultValue);
+        }
+
+        @Override
+        public long getLong(String key, long defaultValue) {
+            return bundle.getLong(key, defaultValue);
         }
     }
 }

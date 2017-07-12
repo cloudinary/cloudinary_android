@@ -6,6 +6,9 @@ import android.util.Log;
 
 import com.cloudinary.utils.StringUtils;
 
+import static com.cloudinary.android.UploadStatus.FAILURE;
+import static com.cloudinary.android.UploadStatus.SUCCESS;
+
 /***
  * Build a service derived from this class to receive request callback when the application is in the background.
  * Note: The concrete service class should be registered in the manifest twice, once like any other service (under application/service tag)
@@ -38,13 +41,13 @@ public abstract class ListenerService extends Service implements UploadCallback{
                 if (CldAndroid.ACTION_REQUEST_STARTED.equals(intent.getAction())){
                     onStart(requestId);
                 } else if (CldAndroid.ACTION_REQUEST_FINISHED.equals(intent.getAction())){
-                    RequestResultStatus result = (RequestResultStatus) intent.getSerializableExtra(CldAndroid.INTENT_EXTRA_REQUEST_RESULT_STATUS);
+                    UploadStatus result = (UploadStatus) intent.getSerializableExtra(CldAndroid.INTENT_EXTRA_REQUEST_RESULT_STATUS);
                     UploadResult uploadResult = CldAndroid.get().popPendingResult(requestId);
 
                     // ACTION_REQUEST_FINISHED means either success or failure:
-                    if (result == RequestResultStatus.FAILURE){
+                    if (result == FAILURE) {
                         onError(requestId, uploadResult.getError());
-                    } else if (result == RequestResultStatus.SUCCESS){
+                    } else if (result == SUCCESS) {
                         onSuccess(requestId, uploadResult.getSuccessResultData());
                     }
                 }

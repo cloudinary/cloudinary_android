@@ -200,8 +200,8 @@ public class UploadRequest<T extends Payload> {
         }
 
         @Override
-        public void onReschedule(String requestId) {
-            callback.onReschedule(requestId);
+        public void onReschedule(String requestId, String errorMessage) {
+            callback.onReschedule(requestId, errorMessage);
         }
     }
 }
