@@ -22,11 +22,15 @@ android {
 
     // filter in the api credentials before building but without changing original source files - to make sure the
     // credentials are not checked into source control. This is used by the tests only, the credentials
-    // are taken from the CLOUDINARY_URL environment variable.
+    // are taken from the CLOUDINARY_URL environment variable or the cloudinaryUrl property
     testVariants.all { variant ->
         variant.outputs.each { output ->
             output.processManifest.doLast {
-                filterManifest("${buildDir}/intermediates/manifest/${variant.dirName}/AndroidManifest.xml", System.getenv('CLOUDINARY_URL'))
+                def url = System.getenv('CLOUDINARY_URL') ?: project.findProperty("cloudinaryUrl")
+                if(!url) {
+                    throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl build property.")
+                }
+                filterManifest("${buildDir}/intermediates/manifest/${variant.dirName}/AndroidManifest.xml", url)
             }
         }
     }
