@@ -1,4 +1,4 @@
-package com.cloudinary.android;
+package com.cloudinary.android.signed;
 
 public class Signature {
     private final String signature;

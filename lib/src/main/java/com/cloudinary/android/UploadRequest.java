@@ -2,7 +2,10 @@ package com.cloudinary.android;
 
 import android.support.annotation.Nullable;
 
+import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.payload.Payload;
+import com.cloudinary.android.policy.TimeWindow;
+import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.utils.StringUtils;
 
@@ -10,7 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/***
+/**
  * A request to upload a single {@link Payload} to Cloudinary.
  * @param <T> The payload type this request will upload
  */
@@ -18,11 +21,15 @@ public class UploadRequest<T extends Payload> {
     private final UploadContext<T> uploadContext;
     private String requestId;
     private boolean dispatched = false;
-    private RequestUploadPolicy requestUploadPolicy = CldAndroid.get().getGlobalUploadPolicy();
+    private UploadPolicy uploadPolicy = CldAndroid.get().getGlobalUploadPolicy();
     private TimeWindow timeWindow = TimeWindow.getDefault();
     private UploadCallback callback;
     private Map<String, Object> options;
     private String optionsAsString = null;
+
+    UploadRequest(UploadContext<T> uploadContext) {
+        this.uploadContext = uploadContext;
+    }
 
     UploadRequest(UploadContext<T> uploadContext, @Nullable Map<String, Object> options) {
         this.uploadContext = uploadContext;
@@ -40,7 +47,7 @@ public class UploadRequest<T extends Payload> {
         this.requestId = requestId;
     }
 
-    /***
+    /**
      * Setup a callback to get notified on upload events.
      * @return This request for chaining.
      */
@@ -58,7 +65,7 @@ public class UploadRequest<T extends Payload> {
         return this;
     }
 
-    /***
+    /**
      * Constrain this request to run within a specific {@link TimeWindow}.
      * @return This request for chaining.
      */
@@ -68,7 +75,7 @@ public class UploadRequest<T extends Payload> {
         return this;
     }
 
-    /***
+    /**
      * Set a map of options for this request. Note: This replaces any existing options.
      * @return This request for chaining.
      */
@@ -77,7 +84,7 @@ public class UploadRequest<T extends Payload> {
         return this;
     }
 
-    /***
+    /**
      * Add an option to this request.
      * @param name Option name.
      * @param value Option value.
@@ -90,18 +97,18 @@ public class UploadRequest<T extends Payload> {
         return this;
     }
 
-    /***
-     * Set the upload requestUploadPolicy for the request
-     * @param policy The requestUploadPolicy to set. See {@link RequestUploadPolicy.Builder}
+    /**
+     * Set the upload uploadPolicy for the request
+     * @param policy The uploadPolicy to set. See {@link UploadPolicy.Builder}
      * @return This request for chaining.
      */
-    public synchronized UploadRequest<T> policy(RequestUploadPolicy policy) {
+    public synchronized UploadRequest<T> policy(UploadPolicy policy) {
         assertNotDispatched();
-        this.requestUploadPolicy = policy;
+        this.uploadPolicy = policy;
         return this;
     }
 
-    /***
+    /**
      * Dispatch the request
      * @return The unique id of the request.
      */
@@ -152,22 +159,22 @@ public class UploadRequest<T extends Payload> {
         return optionsAsString;
     }
 
-    RequestUploadPolicy getRequestUploadPolicy() {
-        return requestUploadPolicy;
+    UploadPolicy getUploadPolicy() {
+        return uploadPolicy;
     }
 
     void defferByMinutes(int minutes) {
         timeWindow = timeWindow.newDeferredWindow(minutes);
     }
 
-    void populateParamsFromFields(ParamsAdaptable target) {
+    void populateParamsFromFields(RequestParams target) {
         target.putString("uri", getPayload().toUri());
         target.putString("requestId", getRequestId());
-        target.putInt("maxErrorRetries", getRequestUploadPolicy().getMaxErrorRetries());
+        target.putInt("maxErrorRetries", getUploadPolicy().getMaxErrorRetries());
         target.putString("options", getOptionsString());
     }
 
-    /***
+    /**
      * Wraps the delegate and unregisters the callback once a request is finished.
      */
     private static final class DelegateCallback implements UploadCallback {

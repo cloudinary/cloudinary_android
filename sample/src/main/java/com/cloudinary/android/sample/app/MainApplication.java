@@ -4,9 +4,9 @@ package com.cloudinary.android.sample.app;
 import android.app.Application;
 
 import com.cloudinary.android.CldAndroid;
-import com.cloudinary.android.GlobalUploadPolicy;
 import com.cloudinary.android.LogLevel;
-import com.cloudinary.android.RequestUploadPolicy;
+import com.cloudinary.android.policy.GlobalUploadPolicy;
+import com.cloudinary.android.policy.UploadPolicy;
 
 public class MainApplication extends Application {
     static MainApplication _instance;
@@ -29,7 +29,7 @@ public class MainApplication extends Application {
         CldAndroid.get().setGlobalUploadPolicy(
                 new GlobalUploadPolicy.Builder()
                         .maxConcurrentRequests(4)
-                        .networkPolicy(RequestUploadPolicy.NetworkType.ANY)
+                        .networkPolicy(UploadPolicy.NetworkType.ANY)
                         .build());
 
         _instance = this;

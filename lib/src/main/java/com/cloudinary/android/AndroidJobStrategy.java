@@ -4,12 +4,14 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
 
+import com.cloudinary.android.callback.UploadStatus;
+import com.cloudinary.android.policy.UploadPolicy;
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.evernote.android.job.util.support.PersistableBundleCompat;
 
-/***
+/**
  * Background work strategy implementation based on com.evernote.android.job
  */
 class AndroidJobStrategy implements BackgroundRequestStrategy {
@@ -18,9 +20,9 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     static JobRequest adapt(UploadRequest request) {
         PersistableBundleCompat extras = new PersistableBundleCompat();
-        request.populateParamsFromFields(new AndroidJobParamsAdaptable(extras));
+        request.populateParamsFromFields(new AndroidJobRequestParams(extras));
 
-        RequestUploadPolicy policy = request.getRequestUploadPolicy();
+        UploadPolicy policy = request.getUploadPolicy();
 
         return new JobRequest.Builder(JOB_TAG)
                 .setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
@@ -34,7 +36,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
                 .build();
     }
 
-    private static JobRequest.BackoffPolicy adaptPolicy(RequestUploadPolicy.BackoffPolicy backoffPolicy) {
+    private static JobRequest.BackoffPolicy adaptPolicy(UploadPolicy.BackoffPolicy backoffPolicy) {
         switch (backoffPolicy) {
             case LINEAR:
                 return JobRequest.BackoffPolicy.LINEAR;
@@ -44,7 +46,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         }
     }
 
-    private static JobRequest.NetworkType adaptNetworkType(RequestUploadPolicy.NetworkType networkType) {
+    private static JobRequest.NetworkType adaptNetworkType(UploadPolicy.NetworkType networkType) {
         switch (networkType) {
             case NONE:
                 return JobRequest.NetworkType.ANY;
@@ -72,17 +74,26 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         return Job.Result.FAILURE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void init(Context context) {
         JobManager.create(context).addJobCreator(new JobCreator());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void doDispatch(UploadRequest request) {
         JobRequest job = adapt(request);
         job.schedule();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void executeRequestsNow(int howMany) {
         int started = 0;
@@ -105,6 +116,9 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         return jobRequest.getStartMs() < SOON_THRESHOLD;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean cancelRequest(String requestId) {
         boolean cancelled = false;
@@ -120,12 +134,18 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         return cancelled;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int cancelAllRequests() {
         Logger.i(TAG, "All requests cancelled.");
         return JobManager.instance().cancelAll();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getPendingImmediateJobsCount() {
         int pending = 0;
@@ -142,6 +162,9 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         return jobRequest.getStartMs() < IMMEDIATE_THRESHOLD;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getRunningJobsCount() {
         int running = 0;
@@ -177,7 +200,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
             wl.acquire();
             try {
                 // call the generic processor:
-                UploadStatus result = CldAndroid.get().processRequest(getContext(), new AndroidJobParamsAdaptable(params.getExtras()));
+                UploadStatus result = CldAndroid.get().processRequest(getContext(), new AndroidJobRequestParams(params.getExtras()));
                 return adaptResult(result);
             } finally {
                 wl.release();
@@ -185,10 +208,10 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         }
     }
 
-    private static final class AndroidJobParamsAdaptable implements ParamsAdaptable {
+    private static final class AndroidJobRequestParams implements RequestParams {
         private final PersistableBundleCompat bundle;
 
-        private AndroidJobParamsAdaptable(PersistableBundleCompat bundle) {
+        private AndroidJobRequestParams(PersistableBundleCompat bundle) {
             this.bundle = bundle;
         }
 

@@ -4,6 +4,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.cloudinary.android.payload.FilePayload;
+import com.cloudinary.android.policy.TimeWindow;
+import com.cloudinary.android.policy.UploadPolicy;
 import com.evernote.android.job.JobRequest;
 
 import org.junit.Test;
@@ -24,11 +26,11 @@ public class AndroidJobStrategyTest extends AbstractTest {
         UploadRequest<FilePayload> request =
                 new UploadRequest<>(new UploadContext<>(payload, null), null)
                         .constrain(new TimeWindow.Builder().minLatencyMillis(20).mMaxExecutionDelayMillis(200).build())
-                        .policy(new RequestUploadPolicy.Builder()
-                                .networkPolicy(RequestUploadPolicy.NetworkType.UNMETERED)
+                        .policy(new UploadPolicy.Builder()
+                                .networkPolicy(UploadPolicy.NetworkType.UNMETERED)
                                 .requiresCharging(true)
                                 .requiresIdle(false)
-                                .backoffCriteria(100, RequestUploadPolicy.BackoffPolicy.LINEAR)
+                                .backoffCriteria(100, UploadPolicy.BackoffPolicy.LINEAR)
                                 .maxRetries(9)
                                 .build());
 

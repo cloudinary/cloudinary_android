@@ -1,4 +1,4 @@
-/***
+/**
  * Shared script for every root project, including the topmost root.
  */
 allprojects {

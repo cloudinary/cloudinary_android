@@ -7,7 +7,7 @@ import com.cloudinary.android.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
-/***
+/**
  * This class is used to register custom payload types and create instances from Payload URIs
  */
 public class PayloadFactory {
@@ -21,7 +21,7 @@ public class PayloadFactory {
         types.put(ResourcePayload.URI_KEY, ResourcePayload.class);
     }
 
-    /***
+    /**
      * Constructs the payload extracted from the uri.
      * @param uri Uri that contains the payload data and type
      * @return The constructed payload

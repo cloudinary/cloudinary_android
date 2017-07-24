@@ -13,7 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.TypedValue;
 
-import com.cloudinary.android.ListenerService;
+import com.cloudinary.android.callback.ListenerService;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;

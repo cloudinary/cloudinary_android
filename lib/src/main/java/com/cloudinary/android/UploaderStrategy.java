@@ -56,8 +56,6 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
                 params.put("signature", this.cloudinary().apiSignRequest(params, apiSecret));
                 params.put("api_key", apiKey);
             }
-        } else {
-            // Nothing to do
         }
 
         String apiUrl = buildUploadUrl(action, options);

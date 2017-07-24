@@ -7,7 +7,7 @@ import com.cloudinary.utils.Base64Coder;
 
 import java.io.File;
 
-/***
+/**
  * This class is used to handle uploading of images/videos represented as a {@link java.io.File}
  */
 public class FilePayload extends Payload<String> {

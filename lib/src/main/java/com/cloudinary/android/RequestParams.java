@@ -1,12 +1,13 @@
 package com.cloudinary.android;
 
-/***
+/**
  * Classes that implement {@link BackgroundRequestStrategy} will most probably need their own parameter collection to implement this interface
- * so it can be easily adapted to the common params structure.
+ * so it can be easily adapted to the common params structure. This is used as both in and out params.
  */
-public interface ParamsAdaptable {
+interface RequestParams {
     void putString(String key, String value);
-    void putInt (String key, int value);
+
+    void putInt(String key, int value);
 
     void putLong(String key, long value);
 

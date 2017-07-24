@@ -4,6 +4,9 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.cloudinary.android.callback.UploadCallback;
+import com.cloudinary.android.callback.UploadResult;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,7 +25,7 @@ public class CallbackDispatcherTest {
     @Test
     public void testCallbacks() throws InterruptedException {
         Context appContext = InstrumentationRegistry.getTargetContext();
-        CallbackDispatcherInterface dispatcher = new CallbackDispatcher(appContext);
+        CallbackDispatcher dispatcher = new DefaultCallbackDispatcher(appContext);
         CallbackCounter callbackCounter = new CallbackCounter();
         dispatcher.registerCallback(callbackCounter);
 
@@ -67,7 +70,7 @@ public class CallbackDispatcherTest {
     @Test
     public void testQueuedResults() throws InterruptedException {
         Context appContext = InstrumentationRegistry.getTargetContext();
-        CallbackDispatcherInterface dispatcher = new CallbackDispatcher(appContext);
+        CallbackDispatcher dispatcher = new DefaultCallbackDispatcher(appContext);
 
         dispatcher.dispatchSuccess(appContext, "a", Collections.singletonMap("test1", "result1"));
         dispatcher.dispatchSuccess(appContext, "b", Collections.singletonMap("test2", "result2"));

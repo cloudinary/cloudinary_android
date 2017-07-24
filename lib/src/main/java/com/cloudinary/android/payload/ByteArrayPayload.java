@@ -7,7 +7,7 @@ import android.util.Base64;
 
 import java.util.Arrays;
 
-/***
+/**
  * This class is used to handle uploading of images/videos as byte arrays
  */
 public class ByteArrayPayload extends Payload<byte[]> {

@@ -7,7 +7,7 @@ import android.net.Uri;
 
 import java.io.IOException;
 
-/***
+/**
  * This class is used to handle uploading of images/videos represented as an Android raw resource id
  */
 public class ResourcePayload extends Payload<Integer> {

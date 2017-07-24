@@ -15,8 +15,11 @@ import junit.framework.Assert;
 
 import org.cloudinary.json.JSONArray;
 import org.cloudinary.json.JSONObject;
+import org.hamcrest.core.StringContains;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -38,6 +41,8 @@ import static junit.framework.Assert.assertTrue;
 public class UploaderTest extends AbstractTest {
 
     private static Cloudinary cloudinary;
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -389,19 +394,13 @@ public class UploaderTest extends AbstractTest {
     }
 
     @Test
-    public void testAutoTaggingRequest() {
+    public void testAutoTaggingRequest() throws IOException {
         // should support requesting auto tagging
         if (cloudinary.config.apiSecret == null)
             return;
 
-        try {
-            cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("auto_tagging", 0.5f));
-        } catch (Exception e) {
-            for (int i = 0; i < e.getStackTrace().length; i++) {
-                StackTraceElement x = e.getStackTrace()[i];
-            }
-            assertTrue(e.getMessage().matches("^Must use(.*)"));
-        }
+        expectedEx.expectMessage(StringContains.containsString("Must use"));
+        cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("auto_tagging", 0.5f));
     }
 
     @Test

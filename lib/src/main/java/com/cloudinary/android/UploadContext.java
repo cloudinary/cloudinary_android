@@ -4,9 +4,9 @@ import com.cloudinary.android.payload.Payload;
 
 class UploadContext<T extends Payload> {
     private final T payload;
-    private final RequestDispatcherInterface dispatcher;
+    private final RequestDispatcher dispatcher;
 
-    UploadContext(T payload, RequestDispatcherInterface requestDispatcher) {
+    UploadContext(T payload, RequestDispatcher requestDispatcher) {
         this.payload = payload;
         this.dispatcher = requestDispatcher;
     }
@@ -15,7 +15,7 @@ class UploadContext<T extends Payload> {
         return payload;
     }
 
-    RequestDispatcherInterface getDispatcher() {
+    RequestDispatcher getDispatcher() {
         return dispatcher;
     }
 }
