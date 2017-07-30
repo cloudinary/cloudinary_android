@@ -65,7 +65,7 @@ class DefaultRequestProcessor implements RequestProcessor {
         boolean optionsLoadedSuccessfully = false;
         Map<String, Object> options = null;
         try {
-            options = (Map<String, Object>) ObjectUtils.deserialize(optionsAsString);
+            options = UploadRequest.decodeOptions(optionsAsString);
             optionsLoadedSuccessfully = true;
         } catch (IOException e) {
             Logger.e(TAG, String.format("Request %s, error loading options.", requestId), e);

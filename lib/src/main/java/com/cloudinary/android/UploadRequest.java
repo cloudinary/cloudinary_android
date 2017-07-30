@@ -14,12 +14,15 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * A request to upload a single {@link Payload} to Cloudinary.
+ * A request to upload a single {@link Payload} to Cloudinary. Note: Once calling {@link #dispatch()} the request is sealed and any
+ * attempt to modify it will produce an {@link IllegalStateException}. If there's a need to change a request after dispatching,
+ * it needs to be cancelled ({@link CldAndroid#cancelRequest(String)}) and a new request should be dispatched in it's place.
  * @param <T> The payload type this request will upload
  */
 public class UploadRequest<T extends Payload> {
     private final UploadContext<T> uploadContext;
     private final String requestId = UUID.randomUUID().toString();
+    private final Object optionsLockObject = new Object();
     private boolean dispatched = false;
     private UploadPolicy uploadPolicy = CldAndroid.get().getGlobalUploadPolicy();
     private TimeWindow timeWindow = TimeWindow.getDefault();
@@ -36,9 +39,15 @@ public class UploadRequest<T extends Payload> {
         this.options = options;
     }
 
-    String getRequestId() {
-        return requestId;
+    static String encodeOptions(Map<String, Object> options) throws IOException {
+        return ObjectUtils.serialize(options);
     }
+
+    @SuppressWarnings("unchecked")
+    static Map<String, Object> decodeOptions(String encoded) throws IOException, ClassNotFoundException {
+        return (Map<String, Object>) ObjectUtils.deserialize(encoded);
+    }
+
 
     /**
      * Setup a callback to get notified on upload events.
@@ -73,6 +82,7 @@ public class UploadRequest<T extends Payload> {
      * @return This request for chaining.
      */
     public synchronized UploadRequest<T> options(Map<String, Object> options) {
+        assertNotDispatched();
         this.options = options;
         return this;
     }
@@ -110,20 +120,27 @@ public class UploadRequest<T extends Payload> {
         verifyOptionsExist();
         this.dispatched = true;
         try {
-            optionsAsString = ObjectUtils.serialize(options);
+            optionsAsString = encodeOptions(options);
         } catch (IOException e) {
             throw new InvalidParamsException("Parameters must be serializable", e);
         }
 
-        String requestId = uploadContext.getDispatcher().dispatch(this);
         CldAndroid.get().registerCallback(requestId, callback);
+        uploadContext.getDispatcher().dispatch(this);
+
         return requestId;
     }
 
-    private synchronized void verifyOptionsExist() {
-        if (options == null) {
-            options = new HashMap<>();
+    private void verifyOptionsExist() {
+        synchronized (optionsLockObject) {
+            if (options == null) {
+                options = new HashMap<>();
+            }
         }
+    }
+
+    String getRequestId() {
+        return requestId;
     }
 
     T getPayload() {
@@ -148,7 +165,7 @@ public class UploadRequest<T extends Payload> {
         }
     }
 
-    String getOptionsString() {
+    private String getOptionsString() {
         return optionsAsString;
     }
 
