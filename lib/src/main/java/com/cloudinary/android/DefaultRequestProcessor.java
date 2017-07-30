@@ -83,12 +83,13 @@ class DefaultRequestProcessor implements RequestProcessor {
                     int runningJobsCount = runningJobs.get();
                     if (runningJobsCount < maxConcurrentRequests) {
                         try {
+                            runningJobs.incrementAndGet();
                             resultData = doProcess(requestId, appContext, options, params, payload);
                             requestResultStatus = SUCCESS;
                         } catch (NotFoundException e) {
                             Logger.e(TAG, String.format("NotFoundException for request %s.", requestId), e);
                             requestResultStatus = FAILURE;
-                            error = "The requested file does not exist.";
+                            error = "The requested file does not exist."; // REVIEW messages. consider const or resources
                         } catch (Resources.NotFoundException e) {
                             Logger.e(TAG, String.format("Resources.NotFoundException for request %s.", requestId), e);
                             requestResultStatus = FAILURE;
@@ -154,7 +155,6 @@ class DefaultRequestProcessor implements RequestProcessor {
 
     private Map doProcess(final String requestId, Context appContext, Map<String, Object> options, RequestParams params, Payload payload) throws NotFoundException, IOException, ErrorRetrievingSignatureException {
         Logger.d(TAG, String.format("Starting upload for request %s", requestId));
-        runningJobs.incrementAndGet();
         final long actualTotalBytes = payload.getLength(appContext);
         final long offset = params.getLong("offset", 0);
         final int bufferSize;
@@ -179,7 +179,7 @@ class DefaultRequestProcessor implements RequestProcessor {
                     options.put("timestamp", signature.getTimestamp());
                     options.put("api_key", signature.getApiKey());
                 } catch (Exception e) {
-                    throw new ErrorRetrievingSignatureException("Could not retrieve signature from the given provider: " + signatureProvider.getClass().getSimpleName(), e);
+                    throw new ErrorRetrievingSignatureException("Could not retrieve signature from the given provider: " + signatureProvider.getName(), e);
                 }
             }
         }

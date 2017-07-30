@@ -1,7 +1,6 @@
 package com.cloudinary.android.payload;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Base64;
 
@@ -45,8 +44,8 @@ public class ByteArrayPayload extends Payload<byte[]> {
         return data;
     }
 
-    void fromUri(String uri) {
-        data = decode(Uri.parse(uri).getHost());
+    void loadData(String encodedData) {
+        data = decode(encodedData);
     }
 
     @Override

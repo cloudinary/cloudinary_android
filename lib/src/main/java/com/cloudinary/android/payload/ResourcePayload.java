@@ -3,7 +3,6 @@ package com.cloudinary.android.payload;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
-import android.net.Uri;
 
 import java.io.IOException;
 
@@ -26,8 +25,8 @@ public class ResourcePayload extends Payload<Integer> {
     }
 
     @Override
-    void fromUri(String uri) {
-        data = Integer.parseInt(Uri.parse(uri).getHost());
+    void loadData(String encodedData) {
+        data = Integer.parseInt(encodedData);
     }
 
     @Override

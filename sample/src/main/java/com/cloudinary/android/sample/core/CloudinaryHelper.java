@@ -19,7 +19,6 @@ public class CloudinaryHelper {
     public static String uploadImage(String uri) {
         return CldAndroid.get().upload(Uri.parse(uri))
                 .unsigned("sample_app_preset")
-//                .option("return_delete_token", true)
                 .policy(CldAndroid.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build())
                 .dispatch();
     }

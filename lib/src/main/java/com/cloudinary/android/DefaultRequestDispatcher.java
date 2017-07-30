@@ -1,7 +1,6 @@
 package com.cloudinary.android;
 
 import java.util.Random;
-import java.util.UUID;
 
 /**
  * {@inheritDoc}
@@ -21,11 +20,12 @@ class DefaultRequestDispatcher implements RequestDispatcher {
      */
     @Override
     public final String dispatch(UploadRequest request) {
-        String requestId = UUID.randomUUID().toString();
+        String requestId = request.getRequestId();
 
         // If we are at max capacity and the request is not urgent defer this request by [10-20] minutes.
         // Requests will be started once there's more room
         int totalCount = strategy.getPendingImmediateJobsCount() + strategy.getRunningJobsCount();
+
         if (!request.getTimeWindow().isImmediate() && totalCount >= CldAndroid.get().getGlobalUploadPolicy().getMaxConcurrentRequests()) {
             int minutes = 10 + rand.nextInt(10);
             request.defferByMinutes(minutes);
@@ -34,7 +34,6 @@ class DefaultRequestDispatcher implements RequestDispatcher {
 
         Logger.d(TAG, String.format("Dispatching Request %s, scheduled start in %d minutes.", requestId, request.getTimeWindow().getMinLatencyOffsetMillis() / 60000));
 
-        request.setRequestId(requestId);
         strategy.doDispatch(request);
 
         return requestId;

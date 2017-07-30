@@ -7,11 +7,11 @@ import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.utils.ObjectUtils;
-import com.cloudinary.utils.StringUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * A request to upload a single {@link Payload} to Cloudinary.
@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class UploadRequest<T extends Payload> {
     private final UploadContext<T> uploadContext;
-    private String requestId;
+    private final String requestId = UUID.randomUUID().toString();
     private boolean dispatched = false;
     private UploadPolicy uploadPolicy = CldAndroid.get().getGlobalUploadPolicy();
     private TimeWindow timeWindow = TimeWindow.getDefault();
@@ -38,13 +38,6 @@ public class UploadRequest<T extends Payload> {
 
     String getRequestId() {
         return requestId;
-    }
-
-    synchronized void setRequestId(String requestId) {
-        if (StringUtils.isNotBlank(this.requestId)) {
-            throw new IllegalStateException("Id already set");
-        }
-        this.requestId = requestId;
     }
 
     /**

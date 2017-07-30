@@ -1,7 +1,6 @@
 package com.cloudinary.android.payload;
 
 import android.content.Context;
-import android.net.Uri;
 
 import com.cloudinary.utils.Base64Coder;
 
@@ -48,7 +47,7 @@ public class FilePayload extends Payload<String> {
     }
 
     @Override
-    void fromUri(String uri) {
-        data = Base64Coder.decodeString(Uri.parse(uri).getHost());
+    void loadData(String encodedData) {
+        data = Base64Coder.decodeString(encodedData);
     }
 }

@@ -18,4 +18,9 @@ public interface SignatureProvider {
      * @return A {@link Signature} object containing the generated signature, the api key and the signature's timestamp.
      */
     Signature provideSignature(Map options);
+
+    /**
+     * Return a name for logging purposes.
+     */
+    String getName();
 }

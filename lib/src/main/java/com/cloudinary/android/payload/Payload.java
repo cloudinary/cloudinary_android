@@ -41,7 +41,7 @@ public abstract class Payload<T> {
      * Initializes the payload data from the uri.
      * @param uri Uri that contains the payload data and type
      */
-    abstract void fromUri(String uri);
+    abstract void loadData(String uri);
 
     @Override
     public boolean equals(Object o) {

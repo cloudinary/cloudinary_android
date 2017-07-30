@@ -10,6 +10,7 @@ import com.cloudinary.utils.Base64Coder;
 import java.io.FileNotFoundException;
 
 public class LocalUriPayload extends Payload<Uri> {
+    public static final String[] PROJECTION = {OpenableColumns.SIZE};
     static final String URI_KEY = "uri";
 
     public LocalUriPayload(Uri data) {
@@ -25,8 +26,8 @@ public class LocalUriPayload extends Payload<Uri> {
     }
 
     @Override
-    void fromUri(String uri) {
-        data = Uri.parse(Base64Coder.decodeString(Uri.parse(uri).getHost()));
+    void loadData(String encodedData) {
+        data = Uri.parse(Base64Coder.decodeString(encodedData));
     }
 
     @Override
@@ -48,7 +49,7 @@ public class LocalUriPayload extends Payload<Uri> {
         long size = -1;
 
         try {
-            returnCursor = context.getContentResolver().query(data, null, null, null, null);
+            returnCursor = context.getContentResolver().query(data, PROJECTION, null, null, null);
             if (returnCursor != null && returnCursor.moveToNext()) {
                 int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
                 size = returnCursor.getLong(sizeIndex);
