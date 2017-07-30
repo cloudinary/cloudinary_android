@@ -16,7 +16,7 @@ public class ResourcePayload extends Payload<Integer> {
         super(rawResourceId);
     }
 
-    public ResourcePayload(){
+    ResourcePayload() {
     }
 
     @Override
@@ -30,14 +30,14 @@ public class ResourcePayload extends Payload<Integer> {
     }
 
     @Override
-    public long getLength(Context context) throws NotFoundException {
+    public long getLength(Context context) throws PayloadNotFoundException {
         AssetFileDescriptor afd = null;
-        long size = -1;
+        long size = 0;
         try {
             afd = context.getResources().openRawResourceFd(data);
             size = afd.getLength();
-        }catch (Resources.NotFoundException e){
-            throw new NotFoundException("Resource not found");
+        } catch (Resources.NotFoundException e) {
+            throw new ResourceNotFoundException(String.format("Resource id %d not found", data));
         } finally {
             if (afd != null) {
                 try {
@@ -51,11 +51,11 @@ public class ResourcePayload extends Payload<Integer> {
     }
 
     @Override
-    public Object prepare(Context context) throws NotFoundException{
+    public Object prepare(Context context) throws PayloadNotFoundException {
         try {
             return context.getResources().openRawResource(data);
-        } catch (Resources.NotFoundException e){
-            throw new Resources.NotFoundException(String.format("Resource with id %s does not exists.", data));
+        } catch (Resources.NotFoundException e) {
+            throw new ResourceNotFoundException(String.format("Resource id %d not found", data));
         }
     }
 }

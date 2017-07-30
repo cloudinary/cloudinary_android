@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v4.util.Pools;
 
+import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.ListenerService;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.callback.UploadResult;
@@ -59,13 +60,13 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
                         callbackMessage.callback.onStart(requestId);
                         break;
                     case ERROR_MESSAGE:
-                        callbackMessage.callback.onError(requestId, callbackMessage.errorMessage);
+                        callbackMessage.callback.onError(requestId, callbackMessage.error);
                         break;
                     case PROGRESS_MESSAGE:
                         callbackMessage.callback.onProgress(requestId, callbackMessage.bytes, callbackMessage.totalBytes);
                         break;
                     case RESCHEDULE_MESSAGE:
-                        callbackMessage.callback.onReschedule(requestId, callbackMessage.errorMessage);
+                        callbackMessage.callback.onReschedule(requestId, callbackMessage.error);
                         break;
                     case SUCCESS_MESSAGE:
                         callbackMessage.callback.onSuccess(requestId, callbackMessage.resultData);
@@ -193,10 +194,10 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
      * {@inheritDoc}
      */
     @Override
-    public void dispatchError(Context context, String requestId, String error) {
+    public void dispatchError(Context context, String requestId, ErrorInfo error) {
         pendingResults.put(requestId, new UploadResult(null, error));
         CallbackMessage callbackMessage = CallbackMessage.obtain();
-        callbackMessage.errorMessage = error;
+        callbackMessage.error = error;
         dispatchMessage(requestId, ERROR_MESSAGE, callbackMessage);
     }
 
@@ -204,9 +205,9 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
      * {@inheritDoc}
      */
     @Override
-    public void dispatchReschedule(Context context, String requestId, String error) {
+    public void dispatchReschedule(Context context, String requestId, ErrorInfo error) {
         CallbackMessage callbackMessage = CallbackMessage.obtain();
-        callbackMessage.errorMessage = error;
+        callbackMessage.error = error;
         dispatchMessage(requestId, RESCHEDULE_MESSAGE, callbackMessage);
     }
 
@@ -291,7 +292,7 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
         private String requestId;
         private long bytes;
         private long totalBytes;
-        private String errorMessage;
+        private ErrorInfo error;
         private Map resultData;
 
         static CallbackMessage obtain() {
@@ -305,7 +306,7 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
             instance.callback = callbackMessage.callback;
             instance.bytes = callbackMessage.bytes;
             instance.totalBytes = callbackMessage.totalBytes;
-            instance.errorMessage = callbackMessage.errorMessage;
+            instance.error = callbackMessage.error;
             instance.resultData = callbackMessage.resultData;
             return instance;
         }
@@ -315,7 +316,7 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
             requestId = null;
             bytes = -1;
             totalBytes = -1;
-            errorMessage = null;
+            error = null;
             resultData = null;
             sPool.release(this);
         }

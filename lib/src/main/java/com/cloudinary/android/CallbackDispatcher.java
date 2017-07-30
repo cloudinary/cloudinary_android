@@ -2,6 +2,7 @@ package com.cloudinary.android;
 
 import android.content.Context;
 
+import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.callback.UploadResult;
 import com.cloudinary.android.callback.UploadStatus;
@@ -72,19 +73,19 @@ interface CallbackDispatcher {
     /**
      * Dispatch the error result of an upload operation.
      * @param context Android context.
-     * @param requestId Id of the request to dispatch result for.
-     * @param error Error description.
+     * @param requestId Id of the request to dispatch error for.
+     * @param error Error object containing a technical description and an error code.
      */
-    void dispatchError (Context context, String requestId, String error);
+    void dispatchError(Context context, String requestId, ErrorInfo error);
 
     /**
      * Dispatch callback when a request gets rescheduled. This is usually used to update ui (i.e. remove progress notification, if any). Otherwise
      * no action is required in response to this event.
      * @param context Android context.
      * @param requestId Id of the request getting rescheduled.
-     * @param error Description of the error that caused the rescheduling.
+     * @param error Error object containing a technical description and an error code.
      */
-    void dispatchReschedule(Context context, String requestId, String error);
+    void dispatchReschedule(Context context, String requestId, ErrorInfo error);
 
     /**
      * Fetch a pending upload result (either successful or not), in case the app wasn't awake when the upload finished it can be fetched here.

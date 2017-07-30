@@ -4,14 +4,40 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.support.test.InstrumentationRegistry;
 
+import com.cloudinary.android.signed.Signature;
+import com.cloudinary.android.signed.SignatureProvider;
+
+import org.junit.BeforeClass;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 public class AbstractTest {
     public static final String TEST_IMAGE = "images/old_logo.png";
     public static final String TEST_PRESET = "cloudinary_java_test";
+    private static boolean initialized = false;
+
+    @BeforeClass
+    public synchronized static void initLibrary() {
+        if (!initialized) {
+            CldAndroid.init(InstrumentationRegistry.getTargetContext(), new SignatureProvider() {
+                @Override
+                public Signature provideSignature(Map options) {
+                    return null;
+                }
+
+                @Override
+                public String getName() {
+                    return null;
+                }
+            });
+            CldAndroid.get().getCloudinary().config.apiSecret = null;
+            initialized = true;
+        }
+    }
 
     protected static InputStream getAssetStream(String filename) throws IOException {
         return InstrumentationRegistry.getContext().getAssets().open(filename);

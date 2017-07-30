@@ -25,17 +25,17 @@ public abstract class Payload<T> {
      * Get the length of the resource in bytes
      * @param context Android context.
      * @return The length
-     * @throws NotFoundException in case the resource doesn't exist.
+     * @throws PayloadNotFoundException in case the resource doesn't exist.
      */
-    public abstract long getLength(Context context) throws NotFoundException;
+    public abstract long getLength(Context context) throws PayloadNotFoundException;
 
     /**
      * Prepares the payload to upload to Cloudinary
      * @param context Android context
      * @return An object formatted for Cloudinary uploader. This can be one of InputStream, Byte array, File object or an absolute path (as string).
-     * @throws NotFoundException If the request file or resource does not exist.
+     * @throws PayloadNotFoundException If the request file or resource does not exist.
      */
-    public abstract Object  prepare(Context context) throws NotFoundException;
+    public abstract Object prepare(Context context) throws PayloadNotFoundException;
 
     /**
      * Initializes the payload data from the uri.

@@ -4,14 +4,14 @@ import java.util.Map;
 
 /**
  * This object contains the results of a single upload.
- * If the upload was successful the upload params will be available through {@link UploadResult#getSuccessResultData()} and {@link UploadResult#getError()}  will return null.
+ * If the upload was successful the upload params will be available through {@link UploadResult#getSuccessResultData()} and {@link UploadResult#getError()} will be null.
  * If the upload encountered a fatal error (i.e. will not be rescheduled) there will be no data and {@link UploadResult#getError()} will return the error description.
  */
 public class UploadResult {
     private final Map successResultData;
-    private final String error;
+    private final ErrorInfo error;
 
-    public UploadResult(Map successResultData, String error) {
+    public UploadResult(Map successResultData, ErrorInfo error) {
         this.successResultData = successResultData;
         this.error = error;
     }
@@ -24,9 +24,9 @@ public class UploadResult {
     }
 
     /**
-     * Error description in case the upload failed. Otherwise null.
+     * Error object with a code and a technical description in case the upload failed. Otherwise null.
      */
-    public String getError() {
+    public ErrorInfo getError() {
         return error;
     }
 }

@@ -40,7 +40,11 @@ public class ByteArrayPayload extends Payload<byte[]> {
     }
 
     @Override
-    public Object prepare(Context context) {
+    public Object prepare(Context context) throws EmptyByteArrayException {
+        if (data == null || data.length < 1) {
+            throw new EmptyByteArrayException();
+        }
+
         return data;
     }
 

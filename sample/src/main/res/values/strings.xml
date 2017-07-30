@@ -5,7 +5,7 @@
     <string name="upload_successfully">Image uploaded successfully.</string>
     <string name="upload_error">Error: %s</string>
     <string name="upload_image">Upload resource</string>
-    <string name="upload">Upload missing</string>
+    <string name="upload">Upload now (failed/rescheduled)</string>
     <string name="auto_upload">Auto-Upload</string>
     <string name="auto_upload_on">Auto-Upload on</string>
     <string name="auto_upload_off">Auto-Upload off</string>
@@ -20,4 +20,14 @@
     <string name="effect_desc_face_sharpen">- Crop focusing on automatically detected faces\n- Sharpen the image</string>
     <string name="effect_desc_wide_blue">- Crop the image to a different aspect ratio, focusing on auto-detected faces\n- Increase the intensity of the blue channel</string>
     <string name="effect_desc_narrow_sepia">- Crop focusing on automatically detected faces\n- Apply a sepia effect</string>
+    <string name="no_error_message">No error</string>
+    <string name="file_does_not_exist">File does not exist.</string>
+    <string name="network_error">Network error</string>
+    <string name="options_failure">Failed loading options.</string>
+    <string name="payload_empty">Payload is empty.</string>
+    <string name="payload_could_not_load">Payload could not be loaded.</string>
+    <string name="resource_does_not_exist">Resource does not exists.</string>
+    <string name="signature_failure">Could not generate signature.</string>
+    <string name="uri_does_not_exist">Uri does not exist.</string>
+    <string name="unknown_error">Unknown error.</string>
 </resources>

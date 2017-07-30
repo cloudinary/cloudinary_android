@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.callback.UploadResult;
 
@@ -18,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
-public class CallbackDispatcherTest {
+public class CallbackDispatcherTest extends AbstractTest {
 
     private static final int DISPATCH_SLEEP_MILLIS = 100;
 
@@ -33,8 +34,8 @@ public class CallbackDispatcherTest {
         dispatcher.dispatchStart("a");
         dispatcher.dispatchProgress("a", 10, 100);
         dispatcher.dispatchSuccess(appContext, "a", Collections.singletonMap("test1", "result1"));
-        dispatcher.dispatchError(appContext, "a", "Error!");
-        dispatcher.dispatchReschedule(appContext, "a", "Error?");
+        dispatcher.dispatchError(appContext, "a", new ErrorInfo(ErrorInfo.RESOURCE_DOES_NOT_EXIST, null));
+        dispatcher.dispatchReschedule(appContext, "a", new ErrorInfo(ErrorInfo.FILE_DOES_NOT_EXIST, null));
 
         // callbacks are posted to dedicated thread, give it time to propagate
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
@@ -47,7 +48,7 @@ public class CallbackDispatcherTest {
 
         dispatcher.dispatchProgress("b", 10, 100);
         dispatcher.dispatchSuccess(appContext, "b", Collections.singletonMap("test2", "result2"));
-        dispatcher.dispatchError(appContext, "b", "Error!");
+        dispatcher.dispatchError(appContext, "b", new ErrorInfo(ErrorInfo.RESOURCE_DOES_NOT_EXIST, null));
 
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
         assertEquals(2, callbackCounter.progress);
@@ -58,7 +59,7 @@ public class CallbackDispatcherTest {
 
         dispatcher.dispatchProgress("c", 10, 100);
         dispatcher.dispatchSuccess(appContext, "c", Collections.singletonMap("test3", "result3"));
-        dispatcher.dispatchError(appContext, "c", "Error!");
+        dispatcher.dispatchError(appContext, "c", new ErrorInfo(ErrorInfo.RESOURCE_DOES_NOT_EXIST, null));
 
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
 
@@ -102,13 +103,13 @@ public class CallbackDispatcherTest {
         assertNull(res2);
         assertNull(res3);
 
-        dispatcher.dispatchError(appContext, "a", "error!");
+        dispatcher.dispatchError(appContext, "a", new ErrorInfo(ErrorInfo.RESOURCE_DOES_NOT_EXIST, null));
 
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
 
         res1 = dispatcher.popPendingResult("a");
         assertNotNull(res1);
-        assertEquals("error!", res1.getError());
+        assertEquals(ErrorInfo.RESOURCE_DOES_NOT_EXIST, res1.getError().getCode());
     }
 
     private final static class CallbackCounter implements UploadCallback {
@@ -135,12 +136,12 @@ public class CallbackDispatcherTest {
         }
 
         @Override
-        public void onError(String requestId, String error) {
+        public void onError(String requestId, ErrorInfo error) {
             this.error++;
         }
 
         @Override
-        public void onReschedule(String requestId, String errorMessage) {
+        public void onReschedule(String requestId, ErrorInfo error) {
             this.reschedule++;
         }
     }

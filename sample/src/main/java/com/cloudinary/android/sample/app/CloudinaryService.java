@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.TypedValue;
 
+import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.ListenerService;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
@@ -169,11 +170,11 @@ public class CloudinaryService extends ListenerService {
     }
 
     @Override
-    public void onError(final String requestId, final String error) {
+    public void onError(final String requestId, final ErrorInfo error) {
         backgroundThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                sendBroadcast(ResourceRepo.getInstance().resourceFailed(requestId, error));
+                sendBroadcast(ResourceRepo.getInstance().resourceFailed(requestId, error.getCode()));
             }
         });
         cancelNotification(requestId);
@@ -182,24 +183,25 @@ public class CloudinaryService extends ListenerService {
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
 
+        String errorMessage = CloudinaryHelper.getPrettyErrorMessage(error.getCode());
         notificationManager.notify(id,
                 getBuilder(requestId)
                         .setContentTitle("Error uploading.")
-                        .setContentText(error)
+                        .setContentText(errorMessage)
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .setBigContentTitle("Error uploading.")
-                                .bigText(error))
+                                .bigText(errorMessage))
                         .build());
 
         cleanupBitmap(requestId);
     }
 
     @Override
-    public void onReschedule(final String requestId, final String errorMessage) {
+    public void onReschedule(final String requestId, final ErrorInfo error) {
         backgroundThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                sendBroadcast(ResourceRepo.getInstance().resourceRescheduled(requestId, errorMessage));
+                sendBroadcast(ResourceRepo.getInstance().resourceRescheduled(requestId, error.getCode()));
             }
         });
         cancelNotification(requestId);

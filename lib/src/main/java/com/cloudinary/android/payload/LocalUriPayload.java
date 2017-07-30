@@ -36,17 +36,17 @@ public class LocalUriPayload extends Payload<Uri> {
     }
 
     @Override
-    public Object prepare(Context context) throws NotFoundException {
+    public Object prepare(Context context) throws PayloadNotFoundException {
         try {
             return context.getContentResolver().openInputStream(data);
         } catch (FileNotFoundException e) {
-            throw new NotFoundException("Local uri could not be found");
+            throw new LocalUriNotFoundException(String.format("Uri %s could not be found", data.toString()));
         }
     }
 
     private long fetchFileSizeFromUri(Context context) {
         Cursor returnCursor = null;
-        long size = -1;
+        long size = 0;
 
         try {
             returnCursor = context.getContentResolver().query(data, PROJECTION, null, null, null);

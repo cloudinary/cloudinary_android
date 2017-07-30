@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.persist;
 
+import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.sample.app.MainApplication;
 import com.cloudinary.android.sample.model.Resource;
 
@@ -26,18 +27,18 @@ public class ResourceRepo {
         return _instance;
     }
 
-    public Resource resourceRescheduled(String requestId, String error) {
+    public Resource resourceRescheduled(String requestId, int error) {
         helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.RESCHEDULED, error);
         return helper.findByRequestId(requestId);
     }
 
-    public Resource resourceFailed(String requestId, String error) {
+    public Resource resourceFailed(String requestId, int error) {
         helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.FAILED, error);
         return helper.findByRequestId(requestId);
     }
 
     public Resource resourceUploaded(String requestId, String publicId, String deleteToken) {
-        helper.setUploadResultParams(requestId, publicId, deleteToken, Resource.UploadStatus.UPLOADED, null);
+        helper.setUploadResultParams(requestId, publicId, deleteToken, Resource.UploadStatus.UPLOADED, ErrorInfo.NO_ERROR);
         return helper.findByRequestId(requestId);
     }
 
@@ -49,7 +50,7 @@ public class ResourceRepo {
     }
 
     public Resource resourceUploading(String requestId) {
-        helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.UPLOADING, null);
+        helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.UPLOADING, ErrorInfo.NO_ERROR);
         return helper.findByRequestId(requestId);
     }
 

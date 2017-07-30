@@ -1,6 +1,5 @@
 package com.cloudinary.android;
 
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.cloudinary.android.payload.FilePayload;
@@ -20,7 +19,6 @@ public class AndroidJobStrategyTest extends AbstractTest {
 
     @Test
     public void testAdapter() throws InterruptedException, IOException {
-        CldAndroid.init(InstrumentationRegistry.getContext());
         FilePayload payload = new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath());
 
         UploadRequest<FilePayload> request =

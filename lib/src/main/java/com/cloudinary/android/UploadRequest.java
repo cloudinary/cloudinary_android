@@ -2,6 +2,7 @@ package com.cloudinary.android;
 
 import android.support.annotation.Nullable;
 
+import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.policy.TimeWindow;
@@ -211,14 +212,14 @@ public class UploadRequest<T extends Payload> {
         }
 
         @Override
-        public void onError(String requestId, String error) {
+        public void onError(String requestId, ErrorInfo error) {
             callback.onError(requestId, error);
             CldAndroid.get().unregisterCallback(this);
         }
 
         @Override
-        public void onReschedule(String requestId, String errorMessage) {
-            callback.onReschedule(requestId, errorMessage);
+        public void onReschedule(String requestId, ErrorInfo error) {
+            callback.onReschedule(requestId, error);
         }
     }
 }

@@ -20,22 +20,22 @@ public class FilePayload extends Payload<String> {
     }
 
     @Override
-    public long getLength(Context context) throws NotFoundException {
+    public long getLength(Context context) throws PayloadNotFoundException {
         File file = new File(data);
 
         if (!file.exists()){
-            throw new NotFoundException(String.format("File '%s' does not exist", data));
+            throw new FileNotFoundException(String.format("File '%s' does not exist", data));
         }
 
         return file.length();
     }
 
     @Override
-    public Object prepare(Context context) throws NotFoundException {
+    public Object prepare(Context context) throws PayloadNotFoundException {
         File file = new File(data);
 
         if (!file.exists()){
-            throw new NotFoundException(String.format("File '%s' does not exist", data));
+            throw new FileNotFoundException(String.format("File '%s' does not exist", data));
         }
 
         return file;

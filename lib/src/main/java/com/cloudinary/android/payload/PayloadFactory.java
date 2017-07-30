@@ -18,6 +18,11 @@ public class PayloadFactory {
         Uri parsed = Uri.parse(uri);
         String scheme = parsed.getScheme();
 
+        // invalid payload
+        if (scheme == null) {
+            return null;
+        }
+
         Payload payload;
         switch (scheme) {
             case ByteArrayPayload.URI_KEY:

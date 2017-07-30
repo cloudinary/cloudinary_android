@@ -31,16 +31,16 @@ public interface UploadCallback {
     /**
      * Called when a request encounters an error.
      * @param requestId Id of the request sending this callback.
-     * @param error Error description
+     * @param error Error object containing description and code.
      */
-    void onError(String requestId, String error);
+    void onError(String requestId, ErrorInfo error);
 
     /**
      * Called when a request fails with a recoverable error and is rescheduled to a later time.
      * This is useful to update UI (e.g hide progress notifications), otherwise this callback can be ignored.
      * @param requestId Id of the request sending this callback.
-     * @param errorMessage Error description - The reason for reschedule (e.g. socket timeout).
+     * @param error Error object containing technical description and code.
      */
-    void onReschedule(String requestId, String errorMessage);
+    void onReschedule(String requestId, ErrorInfo error);
 }
 

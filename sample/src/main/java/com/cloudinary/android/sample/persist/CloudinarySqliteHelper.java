@@ -55,7 +55,7 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
                 + REQUEST_ID_COL + " TEXT,"
                 + RESOURCE_TYPE_COL + " TEXT,"
                 + STATUS_COL + " TEXT,"
-                + LAST_ERROR_COL + " TEXT,"
+                + LAST_ERROR_COL + " INTEGER,"
                 + STATUS_TIMESTAMP_COL + " INTEGER,"
                 + DELETE_TOKEN_COL + " TEXT);"
         );
@@ -65,7 +65,7 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    public int setUploadResultParams(String requestId, String publicId, String deleteToken, Resource.UploadStatus status, String lastError) {
+    public int setUploadResultParams(String requestId, String publicId, String deleteToken, Resource.UploadStatus status, int lastError) {
         ContentValues values = new ContentValues();
         values.put(PUBLIC_ID_COL, publicId);
         values.put(DELETE_TOKEN_COL, deleteToken);
@@ -135,7 +135,7 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
                 resource.setStatusTimestamp(cursor.isNull(timestampIdx) ? null : new Date(cursor.getInt(timestampIdx)));
                 resource.setResourceType(cursor.getString(resourceTypeIdx));
                 resource.setStatus(Resource.UploadStatus.valueOf(cursor.getString(statusIdx)));
-                resource.setLastError(cursor.getString(errorIdx));
+                resource.setLastError(cursor.getInt(errorIdx));
                 res.add(resource);
             } while (cursor.moveToNext());
         }
