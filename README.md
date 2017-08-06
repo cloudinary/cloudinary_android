@@ -103,7 +103,7 @@ The following example generates the url for accessing an uploaded `sample` image
 
     CldAndroid.get().url().transformation(new Transformation().width(100).height(150).crop("fill")).generate("sample.jpg")
 
-Another example, emedding a smaller version of an uploaded image while generating a 90x90 face detection based thumbnail: 
+Another example, embedding a smaller version of an uploaded image while generating a 90x90 face detection based thumbnail: 
 
     CldAndroid.get().url().transformation(new Transformation().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
 

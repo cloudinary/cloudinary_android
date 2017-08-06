@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Configuration;
 import com.cloudinary.Url;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
@@ -48,7 +49,7 @@ public class CldAndroid {
 
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
 
-    private CldAndroid(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map<String, Object> config) {
+    private CldAndroid(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map config) {
         // use context to initialize components but DO NOT store it
         strategy = BackgroundStrategyProvider.provideStrategy();
         callbackDispatcher = new DefaultCallbackDispatcher(context);
@@ -101,7 +102,7 @@ public class CldAndroid {
      * @param context Android context for initializations. Does not get cached.
      */
     public static void init(@NonNull Context context) {
-        init(context, null, null);
+        init(context, null, (Map) null);
     }
 
     /**
@@ -117,11 +118,26 @@ public class CldAndroid {
     /**
      * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
+     * @param context Android context for initializations. Does not get cached.
+     * @param config  Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
+     */
+    public static void init(@NonNull Context context, @Nullable Configuration config) {
+        Map<String, Object> map = null;
+        if (config != null) {
+            map = config.asMap();
+
+        }
+        init(context, null, map);
+    }
+
+    /**
+     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     *
      * @param context           Android context for initializations. Does not get cached.
      * @param signatureProvider A signature provider. Needed if using signed uploads.
      */
     public static void init(@NonNull Context context, @Nullable SignatureProvider signatureProvider) {
-        init(context, signatureProvider, null);
+        init(context, signatureProvider, (Map) null);
     }
 
     /**
@@ -145,6 +161,21 @@ public class CldAndroid {
                 throw new IllegalStateException("CldAndroid is already initialized");
             }
         }
+    }
+
+    /**
+     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     *
+     * @param context  Android context for initializations. Does not get cached.
+     * @param provider A signature provider. Needed if using signed uploads.
+     * @param config   Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
+     */
+    public static void init(@NonNull Context context, @Nullable SignatureProvider provider, @Nullable Configuration config) {
+        Map map = null;
+        if (config != null) {
+            map = config.asMap();
+        }
+        init(context, provider, map);
     }
 
     /**
@@ -322,9 +353,9 @@ public class CldAndroid {
         return callbackDispatcher.popPendingResult(requestId);
     }
 
-    private UploadRequest buildUploadRequest(Payload payload) {
+    private UploadRequest<Payload> buildUploadRequest(Payload payload) {
         UploadContext<Payload> payloadUploadContext = new UploadContext<>(payload, requestDispatcher);
-        return new UploadRequest(payloadUploadContext);
+        return new UploadRequest<>(payloadUploadContext);
     }
 
     /**

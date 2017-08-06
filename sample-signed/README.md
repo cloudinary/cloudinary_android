@@ -9,7 +9,7 @@ Once you clone this repository you need to open the advanced-samples folder (not
     * Once you open the project a file named `gradle-local.properies` should be automatically created in the repository root (you can manually create it if it's not there). Note: This file is ignored by git and should never be checked in. 
     * The file should contain a single property with your cloudinary url, stripped to cloud name only: `cloudinary.url=cloudinary://@myCloudName`
     * Run `./gradlew clean` (`gradlew clean` on Windows) from the repository root before proceeding. 
-2. Configure the full credentials for the backend module. The best practice is to create an environment variable wtih your Cloudinary credentials:
+2. Configure the full credentials for the backend module. The best practice is to create an environment variable with your Cloudinary credentials:
 
     `CLOUDINARY_URL=cloudinary://1234567890:abcdefghijklmno@myCloudName`
     
