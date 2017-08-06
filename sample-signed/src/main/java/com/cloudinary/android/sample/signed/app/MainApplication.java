@@ -1,4 +1,4 @@
-package com.cloudinary.android.sample.app;
+package com.cloudinary.android.sample.signed.app;
 
 
 import android.app.Application;

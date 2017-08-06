@@ -1,4 +1,4 @@
-package com.cloudinary.android.sample.app;
+package com.cloudinary.android.sample.signed.app;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,8 +13,8 @@ import com.cloudinary.Transformation;
 import com.cloudinary.android.CldAndroid;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
+import com.cloudinary.android.sample.signed.R;
 import com.cloudinary.android.sample.util.Utils;
-import com.cloudinary.android.signed.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.Map;
