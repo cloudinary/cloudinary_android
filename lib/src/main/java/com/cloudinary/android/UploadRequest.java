@@ -133,9 +133,11 @@ public class UploadRequest<T extends Payload> {
     }
 
     private void verifyOptionsExist() {
-        synchronized (optionsLockObject) {
-            if (options == null) {
-                options = new HashMap<>();
+        if (options == null) {
+            synchronized (optionsLockObject) {
+                if (options == null) {
+                    options = new HashMap<>();
+                }
             }
         }
     }
