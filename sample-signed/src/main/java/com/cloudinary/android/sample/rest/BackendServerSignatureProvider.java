@@ -1,9 +1,9 @@
 package com.cloudinary.android.sample.rest;
 
-import com.cloudinary.android.Signature;
-import com.cloudinary.android.SignatureProvider;
 import com.cloudinary.android.sample.rest.model.JsonMap;
 import com.cloudinary.android.sample.rest.model.SignResult;
+import com.cloudinary.android.signed.Signature;
+import com.cloudinary.android.signed.SignatureProvider;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
@@ -50,5 +50,10 @@ public class BackendServerSignatureProvider implements SignatureProvider {
 
         SignResult res = signUpload(map);
         return new Signature(res.getSignature(), res.getApiKey(), res.getTimestamp());
+    }
+
+    @Override
+    public String getName() {
+        return "SampleSignatureProvider";
     }
 }

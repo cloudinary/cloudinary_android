@@ -11,9 +11,10 @@ import android.widget.ImageView;
 
 import com.cloudinary.Transformation;
 import com.cloudinary.android.CldAndroid;
-import com.cloudinary.android.UploadCallback;
-import com.cloudinary.android.Utils;
-import com.cloudinary.android.sample.R;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
+import com.cloudinary.android.sample.util.Utils;
+import com.cloudinary.android.signed.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.Map;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null && data.getData() != null) {
             CldAndroid.get().upload(data.getData()).callback(new UploadCallback() {
-                ;
 
                 @Override
                 public void onStart(String requestId) {
@@ -75,12 +75,12 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onError(String requestId, String error) {
-                    showSnackBar("Upload error: " + error);
+                public void onError(String requestId, ErrorInfo error) {
+                    showSnackBar("Upload error: " + error.getDescription());
                 }
 
                 @Override
-                public void onReschedule(String requestId) {
+                public void onReschedule(String requestId, ErrorInfo error) {
                     showSnackBar("Upload rescheduled.");
                 }
             }).dispatch();
