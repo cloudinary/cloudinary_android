@@ -119,6 +119,7 @@ public class UploadPolicy {
     /**
      * Base class for {@link UploadPolicy} builders.
      */
+    @SuppressWarnings("unchecked")
     abstract static class BaseBuilder<T extends BaseBuilder> {
         NetworkType networkPolicy = NetworkType.ANY;
         boolean requiresCharging = false;
