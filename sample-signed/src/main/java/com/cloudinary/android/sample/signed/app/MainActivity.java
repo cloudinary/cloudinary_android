@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.cloudinary.Transformation;
-import com.cloudinary.android.CldAndroid;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.sample.signed.R;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null && data.getData() != null) {
-            CldAndroid.get().upload(data.getData()).callback(new UploadCallback() {
+            MediaManager.get().upload(data.getData()).callback(new UploadCallback() {
 
                 @Override
                 public void onStart(String requestId) {
@@ -89,6 +89,6 @@ public class MainActivity extends AppCompatActivity {
 
     public String getUrlForMaxWidth(String imageId) {
         int width = Utils.getScreenWidth(this);
-        return CldAndroid.get().getCloudinary().url().transformation(new Transformation().width(width)).generate(imageId);
+        return MediaManager.get().getCloudinary().url().transformation(new Transformation().width(width)).generate(imageId);
     }
 }

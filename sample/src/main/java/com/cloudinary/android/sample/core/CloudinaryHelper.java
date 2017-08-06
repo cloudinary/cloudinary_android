@@ -5,7 +5,7 @@ import android.net.Uri;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
-import com.cloudinary.android.CldAndroid;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainApplication;
@@ -19,27 +19,27 @@ import java.util.Map;
 
 public class CloudinaryHelper {
     public static String uploadImage(String uri) {
-        return CldAndroid.get().upload(Uri.parse(uri))
+        return MediaManager.get().upload(Uri.parse(uri))
                 .unsigned("sample_app_preset")
-                .policy(CldAndroid.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build())
+                .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build())
                 .dispatch();
     }
 
     public static String getCroppedThumbnailUrl(int size, Resource resource) {
 
-        return CldAndroid.get().getCloudinary().url()
+        return MediaManager.get().getCloudinary().url()
                 .resourceType(resource.getResourceType())
                 .transformation(new Transformation().crop("thumb").gravity("auto").width(size).height(size))
                 .generate(resource.getCloudinaryPublicId());
     }
 
     public static String getOriginalSizeImage(String imageId) {
-        return CldAndroid.get().getCloudinary().url().generate(imageId);
+        return MediaManager.get().getCloudinary().url().generate(imageId);
     }
 
     public static String getUrlForMaxWidth(Context context, String imageId) {
         int width = Utils.getScreenWidth(context);
-        return CldAndroid.get().getCloudinary().url().transformation(new Transformation().width(width)).generate(imageId);
+        return MediaManager.get().getCloudinary().url().transformation(new Transformation().width(width)).generate(imageId);
     }
 
     public static void deleteByToken(final String token, final DeleteCallback callback) {
@@ -47,7 +47,7 @@ public class CloudinaryHelper {
             @Override
             public void run() {
                 try {
-                    Map res = CldAndroid.get().getCloudinary().uploader().deleteByToken(token);
+                    Map res = MediaManager.get().getCloudinary().uploader().deleteByToken(token);
                     if (res != null && res.containsKey("result") && res.get("result").equals("ok")) {
                         callback.onSuccess();
                     } else {
@@ -62,7 +62,7 @@ public class CloudinaryHelper {
     }
 
     public static List<EffectData> generateEffectsList(Context context, int screenWidth, int thumbHeight, String publicId) {
-        Cloudinary cloudinary = CldAndroid.get().getCloudinary();
+        Cloudinary cloudinary = MediaManager.get().getCloudinary();
         List<EffectData> effects = new ArrayList<>();
         String thumbUrl;
         String imageUrl;

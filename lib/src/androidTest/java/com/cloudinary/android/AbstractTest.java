@@ -23,7 +23,7 @@ public class AbstractTest {
     @BeforeClass
     public synchronized static void initLibrary() {
         if (!initialized) {
-            CldAndroid.init(InstrumentationRegistry.getTargetContext(), new SignatureProvider() {
+            MediaManager.init(InstrumentationRegistry.getTargetContext(), new SignatureProvider() {
                 @Override
                 public Signature provideSignature(Map options) {
                     return null;
@@ -34,7 +34,7 @@ public class AbstractTest {
                     return null;
                 }
             });
-            CldAndroid.get().getCloudinary().config.apiSecret = null;
+            MediaManager.get().getCloudinary().config.apiSecret = null;
             initialized = true;
         }
     }

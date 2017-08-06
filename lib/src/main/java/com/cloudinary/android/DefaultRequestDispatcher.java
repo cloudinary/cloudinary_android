@@ -26,7 +26,7 @@ class DefaultRequestDispatcher implements RequestDispatcher {
         // Requests will be started once there's more room
         int totalCount = strategy.getPendingImmediateJobsCount() + strategy.getRunningJobsCount();
 
-        if (!request.getTimeWindow().isImmediate() && totalCount >= CldAndroid.get().getGlobalUploadPolicy().getMaxConcurrentRequests()) {
+        if (!request.getTimeWindow().isImmediate() && totalCount >= MediaManager.get().getGlobalUploadPolicy().getMaxConcurrentRequests()) {
             int minutes = 10 + rand.nextInt(10);
             request.defferByMinutes(minutes);
             Logger.d(TAG, String.format("Request %s deferred by %d minutes.", requestId, minutes));

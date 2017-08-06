@@ -2,13 +2,13 @@ package com.cloudinary.android.signed;
 
 import android.content.Context;
 
-import com.cloudinary.android.CldAndroid;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.UploadRequest;
 
 import java.util.Map;
 
 /**
- * Provide an implementation of this class to {@link CldAndroid#init(Context, SignatureProvider, Map)} to enable signed uploads.
+ * Provide an implementation of this class to {@link MediaManager#init(Context, SignatureProvider, Map)} to enable signed uploads.
  * Note: If an api key and secret are provided to the library this interface is not required.
  */
 public interface SignatureProvider {

@@ -3,7 +3,7 @@ package com.cloudinary.android.sample.app;
 
 import android.app.Application;
 
-import com.cloudinary.android.CldAndroid;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.LogLevel;
 import com.cloudinary.android.policy.GlobalUploadPolicy;
 import com.cloudinary.android.policy.UploadPolicy;
@@ -20,13 +20,13 @@ public class MainApplication extends Application {
         super.onCreate();
 
         // This can be called any time regardless of initialization.
-        CldAndroid.setLogLevel(LogLevel.DEBUG);
+        MediaManager.setLogLevel(LogLevel.DEBUG);
 
         // Mandatory - call a flavor of init. Config can be null if cloudinary_url is provided in the manifest.
-        CldAndroid.init(this, null, null);
+        MediaManager.init(this, null, null);
 
         // Optional - configure global policy.
-        CldAndroid.get().setGlobalUploadPolicy(
+        MediaManager.get().setGlobalUploadPolicy(
                 new GlobalUploadPolicy.Builder()
                         .maxConcurrentRequests(4)
                         .networkPolicy(UploadPolicy.NetworkType.ANY)

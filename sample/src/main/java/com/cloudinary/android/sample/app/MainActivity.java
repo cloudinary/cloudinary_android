@@ -25,7 +25,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.cloudinary.android.CldAndroid;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
 
     private void clearLocalImages() {
         ResourceRepo.getInstance().clear();
-        CldAndroid.get().cancelAllRequests();
+        MediaManager.get().cancelAllRequests();
         PicassoTools.clearCache(Picasso.with(this));
     }
 
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     private void uploadImage(Resource resource) {
         if (StringUtils.isNotBlank(resource.getRequestId())) {
             // cancel previous upload requests for this resource:
-            CldAndroid.get().cancelRequest(resource.getRequestId());
+            MediaManager.get().cancelRequest(resource.getRequestId());
         }
 
         String requestId = CloudinaryHelper.uploadImage(resource.getLocalUri());

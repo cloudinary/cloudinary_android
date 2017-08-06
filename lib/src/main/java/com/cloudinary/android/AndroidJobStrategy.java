@@ -200,7 +200,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
             wl.acquire();
             try {
                 // call the generic processor:
-                UploadStatus result = CldAndroid.get().processRequest(getContext(), new AndroidJobRequestParams(params.getExtras()));
+                UploadStatus result = MediaManager.get().processRequest(getContext(), new AndroidJobRequestParams(params.getExtras()));
                 return adaptResult(result);
             } finally {
                 wl.release();

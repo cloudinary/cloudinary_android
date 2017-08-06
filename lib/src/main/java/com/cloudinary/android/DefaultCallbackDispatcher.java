@@ -150,8 +150,8 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
         // if the service is already 'awake' it will receive events via callback. If we send the intent the event will be received twice.
         if (listenerServiceClass != null && !isListenerServiceAlreadyRegistered) {
             appContext.startService(new Intent(appContext, listenerServiceClass)
-                    .setAction(CldAndroid.ACTION_REQUEST_STARTED)
-                    .putExtra(CldAndroid.INTENT_EXTRA_REQUEST_ID, requestId));
+                    .setAction(MediaManager.ACTION_REQUEST_STARTED)
+                    .putExtra(MediaManager.INTENT_EXTRA_REQUEST_ID, requestId));
         }
     }
 
@@ -165,9 +165,9 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
         // if the service is already 'awake' it will receive events via callback. If we send the intent the event will be received twice.
         if (listenerServiceClass != null && !isListenerServiceAlreadyRegistered) {
             appContext.startService(new Intent(appContext, listenerServiceClass)
-                    .setAction(CldAndroid.ACTION_REQUEST_FINISHED)
-                    .putExtra(CldAndroid.INTENT_EXTRA_REQUEST_ID, requestId)
-                    .putExtra(CldAndroid.INTENT_EXTRA_REQUEST_RESULT_STATUS, uploadStatus));
+                    .setAction(MediaManager.ACTION_REQUEST_FINISHED)
+                    .putExtra(MediaManager.INTENT_EXTRA_REQUEST_ID, requestId)
+                    .putExtra(MediaManager.INTENT_EXTRA_REQUEST_RESULT_STATUS, uploadStatus));
         }
     }
 

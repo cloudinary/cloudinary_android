@@ -26,18 +26,18 @@ import com.cloudinary.utils.StringUtils;
 import java.util.Map;
 
 /**
- * Main class used as entry point to any operation against Cloudinary. Use {@link CldAndroid#get()} to get an instance.
+ * Main class used as entry point to any operation against Cloudinary. Use {@link MediaManager#get()} to get an instance.
  * Must be initialized before use, see {@link #init(Context, SignatureProvider, Map)}.
  */
-public class CldAndroid {
+public class MediaManager {
 
     public static final String INTENT_EXTRA_REQUEST_ID = "INTENT_EXTRA_REQUEST_ID";
     public static final String INTENT_EXTRA_REQUEST_RESULT_STATUS = "INTENT_EXTRA_REQUEST_RESULT_STATUS";
     public static final String ACTION_REQUEST_STARTED = "com.cloudinary.ACTION_REQUEST_STARTED";
     public static final String ACTION_REQUEST_FINISHED = "com.cloudinary.ACTION_REQUEST_FINISHED";
-    private static final String TAG = CldAndroid.class.getSimpleName();
+    private static final String TAG = MediaManager.class.getSimpleName();
 
-    private static CldAndroid _instance;
+    private static MediaManager _instance;
 
     private final com.cloudinary.Cloudinary cloudinary;
     private final RequestDispatcher requestDispatcher;
@@ -49,7 +49,7 @@ public class CldAndroid {
 
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
 
-    private CldAndroid(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map config) {
+    private MediaManager(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map config) {
         // use context to initialize components but DO NOT store it
         strategy = BackgroundStrategyProvider.provideStrategy();
         callbackDispatcher = new DefaultCallbackDispatcher(context);
@@ -97,7 +97,7 @@ public class CldAndroid {
     }
 
     /**
-     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before MediaManager can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
      * @param context Android context for initializations. Does not get cached.
      */
@@ -106,7 +106,7 @@ public class CldAndroid {
     }
 
     /**
-     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before MediaManager can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
      * @param context Android context for initializations. Does not get cached.
      * @param config  Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
@@ -116,7 +116,7 @@ public class CldAndroid {
     }
 
     /**
-     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before MediaManager can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
      * @param context Android context for initializations. Does not get cached.
      * @param config  Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
@@ -131,7 +131,7 @@ public class CldAndroid {
     }
 
     /**
-     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before MediaManager can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
      * @param context           Android context for initializations. Does not get cached.
      * @param signatureProvider A signature provider. Needed if using signed uploads.
@@ -141,14 +141,14 @@ public class CldAndroid {
     }
 
     /**
-     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before MediaManager can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
      * @param context  Android context for initializations. Does not get cached.
      * @param provider A signature provider. Needed if using signed uploads.
      * @param config   Cloudinary configuration parameters. If not supplied a cloudinary-url metadata must exist in the manifest.
      */
     public static void init(@NonNull Context context, @Nullable SignatureProvider provider, @Nullable Map config) {
-        synchronized (CldAndroid.class) {
+        synchronized (MediaManager.class) {
             //noinspection ConstantConditions
             if (context == null) {
                 throw new IllegalArgumentException("context cannot be null.");
@@ -156,15 +156,15 @@ public class CldAndroid {
 
 
             if (_instance == null) {
-                _instance = new CldAndroid(context, provider, config);
+                _instance = new MediaManager(context, provider, config);
             } else {
-                throw new IllegalStateException("CldAndroid is already initialized");
+                throw new IllegalStateException("MediaManager is already initialized");
             }
         }
     }
 
     /**
-     * Setup the library with the required parameters. A flavor of init() must be called once before CldAndroid can be used, preferably in an implementation of {@link Application#onCreate()}.
+     * Setup the library with the required parameters. A flavor of init() must be called once before MediaManager can be used, preferably in an implementation of {@link Application#onCreate()}.
      *
      * @param context  Android context for initializations. Does not get cached.
      * @param provider A signature provider. Needed if using signed uploads.
@@ -181,9 +181,9 @@ public class CldAndroid {
     /**
      * Entry point for any operation against Cloudinary
      *
-     * @return An instance of the CldAndroid class to run operations against cloudinary.
+     * @return An instance of the MediaManager class to run operations against cloudinary.
      */
-    public static CldAndroid get() {
+    public static MediaManager get() {
         if (_instance == null) {
             throw new IllegalStateException("Must call init() before accessing Cloudinary.");
         }
@@ -192,7 +192,7 @@ public class CldAndroid {
     }
 
     /**
-     * Set the log level. In order to affect initialization logging this can be set before calling {@link CldAndroid#init(Context)}.
+     * Set the log level. In order to affect initialization logging this can be set before calling {@link MediaManager#init(Context)}.
      *
      * @param logLevel The log level to set, see {@link LogLevel}.
      */

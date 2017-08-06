@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * A request to upload a single {@link Payload} to Cloudinary. Note: Once calling {@link #dispatch()} the request is sealed and any
  * attempt to modify it will produce an {@link IllegalStateException}. If there's a need to change a request after dispatching,
- * it needs to be cancelled ({@link CldAndroid#cancelRequest(String)}) and a new request should be dispatched in it's place.
+ * it needs to be cancelled ({@link MediaManager#cancelRequest(String)}) and a new request should be dispatched in it's place.
  * @param <T> The payload type this request will upload
  */
 public class UploadRequest<T extends Payload> {
@@ -25,7 +25,7 @@ public class UploadRequest<T extends Payload> {
     private final String requestId = UUID.randomUUID().toString();
     private final Object optionsLockObject = new Object();
     private boolean dispatched = false;
-    private UploadPolicy uploadPolicy = CldAndroid.get().getGlobalUploadPolicy();
+    private UploadPolicy uploadPolicy = MediaManager.get().getGlobalUploadPolicy();
     private TimeWindow timeWindow = TimeWindow.getDefault();
     private UploadCallback callback;
     private Map<String, Object> options;
@@ -126,7 +126,7 @@ public class UploadRequest<T extends Payload> {
             throw new InvalidParamsException("Parameters must be serializable", e);
         }
 
-        CldAndroid.get().registerCallback(requestId, callback);
+        MediaManager.get().registerCallback(requestId, callback);
         uploadContext.getDispatcher().dispatch(this);
 
         return requestId;
@@ -210,13 +210,13 @@ public class UploadRequest<T extends Payload> {
         @Override
         public void onSuccess(String requestId, Map resultData) {
             callback.onSuccess(requestId, resultData);
-            CldAndroid.get().unregisterCallback(this);
+            MediaManager.get().unregisterCallback(this);
         }
 
         @Override
         public void onError(String requestId, ErrorInfo error) {
             callback.onError(requestId, error);
-            CldAndroid.get().unregisterCallback(this);
+            MediaManager.get().unregisterCallback(this);
         }
 
         @Override

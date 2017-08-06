@@ -3,7 +3,7 @@ package com.cloudinary.android.callback;
 import android.app.Service;
 import android.content.Intent;
 
-import com.cloudinary.android.CldAndroid;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.utils.StringUtils;
 
 /**
@@ -24,20 +24,20 @@ public abstract class ListenerService extends Service implements UploadCallback{
     @Override
     public void onCreate() {
         super.onCreate();
-        CldAndroid.get().registerCallback(this);
+        MediaManager.get().registerCallback(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            final String requestId = intent.getStringExtra(CldAndroid.INTENT_EXTRA_REQUEST_ID);
+            final String requestId = intent.getStringExtra(MediaManager.INTENT_EXTRA_REQUEST_ID);
 
             if (StringUtils.isNotBlank(requestId)) {
-                if (CldAndroid.ACTION_REQUEST_STARTED.equals(intent.getAction())){
+                if (MediaManager.ACTION_REQUEST_STARTED.equals(intent.getAction())){
                     onStart(requestId);
-                } else if (CldAndroid.ACTION_REQUEST_FINISHED.equals(intent.getAction())){
-                    UploadStatus result = (UploadStatus) intent.getSerializableExtra(CldAndroid.INTENT_EXTRA_REQUEST_RESULT_STATUS);
-                    UploadResult uploadResult = CldAndroid.get().popPendingResult(requestId);
+                } else if (MediaManager.ACTION_REQUEST_FINISHED.equals(intent.getAction())){
+                    UploadStatus result = (UploadStatus) intent.getSerializableExtra(MediaManager.INTENT_EXTRA_REQUEST_RESULT_STATUS);
+                    UploadResult uploadResult = MediaManager.get().popPendingResult(requestId);
 
                     // ACTION_REQUEST_FINISHED means either success or failure:
                     if (result == UploadStatus.FAILURE) {
@@ -55,6 +55,6 @@ public abstract class ListenerService extends Service implements UploadCallback{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        CldAndroid.get().unregisterCallback(this);
+        MediaManager.get().unregisterCallback(this);
     }
 }

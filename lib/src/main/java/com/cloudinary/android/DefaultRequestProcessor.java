@@ -49,7 +49,7 @@ class DefaultRequestProcessor implements RequestProcessor {
         final String requestId = params.getString("requestId", null);
         final String uri = params.getString("uri", null);
         final String optionsAsString = params.getString("options", null);
-        final int maxErrorRetries = params.getInt("maxErrorRetries", CldAndroid.get().getGlobalUploadPolicy().getMaxErrorRetries());
+        final int maxErrorRetries = params.getInt("maxErrorRetries", MediaManager.get().getGlobalUploadPolicy().getMaxErrorRetries());
         final int errorCount = params.getInt("errorCount", 0);
 
         Logger.i(TAG, String.format("Processing Request %s.", requestId));
@@ -81,7 +81,7 @@ class DefaultRequestProcessor implements RequestProcessor {
             if (StringUtils.isNotBlank(uri)) {
                 Payload payload = PayloadFactory.fromUri(uri);
                 if (payload != null) {
-                    int maxConcurrentRequests = CldAndroid.get().getGlobalUploadPolicy().getMaxConcurrentRequests();
+                    int maxConcurrentRequests = MediaManager.get().getGlobalUploadPolicy().getMaxConcurrentRequests();
                     int runningJobsCount = runningJobs.get();
                     if (runningJobsCount < maxConcurrentRequests) {
                         try {
@@ -177,8 +177,8 @@ class DefaultRequestProcessor implements RequestProcessor {
         }
 
         // if there are no credentials and the request is NOT unsigned - activate the signature provider (if present).
-        if (!CldAndroid.get().hasCredentials() && !TRUE.equals(options.get("unsigned"))) {
-            SignatureProvider signatureProvider = CldAndroid.get().getSignatureProvider();
+        if (!MediaManager.get().hasCredentials() && !TRUE.equals(options.get("unsigned"))) {
+            SignatureProvider signatureProvider = MediaManager.get().getSignatureProvider();
             if (signatureProvider != null) {
                 try {
                     Signature signature = signatureProvider.provideSignature(options);
@@ -194,7 +194,7 @@ class DefaultRequestProcessor implements RequestProcessor {
         final ProcessorCallback processorCallback = new ProcessorCallback(actualTotalBytes, offset, callbackDispatcher, requestId);
 
         try {
-            return CldAndroid.get().getCloudinary().uploader().uploadLarge(preparedPayload, options, bufferSize, offset, uploadUniqueId, processorCallback);
+            return MediaManager.get().getCloudinary().uploader().uploadLarge(preparedPayload, options, bufferSize, offset, uploadUniqueId, processorCallback);
         } finally {
             // save data into persisted request params to enable resuming later on
             params.putInt("original_buffer_size", bufferSize);
