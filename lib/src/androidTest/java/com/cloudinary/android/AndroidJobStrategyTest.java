@@ -23,7 +23,7 @@ public class AndroidJobStrategyTest extends AbstractTest {
 
         UploadRequest<FilePayload> request =
                 new UploadRequest<>(new UploadContext<>(payload, null), null)
-                        .constrain(new TimeWindow.Builder().minLatencyMillis(20).mMaxExecutionDelayMillis(200).build())
+                        .constrain(new TimeWindow.Builder().minLatencyMillis(20).maxExecutionDelayMillis(200).build())
                         .policy(new UploadPolicy.Builder()
                                 .networkPolicy(UploadPolicy.NetworkType.UNMETERED)
                                 .requiresCharging(true)

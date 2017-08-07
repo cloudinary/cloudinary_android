@@ -90,7 +90,7 @@ public class TimeWindow {
          * @param maxExecutionDelayMillis The maximum time to wait before a request must be executed regardless of the upload policy. This is defined as offset to current time.
          * @return Itself for chaining operations.
          */
-        public Builder mMaxExecutionDelayMillis(long maxExecutionDelayMillis){
+        public Builder maxExecutionDelayMillis(long maxExecutionDelayMillis){
             this.maxExecutionDelayMillis = maxExecutionDelayMillis;
             return this;
         }
