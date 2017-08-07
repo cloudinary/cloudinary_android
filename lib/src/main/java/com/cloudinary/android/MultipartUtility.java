@@ -23,7 +23,7 @@ import java.util.Map;
  * @author Cloudinary
  */
 public class MultipartUtility {
-    public final static String USER_AGENT = "CloudinaryAndroid/" + Cloudinary.VERSION + " (" + Build.VERSION.RELEASE + "; " + Build.MODEL + " Build/" + Build.DISPLAY;
+    public final static String USER_AGENT = "CloudinaryAndroid/" + MediaManager.VERSION + " (Android " + Build.VERSION.RELEASE + "; " + Build.MODEL + " Build/" + Build.DISPLAY + ") " + Cloudinary.USER_AGENT;
     private static final String LINE_FEED = "\r\n";
     private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     private final String boundary;
