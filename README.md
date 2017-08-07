@@ -15,10 +15,10 @@ For Android, Cloudinary provides a library for simplifying the integration even 
 ## Gradle Integration
 Add the following dependency to your build.gradle:
 
-`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.13.0'`
+`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.20.0'`
 
 ## Manual Setup ######################################################################
-Download cloudinary-core-1.2.2.jar from [here](http://search.maven.org/remotecontent?filepath=com/cloudinary/cloudinary-core/1.2.2/cloudinary-core-1.2.2.jar) and cloudinary-android-1.2.2.jar from [here](http://search.maven.org/remotecontent?filepath=com/cloudinary/cloudinary-android/1.2.2/cloudinary-android-1.2.2.jar) and put them in your libs folder.
+Download cloudinary-android-1.20.0.jar from [here](http://search.maven.org/remotecontent?filepath=com/cloudinary/cloudinary-android/1.20.0/cloudinary-android-1.20.0.jar) and cloudinary-android-1.20.0.jar from [here](http://search.maven.org/remotecontent?filepath=com/cloudinary/cloudinary-android/1.20.0/cloudinary-android-1.20.0.jar) and put them in your libs folder.
 
 ## Maven Integration ######################################################################
 The cloudinary_java library is available in [Maven Central](http://repo1.maven.org/maven/). To use it, add the following dependency to your pom.xml:
@@ -26,7 +26,7 @@ The cloudinary_java library is available in [Maven Central](http://repo1.maven.o
     <dependency>
         <groupId>com.cloudinary</groupId>
         <artifactId>cloudinary-android</artifactId>
-        <version>1.2.2</version>
+        <version>1.20.0</version>
     </dependency>
 
 
@@ -72,16 +72,16 @@ For more details, see our documentation for embedding [Facebook](http://cloudina
 Each request for building a URL of a remote cloud resource must have the `cloud_name` parameter set. 
 Setting the `cloud_name` parameter can be done either when initializing the library, or by using the CLOUDINARY_URL meta-data property in `AndroidManifest.xml`.
 
-The entry point of the library is the `CldAndroid` object. `CldAndroid.init()` must be called before using the library, preferably in `Application.onCreate()`.
+The entry point of the library is the `MediaManager` object. `MediaManager.init()` must be called before using the library, preferably in `Application.onCreate()`.
 Here's an example of setting the configuration parameters programmatically in your `Applicaion.onCreate(`:
     
      Map config = new HashMap();
      config.put("cloud_name", "myCloudName");
-     CldAndroid.init(this, config);
+     MediaManager.init(this, config);
     
 Alternatively, When using the meta-data property, no configuration is required:
     
-    CldAndroid.init(this);
+    MediaManager.init(this);
 
 The added property `AndroidManifest.xml`. Note: You should only include the `cloud_name` in the value, the api secret and key should be left out of the application.
 
@@ -101,25 +101,25 @@ Any image uploaded to Cloudinary can be transformed and embedded using powerful 
 
 The following example generates the url for accessing an uploaded `sample` image while transforming it to fill a 100x150 rectangle:
 
-    CldAndroid.get().url().transformation(new Transformation().width(100).height(150).crop("fill")).generate("sample.jpg")
+    MediaManager.get().url().transformation(new Transformation().width(100).height(150).crop("fill")).generate("sample.jpg")
 
 Another example, embedding a smaller version of an uploaded image while generating a 90x90 face detection based thumbnail: 
 
-    CldAndroid.get().url().transformation(new Transformation().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
+    MediaManager.get().url().transformation(new Transformation().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
 
 You can provide either a Facebook name or a numeric ID of a Facebook profile or a fan page.  
              
 Embedding a Facebook profile to match your graphic design is very simple:
 
-    CldAndroid.get().url().type("facebook").transformation(new Transformation().width(130).height(130).crop("fill").gravity("north_west")).generate("billclinton.jpg")
+    MediaManager.get().url().type("facebook").transformation(new Transformation().width(130).height(130).crop("fill").gravity("north_west")).generate("billclinton.jpg")
                            
 Same goes for Twitter:
 
-    CldAndroid.get().url().type("twitter_name").generate("billclinton.jpg")
+    MediaManager.get().url().type("twitter_name").generate("billclinton.jpg")
 
 ### Uploading
 
-The entry point for upload operations is the `CldAndroid.get().upload()` call. All upload operations are dispatched to a background queue, with 
+The entry point for upload operations is the `MediaManager.get().upload()` call. All upload operations are dispatched to a background queue, with 
 a set of fully customizable rules and limits letting you choose when each upload request should actually run. Requests are automatically rescheduled to be
 retried later if a recoverable error is encountered (e.g. network disconnections, timeouts).
 
@@ -128,25 +128,25 @@ Note: In order to receive global callbacks even when the app is already shut dow
 
 The following examples uploads a `File`  using the default settings, a request upload callback, and an upload preset (more about upload presets below):
     
-    String requestId = CldAndroid.get().upload(imageFile).unsigned("sample_preset").callback(callback).dispatch();
+    String requestId = MediaManager.get().upload(imageFile).unsigned("sample_preset").callback(callback).dispatch();
    
 The returned `requestId` is used to identify the request in global callbacks and to cancel the request if needed. The callback should be any implementation of `UploadCallback`.
 
 The uploaded image is assigned a randomly generated public I. As soon as `onSuccess` is called, the image is immediately available for download through a CDN:
 
-    CldAndroid.get().url().generate("abcfrmo8zul1mafopawefg.jpg")
+    MediaManager.get().url().generate("abcfrmo8zul1mafopawefg.jpg")
       
     http://res.cloudinary.com/demo/image/upload/abcfrmo8zul1mafopawefg.jpg
 
 You can also specify your own public ID:
     
-    String requestId = CldAndroid.get().upload(uri).unsigned("sample_preset").option("public_id", "sample_remote").dispatch();
+    String requestId = MediaManager.get().upload(uri).unsigned("sample_preset").option("public_id", "sample_remote").dispatch();
 
 Using `RequestUploadPolicy`, an upload request can be configured to run under specific circumstance, or within a chosen time window:
 
 The following examples uploads local Uri resource, configured to run immediately (the default), with a maximum of 7 retries, and only on an unmetered network (e.g. wifi):
 
-    String requestId = CldAndroid.get().upload(uri)
+    String requestId = MediaManager.get().upload(uri)
         .unsigned("sample_app_preset")
         .constrain(TimeWindow.immediate())
         .policy(new RequestUploadPolicy.Builder().maxRetries(7).networkPolicy(RequestUploadPolicy.NetworkType.UNMETERED).build())
@@ -161,7 +161,7 @@ Once the preset is defined, it's name is supplied when calling upload. An upload
 
 The following example uploads a local resource, available as a Uri, assuming a preset named 'sample_preset' already exists in the account:
 
-    String requestId = CldAndroid.get().upload(uri).unsigned("sample_preset").dispatch();
+    String requestId = MediaManager.get().upload(uri).unsigned("sample_preset").dispatch();
 
 ##### 2. Signed uploads with server-based signature
 Another way to allow uploading without credentials is using signed uploads. 
@@ -178,10 +178,10 @@ Your server can use any Cloudinary libraries (Ruby on Rails, PHP, Python & Djang
 	  "api_key": "123456789012345"
 	}
 
-When initializing `CldAndroid`, a `SignatureProvider` can be sent. Whenever an upload requires signing, the library will call the provider's `provideSignature()` method, 
+When initializing `MediaManager`, a `SignatureProvider` can be sent. Whenever an upload requires signing, the library will call the provider's `provideSignature()` method, 
 where you should implement the call to your server's signing endpoint. This callback runs on a background a thread so there's no need to handle threading:
 
-    CldAndroid.init(this, new SignatureProvider() {
+    MediaManager.init(this, new SignatureProvider() {
         @Override
         public Signature provideSignature(Map options) {
             // call server signature endpoint

@@ -30,15 +30,21 @@ proguard/
 # Log Files
 *.log
 
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
+
 target/
 test-output/
 .settings
 .classpath
 .project
 
-# intellij
-.idea/
+# Intellij
 *.iml
+.idea/
 
 # Maven
 
