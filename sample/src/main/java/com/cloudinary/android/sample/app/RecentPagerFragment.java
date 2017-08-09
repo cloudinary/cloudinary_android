@@ -12,19 +12,13 @@ import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.android.sample.persist.ResourceRepo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-
-public class QueuedPagerFragment extends AbstractPagerFragment {
-
-    private List<Resource.UploadStatus> statuses = Arrays.asList(Resource.UploadStatus.QUEUED, Resource.UploadStatus.UPLOADING);
+public class RecentPagerFragment extends UploadedPageFragment {
 
     public static Fragment newInstance() {
-        return new QueuedPagerFragment();
+        return new RecentPagerFragment();
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,24 +27,20 @@ public class QueuedPagerFragment extends AbstractPagerFragment {
         TextView labelTextView = (TextView) view.findViewById(R.id.emptyViewLabel);
         Button emptyButton = (Button) view.findViewById(R.id.emptyViewButton);
 
-        emptyButton.setVisibility(View.GONE);
+        emptyButton.setVisibility(View.VISIBLE);
+        emptyButton.setText(R.string.uploaded_button_label);
         labelTextView.setVisibility(View.VISIBLE);
-        labelTextView.setText(R.string.queued_label);
+        labelTextView.setText(R.string.recent_label);
 
         return view;
     }
 
-    @Override
-    protected ResourcesAdapter getAdapter(int thumbSize) {
-        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, null);
+    protected boolean isRecent() {
+        return true;
     }
 
     @Override
-    protected int getSpan() {
-        return 2;
-    }
-
     protected List<Resource> getData() {
-        return ResourceRepo.getInstance().list(statuses);
+        return ResourceRepo.getInstance().listRecent();
     }
 }

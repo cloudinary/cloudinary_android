@@ -1,37 +1,39 @@
 package com.cloudinary.android.sample.model;
 
-import com.cloudinary.android.callback.ErrorInfo;
-import com.cloudinary.android.sample.core.CloudinaryHelper;
-
 import java.io.Serializable;
 import java.util.Date;
 
 public class Resource implements Serializable {
     private String localUri;
+    private String name;
     private String cloudinaryPublicId;
     private String requestId;
     private String deleteToken;
     private Date statusTimestamp;
     private String resourceType;
-    private String lastError;
+    private String lastErrorDesc;
+    private int lastErrorCode;
     private UploadStatus status;
 
     public Resource() {
     }
 
-    public Resource(String localUri) {
+    public Resource(String localUri, String name, String type) {
         this.localUri = localUri;
+        this.name = name;
+        this.resourceType = type;
     }
 
     public static void copyFields(Resource src, Resource dest) {
         dest.setStatus(src.getStatus());
-        dest.setLastError(src.getLastError());
+        dest.setLastErrorDesc(src.getLastErrorDesc());
         dest.setDeleteToken(src.getDeleteToken());
         dest.setResourceType(src.getResourceType());
         dest.setCloudinaryPublicId(src.getCloudinaryPublicId());
         dest.setLocalUri(src.getLocalUri());
         dest.setRequestId(src.getRequestId());
         dest.setStatusTimestamp(src.getStatusTimestamp());
+        dest.setName(src.getName());
     }
 
     public String getLocalUri() {
@@ -82,20 +84,16 @@ public class Resource implements Serializable {
         this.resourceType = resourceType;
     }
 
-    public String getLastError() {
-        return lastError;
+    public String getLastErrorDesc() {
+        return lastErrorDesc;
+    }
+
+    public void setLastErrorDesc(String lastErrorDesc) {
+        this.lastErrorDesc = lastErrorDesc;
     }
 
     public void setLastError(int errorCode) {
-        if (errorCode == ErrorInfo.NO_ERROR) {
-            lastError = null;
-        } else {
-            setLastError(CloudinaryHelper.getPrettyErrorMessage(errorCode));
-        }
-    }
-
-    public void setLastError(String lastError) {
-        this.lastError = lastError;
+        lastErrorCode = errorCode;
     }
 
     public UploadStatus getStatus() {
@@ -104,6 +102,22 @@ public class Resource implements Serializable {
 
     public void setStatus(UploadStatus status) {
         this.status = status;
+    }
+
+    public int getLastErrorCode() {
+        return lastErrorCode;
+    }
+
+    public void setLastErrorCode(int lastErrorCode) {
+        this.lastErrorCode = lastErrorCode;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public enum UploadStatus {

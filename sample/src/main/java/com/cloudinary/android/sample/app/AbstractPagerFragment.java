@@ -1,6 +1,8 @@
 package com.cloudinary.android.sample.app;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractPagerFragment extends Fragment {
-    private static final int SPAN = 2;
 
     private RecyclerView recyclerView;
     private View emptyView;
@@ -26,7 +27,7 @@ public abstract class AbstractPagerFragment extends Fragment {
     private RecyclerView.AdapterDataObserver observer;
 
     protected abstract ResourcesAdapter getAdapter(int thumbSize);
-
+    protected abstract int getSpan();
     protected abstract List<Resource> getData();
 
     @Override
@@ -37,11 +38,11 @@ public abstract class AbstractPagerFragment extends Fragment {
         recyclerView = (RecyclerView) rootView.findViewById(R.id.mainGallery);
         recyclerView.setHasFixedSize(true);
         ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
-        GridLayoutManager layoutManager = new GridLayoutManager(inflater.getContext(), SPAN);
+        RecyclerView.LayoutManager layoutManager = getLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
         emptyView = rootView.findViewById(R.id.emptyListView);
         dividerSize = getResources().getDimensionPixelSize(R.dimen.grid_divider_width);
-        recyclerView.addItemDecoration(new GridDividerItemDecoration(SPAN, dividerSize));
+        addItemDecoration(recyclerView);
         observer = new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
@@ -67,7 +68,6 @@ public abstract class AbstractPagerFragment extends Fragment {
         return rootView;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -86,20 +86,30 @@ public abstract class AbstractPagerFragment extends Fragment {
         }
     }
 
-    private void initThumbSizeAndLoadData() {
-        int thumbSize = recyclerView.getWidth() / SPAN - dividerSize / 2;
-        final ResourcesAdapter adapter = getAdapter(thumbSize);
-
-        adapter.registerAdapterDataObserver(observer);
-        recyclerView.setAdapter(adapter);
-        // fetch data after we know the size so we can request the exact size from Cloudinary
-        adapter.replaceImages(getData());
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         recyclerView.getAdapter().unregisterAdapterDataObserver(observer);
+    }
+
+    @NonNull
+    protected RecyclerView.LayoutManager getLayoutManager(Context context) {
+        return new GridLayoutManager(context, getSpan());
+    }
+
+    protected void addItemDecoration(RecyclerView recyclerView) {
+        recyclerView.addItemDecoration(new GridDividerItemDecoration(getSpan(), dividerSize));
+    }
+
+    private void initThumbSizeAndLoadData() {
+        int thumbSize = recyclerView.getWidth() / getSpan() - dividerSize / 2;
+        final ResourcesAdapter adapter = getAdapter(thumbSize);
+
+        adapter.registerAdapterDataObserver(observer);
+        recyclerView.setAdapter(adapter);
+
+        // fetch data after we know the size so we can request the exact size from Cloudinary
+        adapter.replaceImages(getData());
     }
 
     public RecyclerView getRecyclerView() {

@@ -13,4 +13,12 @@ public class Prefs {
     private static SharedPreferences.Editor getEditor() {
         return getPrefs().edit();
     }
+
+    public static boolean firstRun() {
+        return getPrefs().getBoolean("firstRun", true);
+    }
+
+    public static void setFirstRun(boolean firstRun) {
+        getEditor().putBoolean("firstRun", firstRun).apply();
+    }
 }

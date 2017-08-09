@@ -16,6 +16,7 @@ import java.util.List;
 
 public class CloudinarySqliteHelper extends SQLiteOpenHelper {
     public static final String ID_COL = "ID";
+    public static final int VERSION = 2;
     private static final String TABLE = "images";
     private static final String LOCAL_ID_COL = "localId";
     private static final String PUBLIC_ID_COL = "publicId";
@@ -24,11 +25,13 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
     private static final String STATUS_TIMESTAMP_COL = "statusTimestamp";
     private static final String DELETE_TOKEN_COL = "deleteToken";
     private static final String LAST_ERROR_COL = "lastError";
+    private static final String LAST_ERROR_DESC_COL = "lastErrorDesc";
     private static final String STATUS_COL = "status";
+    private static final String NAME_COL = "name";
     private static final String TAG = CloudinarySqliteHelper.class.getSimpleName();
 
     public CloudinarySqliteHelper(Context context) {
-        super(context, "cloudinary", null, 1);
+        super(context, "cloudinary", null, VERSION);
     }
 
     public static String makeInQueryString(int size) {
@@ -56,28 +59,37 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
                 + RESOURCE_TYPE_COL + " TEXT,"
                 + STATUS_COL + " TEXT,"
                 + LAST_ERROR_COL + " INTEGER,"
+                + LAST_ERROR_DESC_COL + " TEXT, "
                 + STATUS_TIMESTAMP_COL + " INTEGER,"
+                + NAME_COL + " TEXT,"
                 + DELETE_TOKEN_COL + " TEXT);"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        switch (newVersion) {
+            case 2:
+                db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN " + NAME_COL + " TEXT;");
+        }
     }
 
-    public int setUploadResultParams(String requestId, String publicId, String deleteToken, Resource.UploadStatus status, int lastError) {
+    public int setUploadResultParams(String requestId, String publicId, String deleteToken, Resource.UploadStatus status, int lastError, String lastErrorDesc) {
         ContentValues values = new ContentValues();
         values.put(PUBLIC_ID_COL, publicId);
         values.put(DELETE_TOKEN_COL, deleteToken);
         values.put(STATUS_TIMESTAMP_COL, new Date().getTime());
         values.put(STATUS_COL, status.name());
         values.put(LAST_ERROR_COL, lastError);
+        values.put(LAST_ERROR_DESC_COL, lastErrorDesc);
         return getWritableDatabase().update(TABLE, values, REQUEST_ID_COL + "=?", new String[]{requestId});
     }
 
-    public boolean insertOrUpdateQueuedResource(String localId, String requestId, String resourceType, Resource.UploadStatus status) {
+    public boolean insertOrUpdateQueuedResource(String localId, String name, String requestId, String resourceType, Resource.UploadStatus status) {
         ContentValues values = new ContentValues();
+
         values.put(REQUEST_ID_COL, requestId);
+        values.put(NAME_COL, name);
         values.put(RESOURCE_TYPE_COL, resourceType);
         values.put(STATUS_COL, status.name());
         values.put(STATUS_TIMESTAMP_COL, new Date().getTime());
@@ -125,6 +137,8 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
             int resourceTypeIdx = cursor.getColumnIndex(RESOURCE_TYPE_COL);
             int statusIdx = cursor.getColumnIndex(STATUS_COL);
             int errorIdx = cursor.getColumnIndex(LAST_ERROR_COL);
+            int errorDescIdx = cursor.getColumnIndex(LAST_ERROR_DESC_COL);
+            int nameIdx = cursor.getColumnIndex(NAME_COL);
 
             do {
                 Resource resource = new Resource();
@@ -132,10 +146,12 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
                 resource.setCloudinaryPublicId(cursor.getString(remoteIdIdx));
                 resource.setRequestId(cursor.getString(requestIdIdx));
                 resource.setDeleteToken(cursor.getString(deleteTokenIdx));
-                resource.setStatusTimestamp(cursor.isNull(timestampIdx) ? null : new Date(cursor.getInt(timestampIdx)));
+                resource.setStatusTimestamp(cursor.isNull(timestampIdx) ? null : new Date(cursor.getLong(timestampIdx)));
                 resource.setResourceType(cursor.getString(resourceTypeIdx));
                 resource.setStatus(Resource.UploadStatus.valueOf(cursor.getString(statusIdx)));
                 resource.setLastError(cursor.getInt(errorIdx));
+                resource.setLastErrorDesc(cursor.getString(errorDescIdx));
+                resource.setName(cursor.getString(nameIdx));
                 res.add(resource);
             } while (cursor.moveToNext());
         }
@@ -147,7 +163,6 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
 
     public void delete(String localId) {
         getWritableDatabase().execSQL("DELETE FROM " + TABLE + " WHERE " + LOCAL_ID_COL + "=?", new Object[]{localId});
-        ;
     }
 
     public String getLocalUri(String requestId) {
@@ -177,6 +192,19 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
 
     public List<Resource> list(String[] statuses) {
         Cursor cursor = getReadableDatabase().query(TABLE, null, STATUS_COL + makeInQueryString(statuses.length), statuses, null, null, ID_COL);
+        List<Resource> res = new ArrayList<>();
+        try {
+            buildResource(cursor, res);
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return res;
+    }
+
+    public List<Resource> listAllUploadedAfter(long cutoff) {
+        Cursor cursor = getReadableDatabase().query(TABLE, null, STATUS_COL + "=? AND " + STATUS_TIMESTAMP_COL + ">?", new String[]{String.valueOf(Resource.UploadStatus.UPLOADED), String.valueOf(cutoff)}, null, null, ID_COL);
         List<Resource> res = new ArrayList<>();
         try {
             buildResource(cursor, res);

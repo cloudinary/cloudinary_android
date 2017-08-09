@@ -1,6 +1,11 @@
 package com.cloudinary.android.sample.app;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,7 +15,11 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.provider.DocumentsContract;
+import android.support.v4.util.Pair;
 import android.view.WindowManager;
+
+import com.cloudinary.utils.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +41,7 @@ public class Utils {
         is = context.getContentResolver().openInputStream(uri);
         Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
         is.close();
-        return getCroppedBitmap(bitmap);
+        return bitmap == null ? null : getCroppedBitmap(bitmap);
     }
 
     public static Bitmap getCroppedBitmap(Bitmap bitmap) {
@@ -78,10 +87,52 @@ public class Utils {
         return inSampleSize;
     }
 
+    public static Uri toUri(Context context, int resourceId) {
+        Resources res = context.getResources();
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + res.getResourcePackageName(resourceId)
+                + '/' + res.getResourceTypeName(resourceId) + '/' + res.getResourceEntryName(resourceId));
+    }
+
     public static int getScreenWidth(Context context) {
         WindowManager window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
         window.getDefaultDisplay().getSize(point);
         return point.x;
+    }
+
+    public static Pair<String, String> getResourceNameAndType(Context context, Uri uri) {
+        Cursor cursor = null;
+        String type = null;
+        String name = null;
+
+        try {
+            cursor = context.getContentResolver().query(uri, new String[]{DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.COLUMN_DISPLAY_NAME}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                name = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME));
+                type = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE));
+                if (StringUtils.isNotBlank(type)) {
+                    type = type.substring(0, type.indexOf('/'));
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        if (StringUtils.isBlank(type)) {
+            type = "image";
+        }
+        return new Pair<>(name, type);
+    }
+
+    public static void openMediaChooser(Activity activity, int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/jpg", "image/png", "video/*"});
+        intent.setType("(*/*");
+        activity.startActivityForResult(intent, requestCode);
     }
 }

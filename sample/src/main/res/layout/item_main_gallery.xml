@@ -7,44 +7,72 @@
         android:id="@+id/image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/ic_launcher"
-        android:scaleType="centerCrop" />
+        android:scaleType="center" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/buttonsContainer"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/buttons_container_height"
         android:layout_alignParentBottom="true"
         android:background="#60000000"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
         android:visibility="visible">
-
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:gravity="center_vertical|start"
-            android:textColor="#eee" />
 
         <ImageView
             android:id="@+id/deleteButton"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/default_margin"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_delete_white_48dp"
-            android:visibility="gone" />
-    </LinearLayout>
+            android:src="@drawable/ic_delete_white_24dp" />
+
+        <ImageView
+            android:id="@+id/videoIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/default_margin"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_movie_white_24dp" />
+
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/black_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/progress_overlay" />
+
+    <TextView
+        android:id="@+id/filename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/default_margin"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/progressContainer"
+        android:layout_margin="@dimen/default_margin"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse" />
 
     <FrameLayout
+        android:id="@+id/progressContainer"
         android:layout_width="match_parent"
         android:layout_height="4dp"
-        android:layout_above="@id/buttonsContainer">
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="@dimen/default_margin"
+        android:layout_marginRight="@dimen/default_margin">
 
         <ProgressBar
             android:id="@+id/uploadProgress"

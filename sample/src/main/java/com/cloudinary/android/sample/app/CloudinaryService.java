@@ -16,10 +16,8 @@ import android.util.TypedValue;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.ListenerService;
 import com.cloudinary.android.sample.R;
-import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.android.sample.persist.ResourceRepo;
-import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +28,13 @@ public class CloudinaryService extends ListenerService {
 
     public static final String ACTION_RESOURCE_MODIFIED = "ACTION_RESOURCE_MODIFIED";
     public static final String ACTION_UPLOAD_PROGRESS = "ACTION_UPLOAD_PROGRESS";
+    public static final String ACTION_STATE_ERROR = "cloudinary.action_error";
+    public static final String ACTION_STATE_UPLOADED = "cloudinary.action_uploaded";
+    public static final String ACTION_STATE_IN_PROGRESS = "cloudinary.action_progress";
+
     private static final String TAG = "CloudinaryService";
-    final private Map<String, Bitmap> bitmaps = new HashMap<>();
+
+    final private Map<String, BitmapResult> bitmaps = new HashMap<>();
     private NotificationManager notificationManager;
     private AtomicInteger idsProvider = new AtomicInteger(1000);
     private Map<String, Integer> requestIdsToNotificationIds = new ConcurrentHashMap<>();
@@ -45,7 +48,9 @@ public class CloudinaryService extends ListenerService {
         builder = new NotificationCompat.Builder(this);
         builder.setContentTitle("Uploading to Cloudinary...")
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(PendingIntent.getActivity(this, 999, new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
+                .setContentIntent(PendingIntent.getActivity(this, 999,
+                        new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT).setAction(ACTION_STATE_IN_PROGRESS),
+                        0))
                 .setOngoing(true);
 
         HandlerThread handlerThread = new HandlerThread("CloudinaryServiceBackgroundThread");
@@ -59,31 +64,61 @@ public class CloudinaryService extends ListenerService {
         return null;
     }
 
-    private android.support.v4.app.NotificationCompat.Builder getBuilder(String requestId) {
+    private android.support.v4.app.NotificationCompat.Builder getBuilder(String requestId, Resource.UploadStatus status) {
         return new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setAutoCancel(true)
-                .setContentIntent(PendingIntent.getActivity(this, 1234, new Intent(this, MainActivity.class), 0))
-                .setLargeIcon(getBitmap(requestId));
+                .setContentIntent(PendingIntent.getActivity(this, 1234,
+                        new Intent(this, MainActivity.class)
+                                .setAction(actionFromStatus(status))
+                        , 0))
+                .setLargeIcon(getBitmap(requestId))
+                .setColor(getResources().getColor(R.color.colorPrimary));
+    }
+
+    private String actionFromStatus(Resource.UploadStatus status) {
+        switch (status) {
+
+            case QUEUED:
+            case UPLOADING:
+                return ACTION_STATE_IN_PROGRESS;
+            case UPLOADED:
+                return ACTION_STATE_UPLOADED;
+            case RESCHEDULED:
+            case FAILED:
+                return ACTION_STATE_ERROR;
+            default:
+                return ACTION_STATE_UPLOADED;
+        }
     }
 
     private Bitmap getBitmap(String requestId) {
-        synchronized (bitmaps) {
-            Bitmap bitmap = bitmaps.get(requestId);
-            if (bitmap == null) {
-                try {
-                    String uri = ResourceRepo.getInstance().getLocalUri(requestId);
-                    int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
-                    bitmap = Utils.decodeBitmapStream(this, Uri.parse(uri), value, value);
-                    bitmaps.put(requestId, bitmap);
-                } catch (Exception e) {
-                    // print but don't fail the notification
-                    e.printStackTrace();
+        BitmapResult result = bitmaps.get(requestId);
+        if (result == null) {
+            synchronized (bitmaps) {
+                result = bitmaps.get(requestId);
+                if (result == null) {
+                    Bitmap bitmap = null;
+                    try {
+                        Resource resource = ResourceRepo.getInstance().getResource(requestId);
+                        String uri = resource.getLocalUri();
+                        int value = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
+                        if (resource.getResourceType().equals("image")) {
+                            bitmap = Utils.decodeBitmapStream(this, Uri.parse(uri), value, value);
+                        }
+                    } catch (Exception e) {
+                        // print but don't fail the notification
+                        e.printStackTrace();
+                    }
+
+                    // bitmap can be null, save it anyway (we don't want to retry)
+                    result = new BitmapResult(bitmap);
+                    bitmaps.put(requestId, result);
                 }
             }
-
-            return bitmap;
         }
+
+        return result.bitmap;
     }
 
     private void cleanupBitmap(String requestId) {
@@ -115,7 +150,7 @@ public class CloudinaryService extends ListenerService {
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
         notificationManager.notify(id,
-                getBuilder(requestId)
+                getBuilder(requestId, Resource.UploadStatus.UPLOADING)
                         .setContentTitle("Preparing upload...")
                         .build());
     }
@@ -156,12 +191,11 @@ public class CloudinaryService extends ListenerService {
         });
 
         cancelNotification(requestId);
-        // prefetch the image into picasso cache:
-        Picasso.with(this).load(CloudinaryHelper.getUrlForMaxWidth(this, publicId)).fetch();
+
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
         notificationManager.notify(id,
-                getBuilder(requestId)
+                getBuilder(requestId, Resource.UploadStatus.UPLOADED)
                         .setContentTitle("Cloudinary Upload")
                         .setContentText("The image was uploaded successfully!")
                         .build());
@@ -174,7 +208,7 @@ public class CloudinaryService extends ListenerService {
         backgroundThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                sendBroadcast(ResourceRepo.getInstance().resourceFailed(requestId, error.getCode()));
+                sendBroadcast(ResourceRepo.getInstance().resourceFailed(requestId, error.getCode(), error.getDescription()));
             }
         });
         cancelNotification(requestId);
@@ -183,14 +217,13 @@ public class CloudinaryService extends ListenerService {
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
 
-        String errorMessage = CloudinaryHelper.getPrettyErrorMessage(error.getCode());
         notificationManager.notify(id,
-                getBuilder(requestId)
+                getBuilder(requestId, Resource.UploadStatus.FAILED)
                         .setContentTitle("Error uploading.")
-                        .setContentText(errorMessage)
+                        .setContentText(error.getDescription())
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .setBigContentTitle("Error uploading.")
-                                .bigText(errorMessage))
+                                .bigText(error.getDescription()))
                         .build());
 
         cleanupBitmap(requestId);
@@ -201,16 +234,30 @@ public class CloudinaryService extends ListenerService {
         backgroundThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                sendBroadcast(ResourceRepo.getInstance().resourceRescheduled(requestId, error.getCode()));
+                sendBroadcast(ResourceRepo.getInstance().resourceRescheduled(requestId, error.getCode(), error.getDescription()));
             }
         });
         cancelNotification(requestId);
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
         notificationManager.notify(id,
-                getBuilder(requestId)
+                getBuilder(requestId, Resource.UploadStatus.RESCHEDULED)
                         .setContentTitle("Connection issues")
                         .setContentText("The upload will resume once network is available.")
                         .build());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        backgroundThreadHandler.removeCallbacksAndMessages(null);
+    }
+
+    private static final class BitmapResult {
+        final Bitmap bitmap;
+
+        private BitmapResult(Bitmap bitmap) {
+            this.bitmap = bitmap;
+        }
     }
 }

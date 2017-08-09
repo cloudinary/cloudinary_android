@@ -1,7 +1,11 @@
 package com.cloudinary.android.sample.app;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +41,40 @@ public class FailedPagerFragment extends AbstractPagerFragment {
         return view;
     }
 
+    @NonNull
+    @Override
+    protected RecyclerView.LayoutManager getLayoutManager(Context context) {
+        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+    }
+
+    @Override
+    protected void addItemDecoration(RecyclerView recyclerView) {
+        // NOP
+    }
+
     @Override
     protected ResourcesAdapter getAdapter(int thumbSize) {
-        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, null);
+        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, new ResourcesAdapter.ImageClickedListener() {
+            @Override
+            public void onImageClicked(Resource resource) {
+                // NOP
+            }
+
+            @Override
+            public void onDeleteClicked(Resource resource, Boolean recent) {
+                ((DeleteRequestsCallback) getActivity()).onDeleteResourceLocally(resource);
+            }
+
+            @Override
+            public void onRetryClicked(Resource resource) {
+                ((ResourcesAdapter.ImageClickedListener) getActivity()).onRetryClicked(resource);
+            }
+        });
+    }
+
+    @Override
+    protected int getSpan() {
+        return 1;
     }
 
     protected List<Resource> getData() {

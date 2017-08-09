@@ -11,10 +11,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +26,28 @@ import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.EffectData;
 import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.utils.StringUtils;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -30,13 +55,17 @@ import java.util.List;
 
 public class ImageActivity extends AppCompatActivity {
     public static final int UPLOAD_IMAGE_REQUEST_CODE = 1001;
-    public static final String IMAGE_INTENT_EXTRA = "IMAGE_INTENT_EXTRA";
-    public static final String ACTION_UPLOAD = "ACTION_UPLOAD";
+    public static final String RESOURCE_INTENT_EXTRA = "RESOURCE_INTENT_EXTRA";
     private ImageView imageView;
     private Resource resource;
     private RecyclerView recyclerView;
-    private int thumbSize;
+    private int thumbHeight;
     private TextView descriptionTextView;
+    private ProgressBar progressBar;
+    private SimpleExoPlayer exoPlayer;
+    private SimpleExoPlayerView exoPlayerView;
+    private ExoPlayer.EventListener listener;
+    private String currentUrl = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +75,8 @@ public class ImageActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
         imageView = (ImageView) findViewById(R.id.image_view);
         descriptionTextView = (TextView) findViewById(R.id.effectDescription);
         recyclerView = (RecyclerView) findViewById(R.id.effectsGallery);
@@ -53,7 +84,68 @@ public class ImageActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
 
+        initExoPlayer();
+
         fetchImageFromIntent(getIntent());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.image_menu, menu);
+        return true;
+    }
+
+
+    private void initExoPlayer() {
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector =
+                new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
+        exoPlayerView = ((SimpleExoPlayerView) findViewById(R.id.exoPlayer));
+        exoPlayerView.setPlayer(exoPlayer);
+
+        listener = new ExoPlayer.EventListener() {
+            @Override
+            public void onTimelineChanged(Timeline timeline, Object o) {
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
+                if (trackGroupArray.length > 0) {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onLoadingChanged(boolean b) {
+                progressBar.setVisibility(b ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean b, int i) {
+
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException e) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ImageActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onPositionDiscontinuity() {
+
+            }
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+            }
+        };
     }
 
     private void initEffectGallery() {
@@ -62,10 +154,9 @@ public class ImageActivity extends AppCompatActivity {
             @Override
             public boolean onPreDraw() {
                 recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-                thumbSize = Math.round((float) (recyclerView.getWidth() / 4));
-                List<EffectData> data = CloudinaryHelper.generateEffectsList(ImageActivity.this, Utils.getScreenWidth(ImageActivity.this), thumbSize, resource.getCloudinaryPublicId());
-                recyclerView.getLayoutParams().height = thumbSize;
-                recyclerView.setAdapter(new EffectsGalleryAdapter(ImageActivity.this, data, thumbSize, new EffectsGalleryAdapter.ItemClickListener() {
+                thumbHeight = Math.round((float) (recyclerView.getWidth() / 4));
+                List<EffectData> data = CloudinaryHelper.generateEffectsList(ImageActivity.this, Utils.getScreenWidth(ImageActivity.this), thumbHeight, resource);
+                recyclerView.setAdapter(new EffectsGalleryAdapter(ImageActivity.this, data, thumbHeight, new EffectsGalleryAdapter.ItemClickListener() {
                     @Override
                     public void onClick(EffectData data) {
                         updateMainImage(data);
@@ -79,27 +170,69 @@ public class ImageActivity extends AppCompatActivity {
         });
     }
 
-    private void updateMainImage(EffectData data) {
-        imageView.setTag(data.getImageUrl());
-        Picasso.with(this).load(Uri.parse(data.getImageUrl())).into(imageView, new Callback() {
-            @Override
-            public void onSuccess() {
-            }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        exoPlayer.release();
+    }
 
-            @Override
-            public void onError() {
-                showSnackBar("Error loading resource");
-            }
-        });
+    private void updateMainImage(EffectData data) {
+        currentUrl = data.getImageUrl();
+        if (resource.getResourceType().equals("image")) {
+            loadImage(data);
+        } else {
+            loadVideo(data);
+        }
 
         descriptionTextView.setText(data.getDescription());
     }
 
+    private void loadVideo(EffectData data) {
+        progressBar.setVisibility(View.VISIBLE);
+        imageView.setVisibility(View.GONE);
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), null);
+        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(data.getImageUrl()), dataSourceFactory, extractorsFactory, null, null);
+
+        exoPlayer.addListener(listener);
+        exoPlayer.prepare(videoSource);
+    }
+
+    private void loadImage(EffectData data) {
+        exoPlayer.removeListener(listener);
+        exoPlayerView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        imageView.setTag(data.getImageUrl());
+        new Picasso.Builder(this).listener(new Picasso.Listener() {
+            @Override
+            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                showSnackBar("Error loading resource: " + exception.getMessage());
+            }
+        }).build().load(Uri.parse(data.getImageUrl())).into(imageView, new Callback() {
+            @Override
+            public void onSuccess() {
+                progressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onError() {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            case R.id.menu_url:
+                if (StringUtils.isNotBlank(currentUrl)) {
+                    openUrlWithToast(currentUrl);
+                }
+
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -116,25 +249,20 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     private void fetchImageFromIntent(Intent intent) {
-        if (intent == null || !intent.hasExtra(IMAGE_INTENT_EXTRA)) {
+        if (intent == null || !intent.hasExtra(RESOURCE_INTENT_EXTRA)) {
+            // something wrong, nothing to load.
+            Toast.makeText(this, "Could not load image.", Toast.LENGTH_SHORT).show();
             finish();
-        }
-
-        resource = (Resource) intent.getSerializableExtra(IMAGE_INTENT_EXTRA);
-
-        String cloudinaryPublicId = resource.getCloudinaryPublicId();
-        if (StringUtils.isEmpty(cloudinaryPublicId)) {
-            Toast.makeText(this, "Could not load image.", Toast.LENGTH_SHORT);
         } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openUrlWithToast(v.getTag().toString());
-                }
-            });
-
-            initEffectGallery();
+            resource = (Resource) intent.getSerializableExtra(RESOURCE_INTENT_EXTRA);
+            String cloudinaryPublicId = resource.getCloudinaryPublicId();
+            if (StringUtils.isEmpty(cloudinaryPublicId)) {
+                Toast.makeText(this, "Could not load image.", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                recyclerView.setVisibility(View.VISIBLE);
+                initEffectGallery();
+            }
         }
     }
 

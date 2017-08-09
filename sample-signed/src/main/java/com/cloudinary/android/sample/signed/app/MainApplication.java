@@ -3,8 +3,8 @@ package com.cloudinary.android.sample.signed.app;
 
 import android.app.Application;
 
-import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.LogLevel;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.sample.rest.BackendServerSignatureProvider;
 
 public class MainApplication extends Application {
@@ -22,7 +22,7 @@ public class MainApplication extends Application {
         MediaManager.setLogLevel(LogLevel.DEBUG);
 
         // Mandatory - call a flavor of init. Config can be null if cloudinary_url is provided in the manifest.
-        MediaManager.init(this, new BackendServerSignatureProvider(), null);
+        MediaManager.init(this, new BackendServerSignatureProvider());
 
         _instance = this;
     }

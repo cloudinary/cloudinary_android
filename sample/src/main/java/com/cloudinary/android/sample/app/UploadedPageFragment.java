@@ -49,10 +49,24 @@ public class UploadedPageFragment extends AbstractPagerFragment {
             }
 
             @Override
-            public void onDeleteClicked(Resource resource) {
-                ((ResourcesAdapter.ImageClickedListener) getActivity()).onDeleteClicked(resource);
+            public void onDeleteClicked(Resource resource, Boolean recent) {
+                ((ResourcesAdapter.ImageClickedListener) getActivity()).onDeleteClicked(resource, isRecent());
+            }
+
+            @Override
+            public void onRetryClicked(Resource resource) {
+                ((ResourcesAdapter.ImageClickedListener) getActivity()).onRetryClicked(resource);
             }
         });
+    }
+
+    protected boolean isRecent() {
+        return false;
+    }
+
+    @Override
+    protected int getSpan() {
+        return 3;
     }
 
     protected List<Resource> getData() {

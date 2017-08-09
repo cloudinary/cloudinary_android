@@ -1,26 +1,29 @@
 package com.cloudinary.android.sample.app;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;
-import com.cloudinary.utils.StringUtils;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceViewHolder> {
+class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static final int TYPE_REGULAR = 0;
+    private static final int TYPE_ERROR = 1;
+
     private final int requiredSize;
     private final ImageClickedListener listener;
     private final List<Resource.UploadStatus> validStatuses;
@@ -40,8 +43,79 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
     }
 
     @Override
-    public ResourceViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main_gallery, parent, false);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == TYPE_REGULAR) {
+            return createRegularViewHolder(parent);
+        } else {
+            return createFailedViewHolder(parent);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == TYPE_REGULAR) {
+            bindRegularView((ResourceViewHolder) holder, position);
+        } else {
+            bindErrorView((FailedResourceViewHolder) holder, position);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        Resource.UploadStatus status = resources.get(0).resource.getStatus();
+        if (status == Resource.UploadStatus.FAILED || status == Resource.UploadStatus.RESCHEDULED) {
+            return TYPE_ERROR;
+        }
+
+        return TYPE_REGULAR;
+    }
+
+    @Override
+    public int getItemCount() {
+        return resources.size();
+    }
+
+    private RecyclerView.ViewHolder createFailedViewHolder(ViewGroup parent) {
+        ViewGroup viewGroup;
+        viewGroup = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main_gallery_error, parent, false);
+        viewGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    Resource resource = (Resource) v.getTag();
+                    listener.onImageClicked(resource);
+                }
+            }
+        });
+
+        View retryButton = viewGroup.findViewById(R.id.retryButton);
+        retryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    Resource resource = (Resource) v.getTag();
+                    listener.onRetryClicked(resource);
+                }
+            }
+        });
+
+        View cancelButton = viewGroup.findViewById(R.id.cancelButton);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    Resource resource = (Resource) v.getTag();
+                    listener.onDeleteClicked(resource, false);
+                }
+            }
+        });
+
+        return new FailedResourceViewHolder(viewGroup, (TextView) viewGroup.findViewById(R.id.filename), (ImageView) viewGroup.findViewById(R.id.image_view), retryButton, cancelButton, viewGroup.findViewById(R.id.rescheduleLabel), (TextView) viewGroup.findViewById(R.id.errorDescription));
+    }
+
+    private RecyclerView.ViewHolder createRegularViewHolder(ViewGroup parent) {
+        ViewGroup viewGroup;
+        viewGroup = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main_gallery, parent, false);
         viewGroup.getLayoutParams().height = requiredSize;
         viewGroup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,38 +133,95 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
             public void onClick(View v) {
                 if (listener != null) {
                     Resource resource = (Resource) v.getTag();
-                    listener.onDeleteClicked(resource);
+                    listener.onDeleteClicked(resource, false);
                 }
             }
         });
 
-        TextView textView = (TextView) viewGroup.findViewById(R.id.statusText);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context, ((TextView) v).getText(), Toast.LENGTH_LONG).show();
-            }
-        });
-
-        return new ResourceViewHolder(viewGroup, (ImageView) viewGroup.findViewById(R.id.image_view), textView, deleteButton, viewGroup.findViewById(R.id.buttonsContainer), (ProgressBar) viewGroup.findViewById(R.id.uploadProgress));
+        return new ResourceViewHolder(viewGroup, (ImageView) viewGroup.findViewById(R.id.image_view), (TextView) viewGroup.findViewById(R.id.statusText),
+                deleteButton, viewGroup.findViewById(R.id.buttonsContainer), viewGroup.findViewById(R.id.videoIcon), (ProgressBar) viewGroup.findViewById(R.id.uploadProgress),
+                viewGroup.findViewById(R.id.black_overlay), (TextView) viewGroup.findViewById(R.id.filename));
     }
 
-    @Override
-    public void onBindViewHolder(final ResourceViewHolder holder, int position) {
+    private void bindErrorView(FailedResourceViewHolder holder, int position) {
         ResourceWithMeta resourceWithMeta = resources.get(position);
         final Resource resource = resourceWithMeta.resource;
+        holder.errorDescription.setText(resource.getLastErrorDesc());
+        boolean isVideo = resource.getResourceType().equals("video");
+        int placeHolder = isVideo ? R.drawable.video_placeholder : R.drawable.placeholder;
+        Picasso.with(context).load(resource.getLocalUri()).placeholder(placeHolder).centerCrop().resizeDimen(R.dimen.card_image_width, R.dimen.card_height).into(holder.imageView);
+        holder.retryButton.setTag(resource);
+        holder.cancelButton.setTag(resource);
+        holder.rescheduleLabel.setVisibility(resource.getStatus() == Resource.UploadStatus.RESCHEDULED ? View.VISIBLE : View.GONE);
+        holder.filename.setText(resource.getName());
+    }
+
+    private void bindRegularView(ResourceViewHolder holder, int position) {
+        ResourceWithMeta resourceWithMeta = resources.get(position);
+        final Resource resource = resourceWithMeta.resource;
+
+        // setup default values for more readable code:
         holder.itemView.setTag(resource);
         holder.deleteButton.setTag(resource);
-        holder.statusText.setText(getText(resource));
-        if (resource.getStatus() == Resource.UploadStatus.UPLOADED) {
-            // get the resource from cloudinary
-            holder.imageView.setScaleType(ImageView.ScaleType.CENTER);
-            Picasso.with(context).load(CloudinaryHelper.getCroppedThumbnailUrl(requiredSize, resource)).into(holder.imageView);
-        } else {
-            // get the local original
-            holder.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Picasso.with(context).load(resource.getLocalUri()).resize(requiredSize, requiredSize).centerCrop().into(holder.imageView);
+        holder.deleteButton.setVisibility(View.VISIBLE);
+        holder.progressBar.setProgress(0);
+        holder.progressBar.setVisibility(View.INVISIBLE);
+        holder.buttonsContainer.setVisibility(View.GONE);
+        holder.statusText.setText(null);
+        holder.name.setText(null);
+        String uriToLoad = resource.getLocalUri();
+        boolean localResize = true;
+        boolean isVideo = resource.getResourceType().equals("video");
+
+        switch (resource.getStatus()) {
+
+            case QUEUED:
+                holder.blackOverlay.animate().cancel();
+                holder.blackOverlay.setVisibility(View.GONE);
+                break;
+            case UPLOADING:
+                double progressFraction = (double) resourceWithMeta.bytes / resourceWithMeta.totalBytes;
+                int progress = (int) Math.round(progressFraction * 1000);
+                holder.progressBar.setVisibility(View.VISIBLE);
+                holder.progressBar.setMax(1000);
+                holder.progressBar.setProgress(progress);
+                if (holder.blackOverlay.getVisibility() != View.VISIBLE) {
+                    holder.blackOverlay.setAlpha(0);
+                    holder.blackOverlay.setVisibility(View.VISIBLE);
+                    holder.blackOverlay.animate().alpha(1f);
+                }
+                if (isVideo) {
+                    holder.name.setText(resource.getName());
+                }
+                setProgressText(progressFraction, holder.statusText);
+                break;
+            case UPLOADED:
+                holder.blackOverlay.animate().cancel();
+                holder.blackOverlay.setVisibility(View.GONE);
+                uriToLoad = CloudinaryHelper.getCroppedThumbnailUrl(requiredSize, resource);
+                holder.videoIcon.setVisibility(isVideo ? View.VISIBLE : View.GONE);
+                holder.buttonsContainer.setVisibility(View.VISIBLE);
+                localResize = false;
+                break;
+            case RESCHEDULED:
+                holder.blackOverlay.animate().cancel();
+                holder.blackOverlay.setVisibility(View.GONE);
+                break;
+            case FAILED:
+                holder.blackOverlay.animate().cancel();
+                holder.blackOverlay.setVisibility(View.GONE);
+                break;
         }
+
+        int placeholder = resource.getResourceType().equals("image") ? R.drawable.placeholder : R.drawable.video_placeholder;
+
+        RequestCreator creator = Picasso.with(context).load(uriToLoad).placeholder(placeholder);
+
+        if (localResize) {
+            creator.resize(requiredSize, requiredSize).centerCrop();
+        }
+
+        creator.into(holder.imageView);
 
         if (resourceWithMeta.totalBytes > 0) {
             double progressFraction = (double) resourceWithMeta.bytes / resourceWithMeta.totalBytes;
@@ -104,23 +235,20 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
         }
     }
 
-    @NonNull
-    private String getText(Resource resource) {
-        String status = resource.getStatus().name().substring(0, 1).toUpperCase() + resource.getStatus().name().substring(1).toLowerCase();
-        return StringUtils.isBlank(resource.getLastError()) ? status : status + ": " + resource.getLastError();
+    private void setProgressText(double progressFraction, TextView statusText) {
+        String progressStr = String.valueOf(Math.round(progressFraction * 100));
+        String text = statusText.getContext().getString(R.string.uploading, progressStr);
+        SpannableString spannableString = new SpannableString(text);
+        spannableString.setSpan(new ForegroundColorSpan(statusText.getContext().getResources().getColor(R.color.buttonColor)), text.indexOf(progressStr), text.length(), 0);
+        statusText.setText(spannableString);
     }
 
-    @Override
-    public int getItemCount() {
-        return resources.size();
-    }
-
-    public void addResource(Resource resource) {
+    private void addResource(Resource resource) {
         resources.add(0, new ResourceWithMeta(resource));
         notifyItemInserted(0);
     }
 
-    public void replaceImages(List<Resource> resources) {
+    void replaceImages(List<Resource> resources) {
         this.resources.clear();
         for (Resource resource : resources) {
             this.resources.add(new ResourceWithMeta(resource));
@@ -129,7 +257,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
         notifyDataSetChanged();
     }
 
-    public Resource removeResource(String resourceId) {
+    Resource removeResource(String resourceId) {
         Resource toRemove = null;
         for (int i = 0; i < resources.size(); i++) {
             Resource resource = resources.get(i).resource;
@@ -144,7 +272,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
         return toRemove;
     }
 
-    public void resourceUpdated(Resource updated) {
+    void resourceUpdated(Resource updated) {
         if (!validStatuses.contains(updated.getStatus())) {
             removeResource(updated.getLocalUri());
         } else {
@@ -169,7 +297,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
         }
     }
 
-    public void progressUpdated(String requestId, long bytes, long totalBytes) {
+    void progressUpdated(String requestId, long bytes, long totalBytes) {
         for (int i = 0; i < resources.size(); i++) {
             ResourceWithMeta resource = resources.get(i);
             if (resource.resource.getRequestId().equals(requestId)) {
@@ -184,27 +312,54 @@ class ResourcesAdapter extends RecyclerView.Adapter<ResourcesAdapter.ResourceVie
     interface ImageClickedListener {
         void onImageClicked(Resource resource);
 
-        void onDeleteClicked(Resource resource);
+        void onDeleteClicked(Resource resource, Boolean recent);
+
+        void onRetryClicked(Resource resource);
     }
 
-    static class ResourceViewHolder extends RecyclerView.ViewHolder {
+    private static class ResourceViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final TextView statusText;
         private final View deleteButton;
         private final View buttonsContainer;
         private final ProgressBar progressBar;
+        private final View videoIcon;
+        private final View blackOverlay;
+        private final TextView name;
 
-        ResourceViewHolder(final View itemView, final ImageView imageView, TextView statusText, View deleteButton, View buttonsContainer, ProgressBar progressBar) {
+        ResourceViewHolder(final View itemView, final ImageView imageView, TextView statusText, View deleteButton, View buttonsContainer, View videoIcon, ProgressBar progressBar, View blackOverlay, TextView name) {
             super(itemView);
             this.imageView = imageView;
             this.statusText = statusText;
             this.deleteButton = deleteButton;
             this.buttonsContainer = buttonsContainer;
+            this.videoIcon = videoIcon;
             this.progressBar = progressBar;
+            this.blackOverlay = blackOverlay;
+            this.name = name;
         }
     }
 
-    static class ResourceWithMeta {
+    private static class FailedResourceViewHolder extends RecyclerView.ViewHolder {
+        private final TextView filename;
+        private final ImageView imageView;
+        private final View retryButton;
+        private final View rescheduleLabel;
+        private final TextView errorDescription;
+        private final View cancelButton;
+
+        FailedResourceViewHolder(View itemView, TextView filename, ImageView imageView, View cancelButton, View retryButton, View rescheduleLabel, TextView errorDescription) {
+            super(itemView);
+            this.filename = filename;
+            this.imageView = imageView;
+            this.retryButton = retryButton;
+            this.cancelButton = cancelButton;
+            this.rescheduleLabel = rescheduleLabel;
+            this.errorDescription = errorDescription;
+        }
+    }
+
+    private static class ResourceWithMeta {
         final Resource resource;
         long bytes = 0;
         long totalBytes;

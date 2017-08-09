@@ -1,37 +1,44 @@
 package com.cloudinary.android.sample.app;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 
-public class DeleteImageDialogFragment extends DialogFragment {
+import com.cloudinary.android.sample.R;
+import com.cloudinary.android.sample.model.Resource;
 
-    public static DeleteImageDialogFragment newInstance(String imageId) {
+public class DeleteImageDialogFragment extends AppCompatDialogFragment {
+
+    public static DeleteImageDialogFragment newInstance(Resource resource, boolean recent) {
         DeleteImageDialogFragment fragment = new DeleteImageDialogFragment();
         Bundle args = new Bundle();
-        args.putString("id", imageId);
+        args.putSerializable("resource", resource);
+        args.putBoolean("recent", recent);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity()).setTitle("Delete resource")
-                .setMessage("Are you sure you want to delete this resource?")
-                .setNegativeButton("No", null)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        final Resource resource = (Resource) getArguments().getSerializable("resource");
+        final boolean recent = getArguments().getBoolean("recent");
+        final String message = recent ? getString(R.string.delete_resource_everywhere_message, resource.getResourceType()) :
+                getString(R.string.delete_resource_locally_message, resource.getResourceType());
+
+        return new AlertDialog.Builder(getActivity()).setTitle(getString(R.string.delete_single_resource_title, resource.getResourceType()))
+                .setMessage(message)
+                .setNegativeButton(R.string.delete_single_resource_no, null)
+                .setPositiveButton(R.string.delete_single_resource_yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (getActivity() instanceof ImageDeleteRequested) {
-                            ((ImageDeleteRequested) getActivity()).deleteResource(getArguments().getString("id"));
+                        if (recent) {
+                            ((DeleteRequestsCallback) getActivity()).onDeleteResourceEverywhere(resource);
+                        } else {
+                            ((DeleteRequestsCallback) getActivity()).onDeleteResourceLocally(resource);
                         }
                     }
                 }).create();
-    }
-
-    public interface ImageDeleteRequested {
-        void deleteResource(String id);
     }
 }

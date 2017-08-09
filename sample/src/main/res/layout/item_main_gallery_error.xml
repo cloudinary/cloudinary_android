@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/card_height"
+    android:layout_margin="@dimen/default_margin"
+    android:layout_marginBottom="0dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/image_view"
+            android:layout_width="@dimen/card_image_width"
+            android:layout_height="match_parent"
+            android:scaleType="center" />
+
+        <TextView
+            android:id="@+id/filename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_margin="@dimen/default_margin"
+            android:layout_toEndOf="@+id/image_view"
+            android:ellipsize="end"
+            android:lines="1"
+            android:paddingEnd="32dp" />
+
+        <TextView
+            android:id="@+id/errorDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/retryButton"
+            android:layout_below="@+id/filename"
+            android:layout_margin="@dimen/default_margin"
+            android:layout_toEndOf="@+id/image_view"
+            android:paddingEnd="32dp" />
+
+        <TextView
+            android:id="@+id/rescheduleLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/retryButton"
+            android:layout_margin="@dimen/default_margin"
+            android:layout_toEndOf="@+id/image_view"
+            android:text="@string/will_be_scheduled" />
+
+        <Button
+            android:id="@+id/retryButton"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="@dimen/try_now_bottom_margin"
+            android:layout_marginEnd="@dimen/try_now_end_margin"
+            android:text="@string/try_now"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textColor="@color/buttonColor" />
+
+        <ImageView
+            android:id="@+id/cancelButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="@dimen/default_margin"
+            android:src="@drawable/ic_clear_black_24dp" />
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

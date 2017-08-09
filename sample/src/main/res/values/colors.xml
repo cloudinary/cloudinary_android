@@ -2,10 +2,12 @@
 <resources>
     <color name="colorPrimary">#2460af</color>
     <color name="colorPrimaryDark">#0e2f5a</color>
-    <color name="colorAccent">#ff5722</color>
+    <color name="colorAccent">#fff</color>
+    <color name="addButtonColor">#ff5722</color>
     <color name="windowBackground">#e4ebf1</color>
     <color name="buttonColor">#0078ff</color>
     <color name="buttonText">#fff</color>
     <color name="black">#000</color>
     <color name="white">#fff</color>
+    <color name="progress_overlay">#6000</color>
 </resources>
