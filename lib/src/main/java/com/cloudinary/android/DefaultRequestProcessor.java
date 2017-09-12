@@ -19,6 +19,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.utils.StringUtils;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -104,6 +105,10 @@ class DefaultRequestProcessor implements RequestProcessor {
                             Logger.e(TAG, String.format("EmptyByteArrayException for request %s.", requestId), e);
                             requestResultStatus = FAILURE;
                             error = new ErrorInfo(ErrorInfo.BYTE_ARRAY_PAYLOAD_EMPTY, e.getMessage());
+                        } catch (InterruptedIOException e) {
+                            Logger.e(TAG, String.format("InterruptedIO exception for request %s.", requestId), e);
+                            error = new ErrorInfo(ErrorInfo.REQUEST_CANCELLED, "Request cancelled.");
+                            requestResultStatus = FAILURE;
                         } catch (ErrorRetrievingSignatureException e) {
                             Logger.e(TAG, String.format("Error retrieving signature for request %s.", requestId), e);
                             requestResultStatus = FAILURE;

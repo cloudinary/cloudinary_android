@@ -42,7 +42,27 @@ public class QueuedPagerFragment extends AbstractPagerFragment {
 
     @Override
     protected ResourcesAdapter getAdapter(int thumbSize) {
-        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, null);
+        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, new ResourcesAdapter.ImageClickedListener() {
+            @Override
+            public void onImageClicked(Resource resource) {
+
+            }
+
+            @Override
+            public void onDeleteClicked(Resource resource, Boolean recent) {
+
+            }
+
+            @Override
+            public void onRetryClicked(Resource resource) {
+
+            }
+
+            @Override
+            public void onCancelClicked(Resource resource) {
+                ((ResourcesAdapter.ImageClickedListener) getActivity()).onCancelClicked(resource);
+            }
+        });
     }
 
     @Override

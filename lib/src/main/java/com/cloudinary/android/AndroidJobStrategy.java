@@ -11,12 +11,18 @@ import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.evernote.android.job.util.support.PersistableBundleCompat;
 
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Background work strategy implementation based on com.evernote.android.job
  */
 class AndroidJobStrategy implements BackgroundRequestStrategy {
     private static final String JOB_TAG = "CLD";
     private static final String TAG = AndroidJobStrategy.class.getSimpleName();
+    private static final Map<String, WeakReference<Thread>> threads = new ConcurrentHashMap<>();
+    private static final Object threadsMapLockObject = new Object();
 
     static JobRequest adapt(UploadRequest request) {
         PersistableBundleCompat extras = new PersistableBundleCompat();
@@ -122,16 +128,43 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     @Override
     public boolean cancelRequest(String requestId) {
         boolean cancelled = false;
-        for (JobRequest job : JobManager.instance().getAllJobRequests()) {
-            String id = job.getExtras().getString("requestId", null);
-            if (requestId.equals(id)) {
-                cancelled = JobManager.instance().cancel(job.getJobId());
-                break;
+
+        for (Job job : JobManager.instance().getAllJobs()) {
+            String currJobId = ((UploadJob) job).requestId;
+            if (requestId.equals(currJobId)) {
+                job.cancel();
+                cancelled = true;
             }
         }
 
+        if (!cancelled) {
+            for (JobRequest job : JobManager.instance().getAllJobRequests()) {
+                String id = job.getExtras().getString("requestId", null);
+                if (requestId.equals(id)) {
+                    cancelled = JobManager.instance().cancel(job.getJobId());
+                    break;
+                }
+            }
+        }
+
+        killThread(requestId);
+
         Logger.i(TAG, String.format("Cancelling request %s, success: %s", requestId, cancelled));
         return cancelled;
+    }
+
+    private void killThread(String requestId) {
+        synchronized (threadsMapLockObject) {
+            WeakReference<Thread> ref = threads.remove(requestId);
+            if (ref != null) {
+                Thread thread = ref.get();
+                if (thread != null) {
+                    thread.interrupt();
+                }
+
+                ref.clear();
+            }
+        }
     }
 
     /**
@@ -140,7 +173,26 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     @Override
     public int cancelAllRequests() {
         Logger.i(TAG, "All requests cancelled.");
-        return JobManager.instance().cancelAll();
+        int count = JobManager.instance().cancelAll();
+        killAllThreads();
+        return count;
+    }
+
+    private void killAllThreads() {
+        synchronized (threadsMapLockObject) {
+            for (String requestId : threads.keySet()) {
+                WeakReference<Thread> ref = threads.get(requestId);
+                Thread thread = ref.get();
+
+                if (thread != null) {
+                    thread.interrupt();
+                }
+
+                ref.clear();
+            }
+
+            threads.clear();
+        }
     }
 
     /**
@@ -186,24 +238,46 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     }
 
     private static final class UploadJob extends Job {
+        private String requestId;
 
         UploadJob() {
         }
+
 
         @NonNull
         @Override
         protected Result onRunJob(Params params) {
             PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
             final PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CLD_UPLOADER");
+            this.requestId = params.getExtras().getString("requestId", null);
+
+            registerThread();
 
             // Acquire wake readWriteLock - evernote android job only takes wakelock for 3 minutes and file uploads can take (much) longer.
             wl.acquire();
             try {
+
                 // call the generic processor:
                 UploadStatus result = MediaManager.get().processRequest(getContext(), new AndroidJobRequestParams(params.getExtras()));
                 return adaptResult(result);
             } finally {
                 wl.release();
+                unregisterThread();
+            }
+        }
+
+        private void unregisterThread() {
+            synchronized (threadsMapLockObject) {
+                WeakReference<Thread> removed = threads.remove(requestId);
+                if (removed != null) {
+                    removed.clear();
+                }
+            }
+        }
+
+        private void registerThread() {
+            synchronized (threadsMapLockObject) {
+                threads.put(requestId, new WeakReference<>(Thread.currentThread()));
             }
         }
     }

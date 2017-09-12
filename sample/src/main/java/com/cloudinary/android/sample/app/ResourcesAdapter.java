@@ -138,9 +138,19 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         });
 
+        View cancelRequest = viewGroup.findViewById(R.id.buttonClear);
+        cancelRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    Resource resource = (Resource) v.getTag();
+                    listener.onCancelClicked(resource);
+                }
+            }
+        });
         return new ResourceViewHolder(viewGroup, (ImageView) viewGroup.findViewById(R.id.image_view), (TextView) viewGroup.findViewById(R.id.statusText),
                 deleteButton, viewGroup.findViewById(R.id.buttonsContainer), viewGroup.findViewById(R.id.videoIcon), (ProgressBar) viewGroup.findViewById(R.id.uploadProgress),
-                viewGroup.findViewById(R.id.black_overlay), (TextView) viewGroup.findViewById(R.id.filename));
+                viewGroup.findViewById(R.id.black_overlay), (TextView) viewGroup.findViewById(R.id.filename), cancelRequest);
     }
 
     private void bindErrorView(FailedResourceViewHolder holder, int position) {
@@ -163,10 +173,12 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // setup default values for more readable code:
         holder.itemView.setTag(resource);
         holder.deleteButton.setTag(resource);
+        holder.cancelRequest.setTag(resource);
         holder.deleteButton.setVisibility(View.VISIBLE);
         holder.progressBar.setProgress(0);
         holder.progressBar.setVisibility(View.INVISIBLE);
         holder.buttonsContainer.setVisibility(View.GONE);
+        holder.cancelRequest.setVisibility(View.GONE);
         holder.statusText.setText(null);
         holder.name.setText(null);
         String uriToLoad = resource.getLocalUri();
@@ -178,8 +190,10 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case QUEUED:
                 holder.blackOverlay.animate().cancel();
                 holder.blackOverlay.setVisibility(View.GONE);
+                holder.cancelRequest.setVisibility(View.VISIBLE);
                 break;
             case UPLOADING:
+                holder.cancelRequest.setVisibility(View.VISIBLE);
                 double progressFraction = (double) resourceWithMeta.bytes / resourceWithMeta.totalBytes;
                 int progress = (int) Math.round(progressFraction * 1000);
                 holder.progressBar.setVisibility(View.VISIBLE);
@@ -315,6 +329,8 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void onDeleteClicked(Resource resource, Boolean recent);
 
         void onRetryClicked(Resource resource);
+
+        void onCancelClicked(Resource resource);
     }
 
     private static class ResourceViewHolder extends RecyclerView.ViewHolder {
@@ -326,8 +342,9 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final View videoIcon;
         private final View blackOverlay;
         private final TextView name;
+        private final View cancelRequest;
 
-        ResourceViewHolder(final View itemView, final ImageView imageView, TextView statusText, View deleteButton, View buttonsContainer, View videoIcon, ProgressBar progressBar, View blackOverlay, TextView name) {
+        ResourceViewHolder(final View itemView, final ImageView imageView, TextView statusText, View deleteButton, View buttonsContainer, View videoIcon, ProgressBar progressBar, View blackOverlay, TextView name, View cancelRequest) {
             super(itemView);
             this.imageView = imageView;
             this.statusText = statusText;
@@ -337,6 +354,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             this.progressBar = progressBar;
             this.blackOverlay = blackOverlay;
             this.name = name;
+            this.cancelRequest = cancelRequest;
         }
     }
 

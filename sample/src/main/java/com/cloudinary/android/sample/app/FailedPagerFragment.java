@@ -69,6 +69,11 @@ public class FailedPagerFragment extends AbstractPagerFragment {
             public void onRetryClicked(Resource resource) {
                 ((ResourcesAdapter.ImageClickedListener) getActivity()).onRetryClicked(resource);
             }
+
+            @Override
+            public void onCancelClicked(Resource resource) {
+                ((ResourcesAdapter.ImageClickedListener) getActivity()).onCancelClicked(resource);
+            }
         });
     }
 
