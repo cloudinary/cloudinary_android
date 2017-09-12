@@ -72,4 +72,5 @@
     <string name="effect_video_name_blur">Blur</string>
     <string name="effect_video_name_reverse">Reverse</string>
     <string name="open_url">Open url</string>
+    <string name="request_cancelled">Request cancelled successfully</string>
 </resources>

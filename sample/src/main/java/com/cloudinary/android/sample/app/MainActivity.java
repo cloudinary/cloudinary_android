@@ -222,16 +222,18 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (CloudinaryService.ACTION_RESOURCE_MODIFIED.equals(intent.getAction())) {
-                    Resource resource = (Resource) intent.getSerializableExtra("resource");
-                    resourceUpdated(resource);
-                } else if (CloudinaryService.ACTION_UPLOAD_PROGRESS.equals(intent.getAction())) {
-                    String requestId = intent.getStringExtra("requestId");
-                    long bytes = intent.getLongExtra("bytes", 0);
-                    long totalBytes = intent.getLongExtra("totalBytes", 0);
-                    for (AbstractPagerFragment fragment : getPages()) {
-                        ResourcesAdapter adapter = (ResourcesAdapter) fragment.getRecyclerView().getAdapter();
-                        adapter.progressUpdated(requestId, bytes, totalBytes);
+                if (!isFinishing()) {
+                    if (CloudinaryService.ACTION_RESOURCE_MODIFIED.equals(intent.getAction())) {
+                        Resource resource = (Resource) intent.getSerializableExtra("resource");
+                        resourceUpdated(resource);
+                    } else if (CloudinaryService.ACTION_UPLOAD_PROGRESS.equals(intent.getAction())) {
+                        String requestId = intent.getStringExtra("requestId");
+                        long bytes = intent.getLongExtra("bytes", 0);
+                        long totalBytes = intent.getLongExtra("totalBytes", 0);
+                        for (AbstractPagerFragment fragment : getPages()) {
+                            ResourcesAdapter adapter = (ResourcesAdapter) fragment.getRecyclerView().getAdapter();
+                            adapter.progressUpdated(requestId, bytes, totalBytes);
+                        }
                     }
                 }
             }
@@ -287,6 +289,13 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     @Override
     public void onRetryClicked(Resource resource) {
         uploadImage(resource);
+    }
+
+    @Override
+    public void onCancelClicked(Resource resource) {
+        MediaManager.get().cancelRequest(resource.getRequestId());
+        showSnackBar(getString(R.string.request_cancelled));
+        deleteResource(resource, false, false);
     }
 
     private void showSnackBar(String message) {

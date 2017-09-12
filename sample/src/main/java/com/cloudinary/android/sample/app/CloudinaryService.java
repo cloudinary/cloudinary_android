@@ -208,7 +208,21 @@ public class CloudinaryService extends ListenerService {
         backgroundThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                sendBroadcast(ResourceRepo.getInstance().resourceFailed(requestId, error.getCode(), error.getDescription()));
+                final Resource resource;
+                if (error.getCode() == ErrorInfo.REQUEST_CANCELLED) {
+                    resource = ResourceRepo.getInstance().getResource(requestId);
+                    if (resource != null) {
+                        ResourceRepo.getInstance().delete(resource.getLocalUri());
+                    }
+                } else {
+                    resource = ResourceRepo.getInstance().resourceFailed(requestId, error.getCode(), error.getDescription());
+                }
+
+                // resource may be deleted if it was cancelled in the activity
+                if (resource != null) {
+                    sendBroadcast(resource);
+                }
+
             }
         });
         cancelNotification(requestId);

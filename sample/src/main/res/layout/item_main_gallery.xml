@@ -82,4 +82,12 @@
             android:visibility="invisible" />
     </FrameLayout>
 
+    <ImageView
+        android:id="@+id/buttonClear"
+        android:layout_width="@dimen/cancel_request_width"
+        android:layout_height="@dimen/cancel_request_width"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_clear_white_24dp"
+        android:visibility="gone" />
 </RelativeLayout>
