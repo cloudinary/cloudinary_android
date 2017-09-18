@@ -135,7 +135,13 @@ public class CloudinaryService extends ListenerService {
     }
 
     private boolean sendBroadcast(Resource updatedResource) {
-        return LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_RESOURCE_MODIFIED).putExtra("resource", updatedResource));
+        // This is called from background threads and the main thread  may touch the resource and delete it
+        // in the meantime (from the activity) - verify it's still around before sending the broadcast
+        if (updatedResource != null) {
+            return LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_RESOURCE_MODIFIED).putExtra("resource", updatedResource));
+        }
+
+        return false;
     }
 
     @Override
@@ -218,15 +224,11 @@ public class CloudinaryService extends ListenerService {
                     resource = ResourceRepo.getInstance().resourceFailed(requestId, error.getCode(), error.getDescription());
                 }
 
-                // resource may be deleted if it was cancelled in the activity
-                if (resource != null) {
-                    sendBroadcast(resource);
-                }
-
+                sendBroadcast(resource);
             }
         });
-        cancelNotification(requestId);
 
+        cancelNotification(requestId);
 
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
