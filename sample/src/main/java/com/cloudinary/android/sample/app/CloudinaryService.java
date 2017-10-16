@@ -48,6 +48,7 @@ public class CloudinaryService extends ListenerService {
         builder = new NotificationCompat.Builder(this);
         builder.setContentTitle("Uploading to Cloudinary...")
                 .setSmallIcon(R.drawable.ic_launcher)
+                .setChannelId(MainApplication.NOTIFICATION_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(this, 999,
                         new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT).setAction(ACTION_STATE_IN_PROGRESS),
                         0))
@@ -68,6 +69,7 @@ public class CloudinaryService extends ListenerService {
         return new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setAutoCancel(true)
+                .setChannelId(MainApplication.NOTIFICATION_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(this, 1234,
                         new Intent(this, MainActivity.class)
                                 .setAction(actionFromStatus(status))
