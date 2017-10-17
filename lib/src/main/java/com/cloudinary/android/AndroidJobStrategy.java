@@ -36,7 +36,6 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
                 .setBackoffCriteria(policy.getBackoffMillis(), adaptPolicy(policy.getBackoffPolicy()))
                 .setRequiresCharging(policy.isRequiresCharging())
                 .setRequiresDeviceIdle(policy.isRequiresIdle())
-                .setPersisted(true)
                 .setExtras(extras)
                 .setRequirementsEnforced(true)
                 .build();
