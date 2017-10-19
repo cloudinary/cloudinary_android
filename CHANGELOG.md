@@ -1,4 +1,12 @@
 
+1.21.0 / 2017-10-17
+===================
+
+  * Fix Android O compatibility issues
+  * Implement cancellation for in-progress requests.
+  * Sample app improvements and fixes.
+  * Add signing to gradle build
+
 1.20.0 / 2017-08-07
 ===================
 
