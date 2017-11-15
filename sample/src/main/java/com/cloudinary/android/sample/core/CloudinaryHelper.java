@@ -5,6 +5,12 @@ import android.net.Uri;
 
 import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.UploadRequest;
+import com.cloudinary.android.policy.TimeWindow;
+import com.cloudinary.android.preupload.FormatPreprocess;
+import com.cloudinary.android.preupload.ImagePreprocess;
+import com.cloudinary.android.preupload.PreprocessChain;
+import com.cloudinary.android.preupload.ResizePreprocess;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainApplication;
 import com.cloudinary.android.sample.app.Utils;
@@ -17,12 +23,21 @@ import java.util.List;
 import java.util.Map;
 
 public class CloudinaryHelper {
-    public static String uploadResource(Resource resource) {
-        return MediaManager.get().upload(Uri.parse(resource.getLocalUri()))
+    public static String uploadResource(Resource resource, boolean preprocess) {
+        UploadRequest request = MediaManager.get().upload(Uri.parse(resource.getLocalUri()))
                 .unsigned("sample_app_preset")
+                .constrain(TimeWindow.immediate())
                 .option("resource_type", "auto")
-                .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build())
-                .dispatch();
+                .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build());
+        if (preprocess) {
+            return request.preprocess(
+                    new PreprocessChain<>(
+                            new ResizePreprocess(1000, 1000))
+                            .withStep(new FormatPreprocess(ImagePreprocess.Format.WEBP, 80)))
+                    .dispatch(MainApplication.get());
+        }
+
+        return request.dispatch();
     }
 
     public static String getCroppedThumbnailUrl(int size, Resource resource) {
@@ -151,6 +166,10 @@ public class CloudinaryHelper {
         }
 
         return MediaManager.get().url().resourceType(resource.getResourceType()).transformation(transformation).format(format).generate(resource.getCloudinaryPublicId());
+    }
+
+    public static String getCloudName() {
+        return MediaManager.get().getCloudinary().config.cloudName;
     }
 
     public interface DeleteCallback {

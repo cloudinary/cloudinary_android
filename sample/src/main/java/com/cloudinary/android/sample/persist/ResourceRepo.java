@@ -97,7 +97,7 @@ public class ResourceRepo {
             MediaManager.get().cancelRequest(resource.getRequestId());
         }
 
-        String requestId = CloudinaryHelper.uploadResource(resource);
+        String requestId = CloudinaryHelper.uploadResource(resource, resource.getResourceType().equals("image"));
         resource.setRequestId(requestId);
 
         return resourceQueued(resource);

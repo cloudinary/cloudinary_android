@@ -23,7 +23,7 @@ public class FilePayload extends Payload<String> {
     public long getLength(Context context) throws PayloadNotFoundException {
         File file = new File(data);
 
-        if (!file.exists()){
+        if (!file.exists()) {
             throw new FileNotFoundException(String.format("File '%s' does not exist", data));
         }
 
@@ -34,7 +34,7 @@ public class FilePayload extends Payload<String> {
     public Object prepare(Context context) throws PayloadNotFoundException {
         File file = new File(data);
 
-        if (!file.exists()){
+        if (!file.exists()) {
             throw new FileNotFoundException(String.format("File '%s' does not exist", data));
         }
 

@@ -126,5 +126,6 @@ public class Resource implements Serializable {
         UPLOADED,
         RESCHEDULED,
         FAILED,
+        CANCELLED,
     }
 }
