@@ -105,7 +105,8 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         for (JobRequest jobRequest : JobManager.instance().getAllJobRequests()) {
             if (isSoonButNotImmediate(jobRequest)) {
                 JobRequest.Builder builder = jobRequest.cancelAndEdit();
-                builder.setExecutionWindow(10000, jobRequest.getEndMs()).build().schedule();
+                long endMillis = Math.max(jobRequest.getEndMs(), 60_000);
+                builder.setExecutionWindow(10000, endMillis).build().schedule();
                 started++;
             }
 
@@ -118,7 +119,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     }
 
     private boolean isSoonButNotImmediate(JobRequest jobRequest) {
-        return jobRequest.getStartMs() < SOON_THRESHOLD;
+        return IMMEDIATE_THRESHOLD < jobRequest.getStartMs() && jobRequest.getStartMs() < SOON_THRESHOLD;
     }
 
     /**
