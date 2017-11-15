@@ -24,6 +24,10 @@ import com.cloudinary.android.signed.SignatureProvider;
 import com.cloudinary.utils.StringUtils;
 
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Main class used as entry point to any operation against Cloudinary. Use {@link MediaManager#get()} to get an instance.
@@ -43,15 +47,18 @@ public class MediaManager {
     private final RequestDispatcher requestDispatcher;
     private final RequestProcessor requestProcessor;
     private final CallbackDispatcher callbackDispatcher;
-    private final BackgroundRequestStrategy strategy;
     private final SignatureProvider signatureProvider;
-    private final UploadCallback callback;
+    private final ExecutorService executor;
 
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
 
     private MediaManager(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map config) {
+        executor = new ThreadPoolExecutor(3, 10,
+                60L, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<Runnable>(200));
+
         // use context to initialize components but DO NOT store it
-        strategy = BackgroundStrategyProvider.provideStrategy();
+        BackgroundRequestStrategy strategy = BackgroundStrategyProvider.provideStrategy();
         callbackDispatcher = new DefaultCallbackDispatcher(context);
         requestDispatcher = new DefaultRequestDispatcher(strategy);
         requestProcessor = new DefaultRequestProcessor(callbackDispatcher);
@@ -67,7 +74,7 @@ public class MediaManager {
             cloudinary = new Cloudinary();
         }
 
-        callback = new UploadCallback() {
+        callbackDispatcher.registerCallback(new UploadCallback() {
 
             @Override
             public void onStart(String requestId) {
@@ -79,21 +86,19 @@ public class MediaManager {
 
             @Override
             public void onSuccess(String requestId, Map resultData) {
-                queueRoomFreed();
+                requestDispatcher.queueRoomFreed();
             }
 
             @Override
             public void onError(String requestId, ErrorInfo error) {
-                queueRoomFreed();
+                requestDispatcher.queueRoomFreed();
             }
 
             @Override
             public void onReschedule(String requestId, ErrorInfo error) {
-                queueRoomFreed();
+                requestDispatcher.queueRoomFreed();
             }
-        };
-
-        callbackDispatcher.registerCallback(callback);
+        });
     }
 
     /**
@@ -201,17 +206,6 @@ public class MediaManager {
     }
 
     /**
-     * Called every time a request finishes, meaning there's room for new requests.
-     */
-    private void queueRoomFreed() {
-        int room = getGlobalUploadPolicy().getMaxConcurrentRequests() - strategy.getPendingImmediateJobsCount() - strategy.getRunningJobsCount();
-        Logger.d(TAG, String.format("queueRoomFreed called, there's room for %d requests.", room));
-        if (room > 0) {
-            strategy.executeRequestsNow(room);
-        }
-    }
-
-    /**
      * Get an instance of the Cloudinary class for raw operations (not wrapped).
      *
      * @return A Pre-configured {@link com.cloudinary.Cloudinary} instance
@@ -235,7 +229,7 @@ public class MediaManager {
      * @return True if the request was found and cancelled successfully.
      */
     public boolean cancelRequest(String requestId) {
-        return strategy.cancelRequest(requestId);
+        return requestDispatcher.cancelRequest(requestId);
     }
 
     /**
@@ -244,7 +238,7 @@ public class MediaManager {
      * @return The count of canceled requests and running jobs.
      */
     public int cancelAllRequests() {
-        return strategy.cancelAllRequests();
+        return requestDispatcher.cancelAllRequests();
     }
 
     /**
@@ -353,6 +347,10 @@ public class MediaManager {
         return callbackDispatcher.popPendingResult(requestId);
     }
 
+    void dispatchRequestError(Context context, String requestId, ErrorInfo error) {
+        callbackDispatcher.dispatchError(context, requestId, error);
+    }
+
     private UploadRequest<Payload> buildUploadRequest(Payload payload) {
         UploadContext<Payload> payloadUploadContext = new UploadContext<>(payload, requestDispatcher);
         return new UploadRequest<>(payloadUploadContext);
@@ -375,4 +373,7 @@ public class MediaManager {
         return signatureProvider;
     }
 
+    void execute(Runnable runnable) {
+        executor.execute(runnable);
+    }
 }

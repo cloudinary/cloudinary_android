@@ -1,12 +1,19 @@
 package com.cloudinary.android;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
+import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.Payload;
+import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
+import com.cloudinary.android.preprocess.CouldNotDecodePayloadException;
+import com.cloudinary.android.preprocess.ErrorCreatingNewBitmapException;
+import com.cloudinary.android.preprocess.PreprocessChain;
+import com.cloudinary.android.preprocess.PreprocessException;
 import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
@@ -18,18 +25,23 @@ import java.util.UUID;
  * A request to upload a single {@link Payload} to Cloudinary. Note: Once calling {@link #dispatch()} the request is sealed and any
  * attempt to modify it will produce an {@link IllegalStateException}. If there's a need to change a request after dispatching,
  * it needs to be cancelled ({@link MediaManager#cancelRequest(String)}) and a new request should be dispatched in it's place.
+ *
  * @param <T> The payload type this request will upload
  */
 public class UploadRequest<T extends Payload> {
+    private static final String TAG = UploadRequest.class.getSimpleName();
+
     private final UploadContext<T> uploadContext;
-    private final String requestId = UUID.randomUUID().toString();
     private final Object optionsLockObject = new Object();
+    private PreprocessChain preprocessChain;
+    private String requestId = UUID.randomUUID().toString();
     private boolean dispatched = false;
     private UploadPolicy uploadPolicy = MediaManager.get().getGlobalUploadPolicy();
     private TimeWindow timeWindow = TimeWindow.getDefault();
     private UploadCallback callback;
     private Map<String, Object> options;
     private String optionsAsString = null;
+    private Long maxFileSize;
 
     UploadRequest(UploadContext<T> uploadContext) {
         this.uploadContext = uploadContext;
@@ -52,6 +64,7 @@ public class UploadRequest<T extends Payload> {
 
     /**
      * Setup a callback to get notified on upload events.
+     *
      * @return This request for chaining.
      */
     public synchronized UploadRequest<T> callback(UploadCallback callback) {
@@ -60,6 +73,12 @@ public class UploadRequest<T extends Payload> {
         return this;
     }
 
+    /**
+     * Make this an unsigned upload
+     *
+     * @param uploadPreset The name of the upload preset to use, as defined in your cloudinary console
+     * @return This request for chaining.
+     */
     public synchronized UploadRequest<T> unsigned(String uploadPreset) {
         assertNotDispatched();
         verifyOptionsExist();
@@ -69,7 +88,32 @@ public class UploadRequest<T extends Payload> {
     }
 
     /**
+     * Fail the request is the file size is larger than this
+     *
+     * @param bytes Maximum allowed file size to upload
+     * @return This request for chaining
+     */
+    public synchronized UploadRequest<T> maxFileSize(long bytes) {
+        assertNotDispatched();
+        this.maxFileSize = bytes;
+        return this;
+    }
+
+    /**
+     * Add a chain of preprocessing step to run on the resource before uploading
+     *
+     * @param preprocessChain Preprocess chain to run on the file before the upload
+     * @return This request for chaining.
+     */
+    public synchronized UploadRequest<T> preprocess(PreprocessChain preprocessChain) {
+        assertNotDispatched();
+        this.preprocessChain = preprocessChain;
+        return this;
+    }
+
+    /**
      * Constrain this request to run within a specific {@link TimeWindow}.
+     *
      * @return This request for chaining.
      */
     public synchronized UploadRequest<T> constrain(TimeWindow timeWindow) {
@@ -80,6 +124,7 @@ public class UploadRequest<T extends Payload> {
 
     /**
      * Set a map of options for this request. Note: This replaces any existing options.
+     *
      * @return This request for chaining.
      */
     public synchronized UploadRequest<T> options(Map<String, Object> options) {
@@ -90,7 +135,8 @@ public class UploadRequest<T extends Payload> {
 
     /**
      * Add an option to this request.
-     * @param name Option name.
+     *
+     * @param name  Option name.
      * @param value Option value.
      * @return This request for chaining.
      */
@@ -103,6 +149,7 @@ public class UploadRequest<T extends Payload> {
 
     /**
      * Set the upload uploadPolicy for the request
+     *
      * @param policy The uploadPolicy to set. See {@link UploadPolicy.Builder}
      * @return This request for chaining.
      */
@@ -114,9 +161,20 @@ public class UploadRequest<T extends Payload> {
 
     /**
      * Dispatch the request
+     *
      * @return The unique id of the request.
      */
     public synchronized String dispatch() {
+        return dispatch(null);
+    }
+
+    /**
+     * Dispatch the request
+     *
+     * @param context Android context. Needed if using preprocessing. Otherwise can be null.
+     * @return The unique id of the request.
+     */
+    public synchronized String dispatch(final Context context) {
         assertNotDispatched();
         verifyOptionsExist();
         this.dispatched = true;
@@ -127,9 +185,69 @@ public class UploadRequest<T extends Payload> {
         }
 
         MediaManager.get().registerCallback(requestId, callback);
-        uploadContext.getDispatcher().dispatch(this);
+
+        boolean hasPreprocess = preprocessChain != null && !preprocessChain.isEmpty();
+        if (!hasPreprocess && maxFileSize == null) {
+            uploadContext.getDispatcher().dispatch(this);
+        } else {
+            if (context == null) {
+                throw new IllegalArgumentException("A valid android context must be supplied to UploadRequest.dispatch() when using preprocessing or setting maxFileSize");
+            }
+
+            MediaManager.get().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final UploadRequest newRequest;
+                        if (preprocessChain != null) {
+                            newRequest = preprocessAndClone(context);
+                        } else {
+                            newRequest = UploadRequest.this;
+                        }
+
+                        long length = newRequest.getPayload().getLength(context);
+                        if (maxFileSize != null && length > maxFileSize) {
+                            MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, String.format("Payload size is too large, %d, max is %d", length, maxFileSize)));
+                        } else {
+                            uploadContext.getDispatcher().dispatch(newRequest);
+                        }
+                    } catch (RuntimeException e) {
+                        Logger.e(TAG, "Error running preprocess for request", e);
+                        MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
+                    } catch (PreprocessException e) {
+                        MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
+                    } catch (PayloadNotFoundException e) {
+                        MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
+                    }
+                }
+            });
+        }
 
         return requestId;
+    }
+
+    /**
+     * Run all the preprocessing steps on the request and replicate a new request, with a file payload
+     * containing the processed resource.
+     * @param context Android context for preprocssing
+
+     * @return A new request with the preprocessed resource
+     * @throws PayloadNotFoundException
+     * @throws CouldNotDecodePayloadException
+     * @throws ErrorCreatingNewBitmapException
+     */
+    private UploadRequest preprocessAndClone(Context context) throws PayloadNotFoundException, PreprocessException {
+        String newFile = preprocessChain.execute(context, getPayload());
+        UploadRequest<FilePayload> uploadRequest = new UploadRequest<>(new UploadContext<>(new FilePayload(newFile), getUploadContext().getDispatcher()));
+        uploadRequest.uploadPolicy = uploadPolicy;
+        uploadRequest.timeWindow = TimeWindow.getDefault();
+        uploadRequest.callback = callback;
+        uploadRequest.options = options;
+        uploadRequest.optionsAsString = optionsAsString;
+        uploadRequest.requestId = requestId;
+        uploadRequest.dispatched = dispatched;
+
+        return uploadRequest;
     }
 
     private void verifyOptionsExist() {

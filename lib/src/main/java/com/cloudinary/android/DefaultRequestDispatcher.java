@@ -1,6 +1,10 @@
 package com.cloudinary.android;
 
+import com.cloudinary.android.callback.ErrorInfo;
+
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * {@inheritDoc}
@@ -10,6 +14,9 @@ class DefaultRequestDispatcher implements RequestDispatcher {
 
     private final Random rand = new Random();
     private final BackgroundRequestStrategy strategy;
+    private final Set<String> abortedRequestIds = new HashSet<>();
+    private final Object cancellationLock = new Object();
+
 
     DefaultRequestDispatcher(BackgroundRequestStrategy strategy) {
         this.strategy = strategy;
@@ -21,6 +28,7 @@ class DefaultRequestDispatcher implements RequestDispatcher {
     @Override
     public final String dispatch(UploadRequest request) {
         String requestId = request.getRequestId();
+
 
         // If we are at max capacity and the request is not urgent defer this request by [10-20] minutes.
         // Requests will be started once there's more room
@@ -34,8 +42,51 @@ class DefaultRequestDispatcher implements RequestDispatcher {
 
         Logger.d(TAG, String.format("Dispatching Request %s, scheduled start in %d minutes.", requestId, request.getTimeWindow().getMinLatencyOffsetMillis() / 60000));
 
-        strategy.doDispatch(request);
+        synchronized (cancellationLock) {
+            if (abortedRequestIds.remove(requestId)) {
+                MediaManager.get().dispatchRequestError(null, requestId, new ErrorInfo(ErrorInfo.REQUEST_CANCELLED, "Request cancelled"));
+                return requestId;
+            }
+
+            strategy.doDispatch(request);
+        }
 
         return requestId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean cancelRequest(String requestId) {
+        synchronized (cancellationLock) {
+            boolean cancelled = strategy.cancelRequest(requestId);
+            if (!cancelled) {
+                // request not dispatched yet (still preprocessing/preparing)
+                abortedRequestIds.add(requestId);
+            }
+
+            return cancelled;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void queueRoomFreed() {
+        int room = MediaManager.get().getGlobalUploadPolicy().getMaxConcurrentRequests() - strategy.getPendingImmediateJobsCount() - strategy.getRunningJobsCount();
+        Logger.d(TAG, String.format("queueRoomFreed called, there's room for %d requests.", room));
+        if (room > 0) {
+            strategy.executeRequestsNow(room);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int cancelAllRequests() {
+        return strategy.cancelAllRequests();
     }
 }

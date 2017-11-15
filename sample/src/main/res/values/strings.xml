@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cloudinary Demo</string>
+    <string name="app_name">Cloudinary</string>
     <string name="action_settings">Settings</string>
     <string name="sync">Sync local media with cloud.</string>
     <string name="upload_successfully">Image uploaded successfully.</string>
