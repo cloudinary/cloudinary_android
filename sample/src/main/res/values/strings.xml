@@ -73,4 +73,6 @@
     <string name="effect_video_name_reverse">Reverse</string>
     <string name="open_url">Open url</string>
     <string name="request_cancelled">Request cancelled successfully</string>
+    <string name="channel_name">Cloudinary</string>
+    <string name="channel_description">Notifications regarding progress and status updates for Cloudinary resources</string>
 </resources>
