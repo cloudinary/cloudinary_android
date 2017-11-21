@@ -23,6 +23,8 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
     private static final String TAG = AndroidJobStrategy.class.getSimpleName();
     private static final Map<String, WeakReference<Thread>> threads = new ConcurrentHashMap<>();
     private static final Object threadsMapLockObject = new Object();
+    private static final int RUN_NOW_TIME_WINDOW_START = 10_000;
+    private static final int RUN_NOW_TIME_WINDOW_END = 60_000;
 
     static JobRequest adapt(UploadRequest request) {
         PersistableBundleCompat extras = new PersistableBundleCompat();
@@ -105,8 +107,8 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         for (JobRequest jobRequest : JobManager.instance().getAllJobRequests()) {
             if (isSoonButNotImmediate(jobRequest)) {
                 JobRequest.Builder builder = jobRequest.cancelAndEdit();
-                long endMillis = Math.max(jobRequest.getEndMs(), 60_000);
-                builder.setExecutionWindow(10000, endMillis).build().schedule();
+                long endMillis = Math.max(jobRequest.getEndMs(), RUN_NOW_TIME_WINDOW_END);
+                builder.setExecutionWindow(RUN_NOW_TIME_WINDOW_START, endMillis).build().schedule();
                 started++;
             }
 
