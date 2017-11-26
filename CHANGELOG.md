@@ -1,4 +1,10 @@
 
+1.22.0 / 2017-11-26
+===================
+
+  * Fix immediate TimeWindow issues
+  * Fix travis configuration
+
 1.21.0 / 2017-10-17
 ===================
 
