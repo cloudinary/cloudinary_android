@@ -5,14 +5,15 @@ import android.support.annotation.Nullable;
 
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
-import com.cloudinary.android.payload.CouldNotDecodePayloadException;
-import com.cloudinary.android.payload.ErrorCreatingNewBitmapException;
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
-import com.cloudinary.android.preupload.PreprocessChain;
+import com.cloudinary.android.preprocess.CouldNotDecodePayloadException;
+import com.cloudinary.android.preprocess.ErrorCreatingNewBitmapException;
+import com.cloudinary.android.preprocess.PreprocessChain;
+import com.cloudinary.android.preprocess.PreprocessException;
 import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ public class UploadRequest<T extends Payload> {
     private UploadCallback callback;
     private Map<String, Object> options;
     private String optionsAsString = null;
+    private Long maxFileSize;
 
     UploadRequest(UploadContext<T> uploadContext) {
         this.uploadContext = uploadContext;
@@ -71,11 +73,29 @@ public class UploadRequest<T extends Payload> {
         return this;
     }
 
+    /**
+     * Make this an unsigned upload
+     *
+     * @param uploadPreset The name of the upload preset to use, as defined in your cloudinary console
+     * @return This request for chaining.
+     */
     public synchronized UploadRequest<T> unsigned(String uploadPreset) {
         assertNotDispatched();
         verifyOptionsExist();
         options.put("unsigned", true);
         options.put("upload_preset", uploadPreset);
+        return this;
+    }
+
+    /**
+     * Fail the request is the file size is larger than this
+     *
+     * @param bytes Maximum allowed file size to upload
+     * @return This request for chaining
+     */
+    public synchronized UploadRequest<T> maxFileSize(long bytes) {
+        assertNotDispatched();
+        this.maxFileSize = bytes;
         return this;
     }
 
@@ -166,25 +186,35 @@ public class UploadRequest<T extends Payload> {
 
         MediaManager.get().registerCallback(requestId, callback);
 
-        if (preprocessChain == null) {
+        boolean hasPreprocess = preprocessChain != null && !preprocessChain.isEmpty();
+        if (!hasPreprocess && maxFileSize == null) {
             uploadContext.getDispatcher().dispatch(this);
         } else {
             if (context == null) {
-                throw new IllegalArgumentException("A valid android context must be supplied to UploadRequest.dispatch() when using preprocessing");
+                throw new IllegalArgumentException("A valid android context must be supplied to UploadRequest.dispatch() when using preprocessing or setting maxFileSize");
             }
 
             MediaManager.get().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        UploadRequest newRequest = preprocessAndClone(context);
-                        newRequest.dispatch();
+                        final UploadRequest newRequest;
+                        if (preprocessChain != null) {
+                            newRequest = preprocessAndClone(context);
+                        } else {
+                            newRequest = UploadRequest.this;
+                        }
+
+                        long length = newRequest.getPayload().getLength(context);
+                        if (maxFileSize != null && length > maxFileSize) {
+                            MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, String.format("Payload size is too large, %d, max is %d", length, maxFileSize)));
+                        } else {
+                            uploadContext.getDispatcher().dispatch(newRequest);
+                        }
                     } catch (RuntimeException e) {
                         Logger.e(TAG, "Error running preprocess for request", e);
                         MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
-                    } catch (ErrorCreatingNewBitmapException e) {
-                        MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
-                    } catch (CouldNotDecodePayloadException e) {
+                    } catch (PreprocessException e) {
                         MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
                     } catch (PayloadNotFoundException e) {
                         MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, e.getClass().getSimpleName() + ": " + e.getMessage()));
@@ -206,7 +236,7 @@ public class UploadRequest<T extends Payload> {
      * @throws CouldNotDecodePayloadException
      * @throws ErrorCreatingNewBitmapException
      */
-    private UploadRequest preprocessAndClone(Context context) throws PayloadNotFoundException, CouldNotDecodePayloadException, ErrorCreatingNewBitmapException {
+    private UploadRequest preprocessAndClone(Context context) throws PayloadNotFoundException, PreprocessException {
         String newFile = preprocessChain.execute(context, getPayload());
         UploadRequest<FilePayload> uploadRequest = new UploadRequest<>(new UploadContext<>(new FilePayload(newFile), getUploadContext().getDispatcher()));
         uploadRequest.uploadPolicy = uploadPolicy;
@@ -215,6 +245,7 @@ public class UploadRequest<T extends Payload> {
         uploadRequest.options = options;
         uploadRequest.optionsAsString = optionsAsString;
         uploadRequest.requestId = requestId;
+        uploadRequest.dispatched = dispatched;
 
         return uploadRequest;
     }

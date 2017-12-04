@@ -7,10 +7,8 @@ import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.policy.TimeWindow;
-import com.cloudinary.android.preupload.FormatPreprocess;
-import com.cloudinary.android.preupload.ImagePreprocess;
-import com.cloudinary.android.preupload.PreprocessChain;
-import com.cloudinary.android.preupload.ResizePreprocess;
+import com.cloudinary.android.preprocess.DefaultBitmapEncoder;
+import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainApplication;
 import com.cloudinary.android.sample.app.Utils;
@@ -28,16 +26,16 @@ public class CloudinaryHelper {
                 .unsigned("sample_app_preset")
                 .constrain(TimeWindow.immediate())
                 .option("resource_type", "auto")
+                .maxFileSize(100 * 1024 * 1024) // max 100mb
                 .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build());
         if (preprocess) {
-            return request.preprocess(
-                    new PreprocessChain<>(
-                            new ResizePreprocess(1000, 1000))
-                            .withStep(new FormatPreprocess(ImagePreprocess.Format.WEBP, 80)))
-                    .dispatch(MainApplication.get());
+            // scale down images above 2000 width/height, and re-encode as webp with 80 quality to save bandwidth
+            request.preprocess(ImagePreprocessChain.reduceDimensionsChain(2000, 2000)
+                    .saveWith(new DefaultBitmapEncoder(DefaultBitmapEncoder.Format.WEBP, 80)));
+
         }
 
-        return request.dispatch();
+        return request.dispatch(MainApplication.get());
     }
 
     public static String getCroppedThumbnailUrl(int size, Resource resource) {

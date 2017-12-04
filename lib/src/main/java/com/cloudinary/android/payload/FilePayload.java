@@ -16,26 +16,29 @@ public class FilePayload extends Payload<String> {
         super(filePath);
     }
 
-    public FilePayload(){
+    public FilePayload() {
     }
 
     @Override
     public long getLength(Context context) throws PayloadNotFoundException {
-        File file = new File(data);
-
-        if (!file.exists()) {
-            throw new FileNotFoundException(String.format("File '%s' does not exist", data));
-        }
-
-        return file.length();
+        return getFile(context).length();
     }
 
     @Override
     public Object prepare(Context context) throws PayloadNotFoundException {
+        return getFile(context);
+    }
+
+    private File getFile(Context context) throws FileNotFoundException {
         File file = new File(data);
 
         if (!file.exists()) {
-            throw new FileNotFoundException(String.format("File '%s' does not exist", data));
+
+            // check if it's a local app file:
+            file = context.getFileStreamPath(data);
+            if (!file.exists()) {
+                throw new FileNotFoundException(String.format("File '%s' does not exist", data));
+            }
         }
 
         return file;
@@ -43,7 +46,7 @@ public class FilePayload extends Payload<String> {
 
     @Override
     public String toUri() {
-        return URI_KEY +  "://" + Base64Coder.encodeString(data);
+        return URI_KEY + "://" + Base64Coder.encodeString(data);
     }
 
     @Override
