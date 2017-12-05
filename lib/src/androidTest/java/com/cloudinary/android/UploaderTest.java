@@ -15,7 +15,6 @@ import junit.framework.Assert;
 
 import org.cloudinary.json.JSONArray;
 import org.cloudinary.json.JSONObject;
-import org.hamcrest.core.StringContains;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -391,16 +390,6 @@ public class UploaderTest extends AbstractTest {
         } catch (Exception e) {
             assertTrue(e.getMessage().matches(".*(Illegal value|not a valid|invalid).*"));
         }
-    }
-
-    @Test
-    public void testAutoTaggingRequest() throws IOException {
-        // should support requesting auto tagging
-        if (cloudinary.config.apiSecret == null)
-            return;
-
-        expectedEx.expectMessage(StringContains.containsString("Must use"));
-        cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("auto_tagging", 0.5f));
     }
 
     @Test
