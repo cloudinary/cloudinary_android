@@ -1,16 +1,17 @@
 package com.cloudinary.android.sample.app;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.NotificationCompat;
 import android.util.TypedValue;
 
 import com.cloudinary.android.callback.ErrorInfo;
@@ -38,21 +39,24 @@ public class CloudinaryService extends ListenerService {
     private NotificationManager notificationManager;
     private AtomicInteger idsProvider = new AtomicInteger(1000);
     private Map<String, Integer> requestIdsToNotificationIds = new ConcurrentHashMap<>();
-    private NotificationCompat.Builder builder;
+    private Notification.Builder builder;
     private Handler backgroundThreadHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        builder = new NotificationCompat.Builder(this);
+        builder = new Notification.Builder(this);
         builder.setContentTitle("Uploading to Cloudinary...")
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setChannelId(MainApplication.NOTIFICATION_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(this, 999,
                         new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT).setAction(ACTION_STATE_IN_PROGRESS),
                         0))
                 .setOngoing(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(MainApplication.NOTIFICATION_CHANNEL_ID);
+        }
 
         HandlerThread handlerThread = new HandlerThread("CloudinaryServiceBackgroundThread");
         handlerThread.start();
@@ -65,17 +69,26 @@ public class CloudinaryService extends ListenerService {
         return null;
     }
 
-    private android.support.v4.app.NotificationCompat.Builder getBuilder(String requestId, Resource.UploadStatus status) {
-        return new NotificationCompat.Builder(this)
+    private Notification.Builder getBuilder(String requestId, Resource.UploadStatus status) {
+        Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setAutoCancel(true)
-                .setChannelId(MainApplication.NOTIFICATION_CHANNEL_ID)
                 .setContentIntent(PendingIntent.getActivity(this, 1234,
                         new Intent(this, MainActivity.class)
                                 .setAction(actionFromStatus(status))
                         , 0))
-                .setLargeIcon(getBitmap(requestId))
-                .setColor(getResources().getColor(R.color.colorPrimary));
+                .setLargeIcon(getBitmap(requestId));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(MainApplication.NOTIFICATION_CHANNEL_ID);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setColor(getResources().getColor(R.color.colorPrimary));
+        }
+
+        return builder;
+
     }
 
     private String actionFromStatus(Resource.UploadStatus status) {
@@ -239,7 +252,7 @@ public class CloudinaryService extends ListenerService {
                 getBuilder(requestId, Resource.UploadStatus.FAILED)
                         .setContentTitle("Error uploading.")
                         .setContentText(error.getDescription())
-                        .setStyle(new NotificationCompat.BigTextStyle()
+                        .setStyle(new Notification.BigTextStyle()
                                 .setBigContentTitle("Error uploading.")
                                 .bigText(error.getDescription()))
                         .build());
