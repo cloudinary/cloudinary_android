@@ -7,7 +7,7 @@ import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.policy.TimeWindow;
-import com.cloudinary.android.preprocess.DefaultBitmapEncoder;
+import com.cloudinary.android.preprocess.BitmapEncoder;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainApplication;
@@ -31,7 +31,7 @@ public class CloudinaryHelper {
         if (preprocess) {
             // scale down images above 2000 width/height, and re-encode as webp with 80 quality to save bandwidth
             request.preprocess(ImagePreprocessChain.reduceDimensionsChain(2000, 2000)
-                    .saveWith(new DefaultBitmapEncoder(DefaultBitmapEncoder.Format.WEBP, 80)));
+                    .saveWith(new BitmapEncoder(BitmapEncoder.Format.WEBP, 80)));
 
         }
 

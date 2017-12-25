@@ -7,7 +7,7 @@ import com.cloudinary.android.payload.PayloadNotFoundException;
 
 /**
  * Implement this interface to pass to {@link PreprocessChain#loadWith(ResourceDecoder)} for custom resource loading behavior.
- * (See {@link DefaultBitmapDecoder} for an example)
+ * (See {@link BitmapDecoder} for an example)
  *
  * @param <T>
  */

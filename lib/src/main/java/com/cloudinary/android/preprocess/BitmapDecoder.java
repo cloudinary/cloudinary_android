@@ -15,7 +15,7 @@ import java.io.InputStream;
  * Decodes a bitmap from a payload. If given width and height the decoding process will take them
  * into account to decode the bitmap efficiently but it will NOT resize the bitmap.
  */
-public class DefaultBitmapDecoder implements ResourceDecoder<Bitmap> {
+public class BitmapDecoder implements ResourceDecoder<Bitmap> {
     private final int width;
     private final int height;
 
@@ -23,7 +23,7 @@ public class DefaultBitmapDecoder implements ResourceDecoder<Bitmap> {
     /**
      * Create a new decoder.
      */
-    public DefaultBitmapDecoder() {
+    public BitmapDecoder() {
         this(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
@@ -33,7 +33,7 @@ public class DefaultBitmapDecoder implements ResourceDecoder<Bitmap> {
      * @param width  Required width
      * @param height Required height
      */
-    public DefaultBitmapDecoder(int width, int height) {
+    public BitmapDecoder(int width, int height) {
         this.width = width;
         this.height = height;
     }

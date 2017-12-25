@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Encodes the bitmap to a file. Allows configuration of quality and format.
  */
-public class DefaultBitmapEncoder implements ResourceEncoder<Bitmap> {
+public class BitmapEncoder implements ResourceEncoder<Bitmap> {
     private static final Format DEFAULT_FORMAT = Format.WEBP;
     private static final int DEFAULT_QUALITY = 100;
     private final Format format;
@@ -21,7 +21,7 @@ public class DefaultBitmapEncoder implements ResourceEncoder<Bitmap> {
     /**
      * Create a new bitmap encoder with the default specifications.
      */
-    public DefaultBitmapEncoder() {
+    public BitmapEncoder() {
         this(DEFAULT_FORMAT, DEFAULT_QUALITY);
     }
 
@@ -31,7 +31,7 @@ public class DefaultBitmapEncoder implements ResourceEncoder<Bitmap> {
      * @param format  The format to encode the bitmap
      * @param quality The quality to use when encoding the bitmap
      */
-    public DefaultBitmapEncoder(Format format, int quality) {
+    public BitmapEncoder(Format format, int quality) {
         this.format = format;
         this.quality = quality;
     }

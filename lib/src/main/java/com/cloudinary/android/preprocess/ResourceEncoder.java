@@ -4,7 +4,7 @@ import android.content.Context;
 
 /**
  * Implement this interface to pass to {@link PreprocessChain#saveWith(ResourceEncoder)} for custom resource encoding behavior.
- * (See {@link DefaultBitmapEncoder} for an example)
+ * (See {@link BitmapEncoder} for an example)
  *
  * @param <T>
  */
