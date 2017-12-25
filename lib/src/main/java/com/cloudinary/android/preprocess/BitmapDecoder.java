@@ -69,14 +69,14 @@ public class BitmapDecoder implements ResourceDecoder<Bitmap> {
      * @param payload Payload to extract the resource from
      * @return
      * @throws PayloadNotFoundException
-     * @throws CouldNotDecodePayloadException
+     * @throws PayloadDecodeException
      */
     @Override
-    public Bitmap decode(Context context, Payload payload) throws PayloadNotFoundException, CouldNotDecodePayloadException {
+    public Bitmap decode(Context context, Payload payload) throws PayloadNotFoundException, PayloadDecodeException {
         return bitmapFromPayload(context, payload, width, height);
     }
 
-    protected final Bitmap bitmapFromPayload(Context context, Payload payload, int width, int height) throws PayloadNotFoundException, CouldNotDecodePayloadException {
+    protected final Bitmap bitmapFromPayload(Context context, Payload payload, int width, int height) throws PayloadNotFoundException, PayloadDecodeException {
         Object resource = payload.prepare(context);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -115,7 +115,7 @@ public class BitmapDecoder implements ResourceDecoder<Bitmap> {
         }
 
         if (bitmap == null) {
-            throw new CouldNotDecodePayloadException();
+            throw new PayloadDecodeException();
         }
 
         return bitmap;

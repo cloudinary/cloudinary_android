@@ -20,7 +20,7 @@ public interface ResourceDecoder<T> {
      * @param payload Payload to extract the resource from
      * @return The extract concrete resource of type T
      * @throws PayloadNotFoundException
-     * @throws CouldNotDecodePayloadException
+     * @throws PayloadDecodeException
      */
-    T decode(Context context, Payload payload) throws PayloadNotFoundException, CouldNotDecodePayloadException;
+    T decode(Context context, Payload payload) throws PayloadNotFoundException, PayloadDecodeException;
 }

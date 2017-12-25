@@ -43,14 +43,14 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
      * @param context  Android context
      * @param resource The resource (after processing) to save to file.
      * @return
-     * @throws ErrorCreatingNewBitmapException
+     * @throws ResourceCreationException
      */
     @Override
-    public String encode(Context context, Bitmap resource) throws ErrorCreatingNewBitmapException {
+    public String encode(Context context, Bitmap resource) throws ResourceCreationException {
         return saveFile(context, resource, quality, format);
     }
 
-    protected final String saveFile(Context context, Bitmap resource, int quality, Format format) throws ErrorCreatingNewBitmapException {
+    protected final String saveFile(Context context, Bitmap resource, int quality, Format format) throws ResourceCreationException {
         FileOutputStream fos = null;
         String fileName = UUID.randomUUID().toString();
         String file = null;
@@ -61,7 +61,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
             resource.recycle();
             file = fileName;
         } catch (java.io.FileNotFoundException e) {
-            throw new ErrorCreatingNewBitmapException("Could not create new file");
+            throw new ResourceCreationException("Could not create new file");
         } finally {
             if (fos != null) {
                 try {

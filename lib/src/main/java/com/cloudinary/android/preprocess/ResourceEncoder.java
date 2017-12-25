@@ -15,7 +15,7 @@ public interface ResourceEncoder<T> {
      * @param context  Android context
      * @param resource The resource (after processing) to save to file.
      * @return The filepath of the newly created file.
-     * @throws ErrorCreatingNewBitmapException
+     * @throws ResourceCreationException
      */
-    String encode(Context context, T resource) throws ErrorCreatingNewBitmapException;
+    String encode(Context context, T resource) throws ResourceCreationException;
 }

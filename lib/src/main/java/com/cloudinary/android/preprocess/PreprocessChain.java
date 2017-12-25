@@ -65,8 +65,8 @@ public abstract class PreprocessChain<T> {
      * @param payload Payload to run the chain on
      * @return A filepath of the end result of the chain
      * @throws PayloadNotFoundException
-     * @throws CouldNotDecodePayloadException
-     * @throws ErrorCreatingNewBitmapException
+     * @throws PayloadDecodeException
+     * @throws ResourceCreationException
      */
     public String execute(Context context, Payload payload) throws PayloadNotFoundException, PreprocessException {
         ensureDecoderAndEncoder();
