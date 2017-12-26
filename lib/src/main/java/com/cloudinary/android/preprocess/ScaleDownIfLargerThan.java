@@ -35,17 +35,13 @@ public class ScaleDownIfLargerThan implements Preprocess<Bitmap> {
     @Override
     public Bitmap execute(Context context, Bitmap resource) {
         if (resource.getWidth() > width || resource.getHeight() > height) {
-            int newWidth;
-            int newHeight;
-            if (resource.getWidth() > resource.getHeight()) {
-                newHeight = (int) Math.floor(((double) width / resource.getWidth()) * resource.getHeight());
-                newWidth = width;
+            double widthRatio = (double) width / resource.getWidth();
+            double heightRatio = (double) height / resource.getHeight();
+            if (heightRatio > widthRatio) {
+                return Bitmap.createScaledBitmap(resource, width, (int) Math.round(widthRatio * resource.getHeight()), true);
             } else {
-                newWidth = (int) Math.floor(((double) height / resource.getHeight()) * resource.getWidth());
-                newHeight = height;
+                return Bitmap.createScaledBitmap(resource, (int) Math.round(heightRatio * resource.getWidth()), height, true);
             }
-
-            return Bitmap.createScaledBitmap(resource, newWidth, newHeight, true);
         }
 
         return resource;
