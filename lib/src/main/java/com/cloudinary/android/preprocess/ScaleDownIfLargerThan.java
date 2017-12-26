@@ -38,10 +38,10 @@ public class ScaleDownIfLargerThan implements Preprocess<Bitmap> {
             int newWidth;
             int newHeight;
             if (resource.getWidth() > resource.getHeight()) {
-                newHeight = (int) Math.floor(((float) resource.getHeight() / resource.getWidth()) * width);
+                newHeight = (int) Math.floor(((double) width / resource.getWidth()) * resource.getHeight());
                 newWidth = width;
             } else {
-                newWidth = (int) Math.floor(((float) resource.getWidth() / resource.getHeight()) * height);
+                newWidth = (int) Math.floor(((double) height / resource.getHeight()) * resource.getWidth());
                 newHeight = height;
             }
 

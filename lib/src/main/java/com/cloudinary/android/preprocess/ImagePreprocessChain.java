@@ -12,7 +12,7 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
     /**
      * Creates a chain instance for reducing image dimensions. If the image is already smaller it will be returned unchanged.
      * The scaling retains aspect ratio while making sure the height and width are within the requested maximum bounds.
-     * The chain also handled efficient decoding of the bitmap (see {@link DefaultBitmapDecoder#calculateInSampleSize(BitmapFactory.Options, int, int)}).
+     * The chain also handled efficient decoding of the bitmap (see {@link BitmapDecoder#calculateInSampleSize(BitmapFactory.Options, int, int)}).
      *
      * @param maxWidth  The maximum width allowed. If the width of the image is greater, the image will be resized accordingly.
      * @param maxHeight The maximum height allowed. If the height of the image is greater, the image will be resized accordingly.
@@ -20,17 +20,17 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
      */
     public static ImagePreprocessChain reduceDimensionsChain(int maxWidth, int maxHeight) {
         return (ImagePreprocessChain) new ImagePreprocessChain()
-                .loadWith(new DefaultBitmapDecoder(maxWidth, maxHeight))
+                .loadWith(new BitmapDecoder(maxWidth, maxHeight))
                 .addStep(new ScaleDownIfLargerThan(maxWidth, maxHeight));
     }
 
     @Override
     protected ResourceEncoder<Bitmap> getDefaultEncoder() {
-        return new DefaultBitmapEncoder();
+        return new BitmapEncoder();
     }
 
     @Override
     protected ResourceDecoder<Bitmap> getDefaultDecoder() {
-        return new DefaultBitmapDecoder();
+        return new BitmapDecoder();
     }
 }
