@@ -100,8 +100,10 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
 
         backgroundHandler = new Handler(handlerThread.getLooper());
 
+        setTitle(getTitle() + " (" + CloudinaryHelper.getCloudName() + ")");
         registerLocalReceiver();
         onNewIntent(getIntent());
+        startService(new Intent(this, CloudinaryService.class));
     }
 
     @Override

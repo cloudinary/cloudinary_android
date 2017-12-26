@@ -52,6 +52,7 @@ public class CloudinaryService extends ListenerService {
                 .setContentIntent(PendingIntent.getActivity(this, 999,
                         new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT).setAction(ACTION_STATE_IN_PROGRESS),
                         0))
+                .setOnlyAlertOnce(true)
                 .setOngoing(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -234,6 +235,7 @@ public class CloudinaryService extends ListenerService {
                     resource = ResourceRepo.getInstance().getResource(requestId);
                     if (resource != null) {
                         ResourceRepo.getInstance().delete(resource.getLocalUri());
+                        resource.setStatus(Resource.UploadStatus.CANCELLED);
                     }
                 } else {
                     resource = ResourceRepo.getInstance().resourceFailed(requestId, error.getCode(), error.getDescription());
