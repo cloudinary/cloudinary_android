@@ -9,7 +9,7 @@ import com.cloudinary.android.payload.PayloadNotFoundException;
  * Implement this interface to pass to {@link PreprocessChain#loadWith(ResourceDecoder)} for custom resource loading behavior.
  * (See {@link BitmapDecoder} for an example)
  *
- * @param <T>
+ * @param <T> The concrete type this decoder needs to decode
  */
 public interface ResourceDecoder<T> {
     /**
@@ -19,8 +19,8 @@ public interface ResourceDecoder<T> {
      * @param context Android context.
      * @param payload Payload to extract the resource from
      * @return The extract concrete resource of type T
-     * @throws PayloadNotFoundException
-     * @throws PayloadDecodeException
+     * @throws PayloadNotFoundException If the given payload could not be found.
+     * @throws PayloadDecodeException If the given payload could not be properly decoded.
      */
     T decode(Context context, Payload payload) throws PayloadNotFoundException, PayloadDecodeException;
 }

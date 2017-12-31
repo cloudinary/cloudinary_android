@@ -13,7 +13,7 @@ import java.io.InputStream;
 
 /**
  * Decodes a bitmap from a payload. If given width and height the decoding process will take them
- * into account to decode the bitmap efficiently but it will NOT resize the bitmap.
+ * into account to decode the bitmap efficiently but will not necessarily resize the bitmap.
  */
 public class BitmapDecoder implements ResourceDecoder<Bitmap> {
     private final int width;
@@ -63,13 +63,16 @@ public class BitmapDecoder implements ResourceDecoder<Bitmap> {
 
     /**
      * Decodes a bitmap from the given payload. If the bitmap is at least two times larger than the required
-     * dimensions it will decode a version scaled down by a factor. Note: This will not give an exact size bitmap.
+     * dimensions it will decode a version scaled down by a factor. Note: The dimensions of the decoded bitmap
+     * will not necessarily be equal to {@link BitmapDecoder#width} and {@link BitmapDecoder#height}. For
+     * exact resizing combine this decoder with {@link Limit} processing step, or use
+     * {@link ImagePreprocessChain#limitDimensionsChain(int, int)}.
      *
      * @param context Android context.
-     * @param payload Payload to extract the resource from
-     * @return
-     * @throws PayloadNotFoundException
-     * @throws PayloadDecodeException
+     * @param payload Payload to extract the bitmap from
+     * @return The decoded bitmap
+     * @throws PayloadNotFoundException if the payload is not found
+     * @throws PayloadDecodeException if the payload exists but cannot be decoded
      */
     @Override
     public Bitmap decode(Context context, Payload payload) throws PayloadNotFoundException, PayloadDecodeException {

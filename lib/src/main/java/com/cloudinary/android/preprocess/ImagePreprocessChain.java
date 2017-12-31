@@ -1,7 +1,6 @@
 package com.cloudinary.android.preprocess;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 /**
  * A preprocess chain to run on images before uploading. Pass an instance of a populated chain to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
@@ -10,18 +9,19 @@ import android.graphics.BitmapFactory;
  */
 public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
     /**
-     * Creates a chain instance for reducing image dimensions. If the image is already smaller it will be returned unchanged.
-     * The scaling retains aspect ratio while making sure the height and width are within the requested maximum bounds.
-     * The chain also handled efficient decoding of the bitmap (see {@link BitmapDecoder#calculateInSampleSize(BitmapFactory.Options, int, int)}).
+     * Convenience method for building an efficient dimension limiting chain using {@link BitmapDecoder} and {@link Limit}.
+     * Use this in {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
+     * The scaling retains the original aspect ratio while guaranteeing the height and width are within the requested
+     * maximum bounds. Note: If the image is already smaller it will be returned unchanged.
      *
      * @param maxWidth  The maximum width allowed. If the width of the image is greater, the image will be resized accordingly.
      * @param maxHeight The maximum height allowed. If the height of the image is greater, the image will be resized accordingly.
      * @return The prepared chain to pass on to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}
      */
-    public static ImagePreprocessChain reduceDimensionsChain(int maxWidth, int maxHeight) {
+    public static ImagePreprocessChain limitDimensionsChain(int maxWidth, int maxHeight) {
         return (ImagePreprocessChain) new ImagePreprocessChain()
                 .loadWith(new BitmapDecoder(maxWidth, maxHeight))
-                .addStep(new ScaleDownIfLargerThan(maxWidth, maxHeight));
+                .addStep(new Limit(maxWidth, maxHeight));
     }
 
     @Override

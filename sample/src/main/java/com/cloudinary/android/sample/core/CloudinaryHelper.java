@@ -30,7 +30,7 @@ public class CloudinaryHelper {
                 .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build());
         if (preprocess) {
             // scale down images above 2000 width/height, and re-encode as webp with 80 quality to save bandwidth
-            request.preprocess(ImagePreprocessChain.reduceDimensionsChain(2000, 2000)
+            request.preprocess(ImagePreprocessChain.limitDimensionsChain(2000, 2000)
                     .saveWith(new BitmapEncoder(BitmapEncoder.Format.WEBP, 80)));
 
         }

@@ -6,7 +6,7 @@ import android.content.Context;
  * Implement this interface to pass to {@link PreprocessChain#saveWith(ResourceEncoder)} for custom resource encoding behavior.
  * (See {@link BitmapEncoder} for an example)
  *
- * @param <T>
+ * @param <T> The concrete type this encoder needs to encode
  */
 public interface ResourceEncoder<T> {
     /**
@@ -15,7 +15,7 @@ public interface ResourceEncoder<T> {
      * @param context  Android context
      * @param resource The resource (after processing) to save to file.
      * @return The filepath of the newly created file.
-     * @throws ResourceCreationException
+     * @throws ResourceCreationException if the processed resource cannot be saved
      */
     String encode(Context context, T resource) throws ResourceCreationException;
 }

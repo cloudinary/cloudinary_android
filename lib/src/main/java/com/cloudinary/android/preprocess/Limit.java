@@ -6,9 +6,10 @@ import android.graphics.Bitmap;
 /**
  * Preprocess implementation for resizing. Send an instance to {@link PreprocessChain#addStep(Preprocess)}
  * to scale down any image larger then {@link #height}/{@link #width}. The scaling retains aspect ratio while
- * making sure the height and width are within the requested maximum bounds.
+ * making sure the height and width are within the requested maximum bounds. If the original image is smaller
+ * than {@link #height} and {@link #width}, it will be returned unchanged.
  */
-public class ScaleDownIfLargerThan implements Preprocess<Bitmap> {
+public class Limit implements Preprocess<Bitmap> {
 
     private final int width;
     private final int height;
@@ -19,7 +20,7 @@ public class ScaleDownIfLargerThan implements Preprocess<Bitmap> {
      * @param width  Maximum allowed width for the image. Will scale down to comply.
      * @param height Maximum allowed height for the image. Will scale down to comply.
      */
-    public ScaleDownIfLargerThan(int width, int height) {
+    public Limit(int width, int height) {
         this.width = width;
         this.height = height;
     }

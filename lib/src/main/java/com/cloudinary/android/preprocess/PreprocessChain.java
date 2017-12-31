@@ -64,9 +64,9 @@ public abstract class PreprocessChain<T> {
      * @param context Android context
      * @param payload Payload to run the chain on
      * @return A filepath of the end result of the chain
-     * @throws PayloadNotFoundException
-     * @throws PayloadDecodeException
-     * @throws ResourceCreationException
+     * @throws PayloadNotFoundException if the payload is not found
+     * @throws PayloadDecodeException if the payload is found but cannot be decoded
+     * @throws ResourceCreationException if the processing is done but the result cannot be saved.
      */
     public String execute(Context context, Payload payload) throws PayloadNotFoundException, PreprocessException {
         ensureDecoderAndEncoder();
@@ -89,6 +89,11 @@ public abstract class PreprocessChain<T> {
         }
     }
 
+    /**
+     * Checks if this chain is an empty chain (NOP chain).
+     *
+     * @return True if it's empty.
+     */
     public boolean isEmpty() {
         return encoder == null && decoder == null && preprocessList.isEmpty();
     }

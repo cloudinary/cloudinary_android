@@ -43,7 +43,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
      * @param context  Android context
      * @param resource The resource (after processing) to save to file.
      * @return
-     * @throws ResourceCreationException
+     * @throws ResourceCreationException if the resource cannot be saved to a file
      */
     @Override
     public String encode(Context context, Bitmap resource) throws ResourceCreationException {

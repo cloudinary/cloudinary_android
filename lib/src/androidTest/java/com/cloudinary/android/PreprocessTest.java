@@ -9,8 +9,8 @@ import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.preprocess.DimensionsValidator;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
+import com.cloudinary.android.preprocess.Limit;
 import com.cloudinary.android.preprocess.PreprocessException;
-import com.cloudinary.android.preprocess.ScaleDownIfLargerThan;
 import com.cloudinary.android.preprocess.ValidationException;
 
 import junit.framework.Assert;
@@ -65,7 +65,7 @@ public class PreprocessTest extends AbstractTest {
             }
         }));
 
-        request.preprocess(ImagePreprocessChain.reduceDimensionsChain(15, 15)).dispatch(InstrumentationRegistry.getTargetContext());
+        request.preprocess(ImagePreprocessChain.limitDimensionsChain(15, 15)).dispatch(InstrumentationRegistry.getTargetContext());
         Awaitility.await().atMost(Duration.FIVE_SECONDS).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
@@ -90,7 +90,7 @@ public class PreprocessTest extends AbstractTest {
     @Test
     public void testChain() throws PreprocessException, PayloadNotFoundException, IOException {
         FilePayload payload = new FilePayload(assetFile.getAbsolutePath());
-        ImagePreprocessChain chain = ImagePreprocessChain.reduceDimensionsChain(40, 40);
+        ImagePreprocessChain chain = ImagePreprocessChain.limitDimensionsChain(40, 40);
         String filePath = chain.execute(InstrumentationRegistry.getTargetContext(), payload);
         FileInputStream fileInputStream = InstrumentationRegistry.getTargetContext().openFileInput(filePath);
         Bitmap bitmap = BitmapFactory.decodeStream(fileInputStream);
@@ -99,30 +99,30 @@ public class PreprocessTest extends AbstractTest {
     }
 
     @Test
-    public void testScaleDownIfLargerThan() {
+    public void testLimit() {
         final Context context = InstrumentationRegistry.getTargetContext();
         Bitmap bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(assetFile.getAbsolutePath()), 1000, 500, false);
-        bitmap = new ScaleDownIfLargerThan(100, 100).execute(context, bitmap);
+        bitmap = new Limit(100, 100).execute(context, bitmap);
         Assert.assertEquals(100, bitmap.getWidth());
         Assert.assertEquals(50, bitmap.getHeight());
 
         bitmap = Bitmap.createScaledBitmap(bitmap, 500, 1000, false);
-        bitmap = new ScaleDownIfLargerThan(100, 100).execute(context, bitmap);
+        bitmap = new Limit(100, 100).execute(context, bitmap);
         Assert.assertEquals(50, bitmap.getWidth());
         Assert.assertEquals(100, bitmap.getHeight());
 
         bitmap = Bitmap.createScaledBitmap(bitmap, 500, 600, false);
-        bitmap = new ScaleDownIfLargerThan(1000, 1000).execute(context, bitmap);
+        bitmap = new Limit(1000, 1000).execute(context, bitmap);
         Assert.assertEquals(500, bitmap.getWidth());
         Assert.assertEquals(600, bitmap.getHeight());
 
         bitmap = Bitmap.createScaledBitmap(bitmap, 500, 600, false);
-        bitmap = new ScaleDownIfLargerThan(510, 360).execute(context, bitmap);
+        bitmap = new Limit(510, 360).execute(context, bitmap);
         Assert.assertEquals(300, bitmap.getWidth());
         Assert.assertEquals(360, bitmap.getHeight());
 
         bitmap = Bitmap.createScaledBitmap(bitmap, 500, 600, false);
-        bitmap = new ScaleDownIfLargerThan(300, 630).execute(context, bitmap);
+        bitmap = new Limit(300, 630).execute(context, bitmap);
         Assert.assertEquals(300, bitmap.getWidth());
         Assert.assertEquals(360, bitmap.getHeight());
     }
