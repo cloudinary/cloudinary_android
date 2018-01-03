@@ -98,7 +98,7 @@ class DefaultCallbackDispatcher implements CallbackDispatcher {
                 int callbackId = System.identityHashCode(callback);
                 UploadCallbackWrapper uploadCallbackWrapper = new UploadCallbackWrapper(callback);
                 uploadCallbackWrapper.addRequestId(requestId);
-                callbackRegistry.put(callbackId, new UploadCallbackWrapper(callback));
+                callbackRegistry.put(callbackId, uploadCallbackWrapper);
             }
         } finally {
             readWriteLock.writeLock().unlock();
