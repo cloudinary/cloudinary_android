@@ -28,8 +28,9 @@ public class CallbackDispatcherTest extends AbstractTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
         CallbackDispatcher dispatcher = new DefaultCallbackDispatcher(appContext);
         CallbackCounter callbackCounter = new CallbackCounter();
+        CallbackCounter oneRequestCallbackCounter = new CallbackCounter();
         dispatcher.registerCallback(callbackCounter);
-
+        dispatcher.registerCallback("a", oneRequestCallbackCounter);
 
         dispatcher.dispatchStart("a");
         dispatcher.dispatchProgress("a", 10, 100);
@@ -39,6 +40,12 @@ public class CallbackDispatcherTest extends AbstractTest {
 
         // callbacks are posted to dedicated thread, give it time to propagate
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
+
+        assertEquals(1, oneRequestCallbackCounter.start);
+        assertEquals(1, oneRequestCallbackCounter.progress);
+        assertEquals(1, oneRequestCallbackCounter.success);
+        assertEquals(1, oneRequestCallbackCounter.error);
+        assertEquals(1, oneRequestCallbackCounter.reschedule);
 
         assertEquals(1, callbackCounter.start);
         assertEquals(1, callbackCounter.progress);
@@ -62,6 +69,12 @@ public class CallbackDispatcherTest extends AbstractTest {
         dispatcher.dispatchError(appContext, "c", new ErrorInfo(ErrorInfo.RESOURCE_DOES_NOT_EXIST, null));
 
         Thread.sleep(DISPATCH_SLEEP_MILLIS);
+
+        assertEquals(1, oneRequestCallbackCounter.start);
+        assertEquals(1, oneRequestCallbackCounter.progress);
+        assertEquals(1, oneRequestCallbackCounter.success);
+        assertEquals(1, oneRequestCallbackCounter.error);
+        assertEquals(1, oneRequestCallbackCounter.reschedule);
 
         assertEquals(2, callbackCounter.progress);
         assertEquals(2, callbackCounter.success);
