@@ -15,10 +15,10 @@ For Android, Cloudinary provides a library for simplifying the integration even 
 ## Gradle Integration
 Add the following dependency to your build.gradle:
 
-`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.22.0'`
+`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.23.0'`
 
 ## Manual Setup ######################################################################
-Download cloudinary-android-1.22.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-android/1.22.0/cloudinary-android-1.22.0.aar) and cloudinary-core-1.14.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-core/1.14.0/cloudinary-core-1.14.0.jar) and put them in your libs folder.
+Download cloudinary-android-1.23.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-android/1.23.0/cloudinary-android-1.23.0.aar) and cloudinary-core-1.14.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-core/1.14.0/cloudinary-core-1.14.0.jar) and put them in your libs folder.
 
 ## Maven Integration ######################################################################
 The cloudinary_java library is available in [Maven Central](http://repo1.maven.org/maven/). To use it, add the following dependency to your pom.xml:
@@ -26,7 +26,7 @@ The cloudinary_java library is available in [Maven Central](http://repo1.maven.o
     <dependency>
         <groupId>com.cloudinary</groupId>
         <artifactId>cloudinary-android</artifactId>
-        <version>1.22.0</version>
+        <version>1.23.0</version>
     </dependency>
 
 

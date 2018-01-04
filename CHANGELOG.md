@@ -1,4 +1,23 @@
 
+1.23.0 / 2018-01-04
+===================
+
+New functionality
+-----------------
+
+  * Add support for image preprocessing and validations
+    * Resizing
+    * Format and quality settings
+    * Dimensions Validator
+    * Exensible with custom processing and validations
+
+Other changes
+-------------
+
+  * Fix callback bug, add tests to verify
+  * Fix android platform 27 travis bug
+  * Feature/upgrade android sdk versions
+
 1.22.0 / 2017-11-26
 ===================
 
