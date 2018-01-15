@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cloudinary.Url;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.ResponsiveUrl;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.model.EffectData;
 import com.squareup.picasso.Picasso;
@@ -55,10 +58,18 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
     @Override
     public void onBindViewHolder(final EffectsGalleryAdapter.ImageViewHolder holder, int position) {
         EffectData data = images.get(position);
-        String url = data.getThumbUrl();
         holder.itemView.setTag(images.get(position));
         holder.nameTextView.setText(data.getName());
-        Picasso.with(context).load(url).placeholder(R.drawable.placeholder).into(holder.imageView);
+
+        Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
+        MediaManager.get().responsiveUrl(ResponsiveUrl.Dimension.all, "thumb", "auto")
+                .stepSize(50)
+                .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {
+                    @Override
+                    public void onUrlReady(Url url) {
+                        Picasso.with(context).load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
+                    }
+                });
 
         if (selected != null && selected.equals(data)) {
             holder.selection.setVisibility(View.VISIBLE);
