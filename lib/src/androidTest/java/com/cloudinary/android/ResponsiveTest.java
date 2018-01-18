@@ -54,7 +54,9 @@ public class ResponsiveTest extends AbstractTest {
     private void twoDimensionTest(String gravity, String cropMode, int stepSize, int minDimension, int maxDimension, int viewWidth, int viewHeight, final String expectedUrlSuffix) {
         final StatefulCallback callback = new StatefulCallback();
 
-        new ResponsiveUrl(cloudinary, ResponsiveUrl.Dimension.all, cropMode, gravity)
+        new ResponsiveUrl(cloudinary, ResponsiveUrl.Dimension.all)
+                .cropMode(cropMode)
+                .gravity(gravity)
                 .stepSize(stepSize)
                 .minDimension(minDimension)
                 .maxDimension(maxDimension)
@@ -71,7 +73,9 @@ public class ResponsiveTest extends AbstractTest {
     private void onlyWidthTest(String gravity, String cropMode, int stepSize, int minDimension, int maxDimension, int viewWidth, int viewHeight, final String expectedUrlSuffix) {
         final StatefulCallback callback = new StatefulCallback();
 
-        new ResponsiveUrl(cloudinary, ResponsiveUrl.Dimension.width, cropMode, gravity)
+        new ResponsiveUrl(cloudinary, ResponsiveUrl.Dimension.width)
+                .cropMode(cropMode)
+                .gravity(gravity)
                 .stepSize(stepSize)
                 .minDimension(minDimension)
                 .maxDimension(maxDimension)

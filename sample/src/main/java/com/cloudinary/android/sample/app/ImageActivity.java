@@ -196,7 +196,9 @@ public class ImageActivity extends AppCompatActivity {
         final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), null);
         final ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
-        MediaManager.get().responsiveUrl(ResponsiveUrl.Dimension.all, "fit", "center")
+        MediaManager.get().responsiveUrl(ResponsiveUrl.Dimension.all)
+                .cropMode("fit")
+                .gravity("center")
                 .generate(baseUrl, exoPlayerView, new ResponsiveUrl.Callback() {
                     @Override
                     public void onUrlReady(Url url) {
@@ -222,7 +224,9 @@ public class ImageActivity extends AppCompatActivity {
         }).build();
 
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
-        MediaManager.get().responsiveUrl(ResponsiveUrl.Dimension.all, "fit", "center")
+        MediaManager.get().responsiveUrl(ResponsiveUrl.Dimension.all)
+                .cropMode("fit")
+                .gravity("center")
                 .generate(baseUrl, imageView, new ResponsiveUrl.Callback() {
                     @Override
                     public void onUrlReady(Url url) {

@@ -357,15 +357,17 @@ public class MediaManager {
     }
 
     /**
-     * Retrieve an instance of a {@link ResponsiveUrl} to generate urls pre-populated with a given view's width and/or height
+     * Retrieve an instance of a {@link ResponsiveUrl} to generate urls pre-populated with a given
+     * view's width and/or height
      *
-     * @param dimension Which dimensions should be included in the transformation
-     * @param cropMode  Crop mode to use in transformation.
-     * @param gravity   Gravity to use in transformation.
+     * @param dimension The dimensions to include in the responsive transformation. Specifying only
+     *                   one dimensions will adjust the image to the view size in this dimension and
+     *                   ignore the other. Specifying all will adjust both width and height.
+     *                   The end result will vary depending on the crop mode and gravity settings.
      * @return The responsive url generator instance.
      */
-    public ResponsiveUrl responsiveUrl(ResponsiveUrl.Dimension dimension, String cropMode, String gravity) {
-        return new ResponsiveUrl(this.cloudinary, dimension, cropMode, gravity);
+    public ResponsiveUrl responsiveUrl(ResponsiveUrl.Dimension dimension) {
+        return new ResponsiveUrl(this.cloudinary, dimension);
     }
 
     /**

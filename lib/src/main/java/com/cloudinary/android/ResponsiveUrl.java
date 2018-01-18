@@ -1,6 +1,7 @@
 package com.cloudinary.android;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -8,75 +9,82 @@ import android.widget.ImageView;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Url;
-import com.cloudinary.utils.StringUtils;
 
 import java.util.EnumSet;
 
 /**
- * This class is used to generate view-size aware cloudinary Urls. It takes any {@link View} and a {@link Url}
- * as input and returns a modifed {@link Url} with the correct width/height transformation inside.
- * Crop mode and gravity are configurable as well.
- * Important: When using this class, it's preferable to not include any cropping/scaling transformation in the base
- * {@link Url} used.
+ * This class is used to generate view-size aware cloudinary Urls. It takes any {@link View} and
+ * a {@link Url} as input and returns a modified {@link Url} with the width/height transformation
+ * included, according to the chosen parameters.
+ * Important: When using this class, it's preferable to not include any cropping/scaling
+ * transformation in the base {@link Url} used.
  */
 public class ResponsiveUrl {
-    // single dimension defaults - /w_***,g_center,c_scale/
-    private static final String DEFAULT_SINGLE_DIMENSION_CROP_MODE = "scale";
-    private static final String DEFAULT_SINGLE_DIMENSION_GRAVITY = "center";
-
-    // defaults when using both dimensions - /w_***,h_***,g_auto,c_fill/
-    private static final String DEFAULT_CROP_MODE = "fill";
-    private static final String DEFAULT_GRAVITY = "auto";
-
     private static final int DEFAULT_MIN_DIMENSION = 100;
     private static final int DEFAULT_MAX_DIMENSION = 3000;
-
-    private static final EnumSet<Dimension> DEFAULT_DIMENSIONS = EnumSet.of(Dimension.width, Dimension.height);
     private static final int DEFAULT_STEP_SIZE = 100;
 
-    // holds url mapped to class instance hashes to make sure we're synched
+    // holds url mapped to class instance hashes to make sure we're synced
     private static final SparseArray<Url> viewsInProgress = new SparseArray<>();
     private final Cloudinary cloudinary;
 
     // fields
+    private final EnumSet<Dimension> dimensions;
     private int stepSize = DEFAULT_STEP_SIZE;
-    private EnumSet<Dimension> dimensions = DEFAULT_DIMENSIONS;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
     private int minDimension = DEFAULT_MIN_DIMENSION;
 
-    // These two fields are not assigned default values, because their defaults depend on dimensions
-    // that may be set later - they're assigned default values when generating the result.
-    private String cropMode;
-    private String gravity;
+    private String cropMode = null;
+    private String gravity = null;
 
     /**
      * Create a new responsive url generator instance.
      *
-     * @param cloudinary The cloudinary instance used.
-     * @param dimension  The dimensions choice to include in the transformation
-     * @param cropMode   The crop mode to use in the transformation (crop, scale, fit, etc.).
-     * @param gravity    The gravity to use in the transformation (north, west, auto, thumb, etc.).
+     * @param cloudinary The cloudinary instance to use.
+     * @param dimension  The dimensions to include in the responsive transformation. Specifying only
+     *                   one dimensions will adjust the image to the view size in this dimension and
+     *                   ignore the other. Specifying all will adjust both width and height.
+     *                   The end result will vary depending on the crop mode and gravity settings.
      */
-    ResponsiveUrl(Cloudinary cloudinary, Dimension dimension, String cropMode, String gravity) {
+    ResponsiveUrl(@NonNull Cloudinary cloudinary, @NonNull Dimension dimension) {
+        this.dimensions = buildSet(dimension);
         this.cloudinary = cloudinary;
-        this.gravity(gravity).cropMode(cropMode).dimension(dimension);
     }
 
-    private ResponsiveUrl cropMode(String cropMode) {
+    /**
+     * Specify the crop mode to use in the transformation.
+     * See complete crop mode documentation <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
+     *
+     * @param cropMode The chosen crop settings.
+     * @return Itself for chaining.
+     */
+    public ResponsiveUrl cropMode(String cropMode) {
         this.cropMode = cropMode;
         return this;
     }
 
-    private ResponsiveUrl dimension(Dimension dimension) {
-        this.dimensions = buildSet(dimension);
-        return this;
-    }
-
-    private ResponsiveUrl gravity(String gravity) {
+    /**
+     * Specify the gravity to use in the transformation.
+     * See complete gravity documentation<a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter"></a>).
+     *
+     * @param gravity The chosen gravity settings.
+     * @return Itself for chaining.
+     */
+    public ResponsiveUrl gravity(String gravity) {
         this.gravity = gravity;
         return this;
     }
 
+    /**
+     * Step size is used to limit the number of generated transformations. The actual width/height
+     * parameter in the constructed url will always be a multiplication of step size and not the
+     * exact view width/height.
+     * For example, when using `width` with `stepSize` 100 on a view with width between 301 and 400
+     * will render as `w_400` in the url. This way we avoid generating a separate transformation
+     * for every possible width.
+     * @param stepSize The step size to use.
+     * @return Itself for chaining.
+     */
     public ResponsiveUrl stepSize(int stepSize) {
         this.stepSize = stepSize;
         return this;
@@ -84,8 +92,8 @@ public class ResponsiveUrl {
 
     /**
      * Limit the maximum allowed dimension. If the actual view dimensions are larger than
-     * the value chosen here, this max value will be used instead. This is useful to limit the
-     * total amount of transformations generated.
+     * the value chosen here, this value will be used instead. This is useful to limit the
+     * total number of transformations generated.
      *
      * @param maxDimension The highest allowed dimension.
      * @return itself for chaining.
@@ -97,8 +105,8 @@ public class ResponsiveUrl {
 
     /**
      * Limit the minimum allowed dimension. If the actual view dimensions are smaller than
-     * the value chosen here, this min value will be used instead. This is useful to limit the
-     * total amount of transformations generated.
+     * the value chosen here, this value will be used instead. This is useful to limit the
+     * total number of transformations generated.
      *
      * @param minDimension The smallest allowed dimension.
      * @return itself for chaining.
@@ -122,15 +130,14 @@ public class ResponsiveUrl {
     /**
      * Generate the modified url.
      *
-     * @param baseUrl  A base url to modify with the view's dimensions. This url can contain
-     *                 any configurations and transformations - The scaling/cropping transformation
-     *                 is chained to the last part.
+     * @param baseUrl  A url to be used as a base to the responsive transformation. This url can
+     *                contain any configurations and transformations. The generated responsive
+     *                transformation will be chained as the last transformation in the url.
      * @param view     The view to adapt the resource dimensions to.
      * @param callback Callback to called when the modified Url is ready.
      */
     public void generate(final Url baseUrl, final View view, final Callback callback) {
         assertViewValidForResponsive(view);
-        verifyAllParams();
         final int key = view.hashCode();
 
         final int width = getWidth(view);
@@ -157,20 +164,6 @@ public class ResponsiveUrl {
                     return true;
                 }
             });
-        }
-    }
-
-    private void verifyAllParams() {
-        if (dimensions == null || dimensions.isEmpty()) {
-            dimensions = DEFAULT_DIMENSIONS;
-        }
-
-        if (StringUtils.isBlank(cropMode)) {
-            cropMode = dimensions.size() == 1 ? DEFAULT_SINGLE_DIMENSION_CROP_MODE : DEFAULT_CROP_MODE;
-        }
-
-        if (StringUtils.isBlank(gravity)) {
-            gravity = dimensions.size() == 1 ? DEFAULT_SINGLE_DIMENSION_GRAVITY : DEFAULT_GRAVITY;
         }
     }
 
@@ -225,7 +218,6 @@ public class ResponsiveUrl {
     private void buildUrl(View view, Url baseUrl, EnumSet<Dimension> dimensions, int width, int height, Callback callback) {
         // add a new transformation on top of anything already there
         Url url = baseUrl.clone();
-
         url.transformation().chain();
 
         if (dimensions.contains(Dimension.height)) {
