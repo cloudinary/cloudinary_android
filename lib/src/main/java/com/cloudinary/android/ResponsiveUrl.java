@@ -27,15 +27,13 @@ public class ResponsiveUrl {
     // holds url mapped to class instance hashes to make sure we're synced
     private static final SparseArray<Url> viewsInProgress = new SparseArray<>();
     private final Cloudinary cloudinary;
-
-    // fields
     private final EnumSet<Dimension> dimensions;
+    private final String cropMode;
+    private final String gravity;
+    // fields
     private int stepSize = DEFAULT_STEP_SIZE;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
     private int minDimension = DEFAULT_MIN_DIMENSION;
-
-    private String cropMode = null;
-    private String gravity = null;
 
     /**
      * Create a new responsive url generator instance.
@@ -45,34 +43,14 @@ public class ResponsiveUrl {
      *                   one dimensions will adjust the image to the view size in this dimension and
      *                   ignore the other. Specifying all will adjust both width and height.
      *                   The end result will vary depending on the crop mode and gravity settings.
+     * @param cropMode   Crop mode to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
+     * @param gravity    Gravity to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter">here</a>).
      */
-    ResponsiveUrl(@NonNull Cloudinary cloudinary, @NonNull Dimension dimension) {
-        this.dimensions = buildSet(dimension);
+    ResponsiveUrl(@NonNull Cloudinary cloudinary, @NonNull Dimension dimension, @NonNull String cropMode, @NonNull String gravity) {
         this.cloudinary = cloudinary;
-    }
-
-    /**
-     * Specify the crop mode to use in the transformation.
-     * See complete crop mode documentation <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
-     *
-     * @param cropMode The chosen crop settings.
-     * @return Itself for chaining.
-     */
-    public ResponsiveUrl cropMode(String cropMode) {
+        this.dimensions = buildSet(dimension);
         this.cropMode = cropMode;
-        return this;
-    }
-
-    /**
-     * Specify the gravity to use in the transformation.
-     * See complete gravity documentation<a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter"></a>).
-     *
-     * @param gravity The chosen gravity settings.
-     * @return Itself for chaining.
-     */
-    public ResponsiveUrl gravity(String gravity) {
         this.gravity = gravity;
-        return this;
     }
 
     /**
@@ -93,7 +71,7 @@ public class ResponsiveUrl {
     /**
      * Limit the maximum allowed dimension. If the actual view dimensions are larger than
      * the value chosen here, this value will be used instead. This is useful to limit the
-     * total number of transformations generated.
+     * total number of generated transformations.
      *
      * @param maxDimension The highest allowed dimension.
      * @return itself for chaining.
@@ -106,7 +84,7 @@ public class ResponsiveUrl {
     /**
      * Limit the minimum allowed dimension. If the actual view dimensions are smaller than
      * the value chosen here, this value will be used instead. This is useful to limit the
-     * total number of transformations generated.
+     * total number of generated transformations.
      *
      * @param minDimension The smallest allowed dimension.
      * @return itself for chaining.
@@ -131,8 +109,10 @@ public class ResponsiveUrl {
      * Generate the modified url.
      *
      * @param baseUrl  A url to be used as a base to the responsive transformation. This url can
-     *                contain any configurations and transformations. The generated responsive
-     *                transformation will be chained as the last transformation in the url.
+     *                 contain any configurations and transformations. The generated responsive
+     *                 transformation will be chained as the last transformation in the url.
+     *                 Important: When generating using a base url, it's preferable to not include
+     *                 any cropping/scaling in the original transformations.
      * @param view     The view to adapt the resource dimensions to.
      * @param callback Callback to called when the modified Url is ready.
      */
@@ -255,6 +235,26 @@ public class ResponsiveUrl {
         width,
         height,
         all
+    }
+
+    public enum Preset {
+        THUMBNAIL(Dimension.all, "fill", "auto"),
+        FULL_PHOTO(Dimension.all, "fit", "center"),
+        FILL_WIDTH(Dimension.width, "fill", "center");
+
+        private final Dimension dimension;
+        private final String cropMode;
+        private final String gravity;
+
+        Preset(Dimension dimension, String cropMode, String gravity) {
+            this.dimension = dimension;
+            this.cropMode = cropMode;
+            this.gravity = gravity;
+        }
+
+        public ResponsiveUrl get(Cloudinary cloudinary) {
+            return new ResponsiveUrl(cloudinary, dimension, cropMode, gravity);
+        }
     }
 
     /**

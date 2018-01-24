@@ -62,9 +62,7 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
         holder.nameTextView.setText(data.getName());
 
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
-        MediaManager.get().responsiveUrl(ResponsiveUrl.Dimension.all)
-                .cropMode("thumb")
-                .gravity("auto")
+        MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.THUMBNAIL)
                 .stepSize(50)
                 .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {
                     @Override
