@@ -10,8 +10,6 @@ import android.widget.ImageView;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Url;
 
-import java.util.EnumSet;
-
 /**
  * This class is used to generate view-size aware cloudinary Urls. It takes any {@link View} and
  * a {@link Url} as input and returns a modified {@link Url} with the width/height transformation
@@ -20,17 +18,20 @@ import java.util.EnumSet;
  * transformation in the base {@link Url} used.
  */
 public class ResponsiveUrl {
+    // defaults
     private static final int DEFAULT_MIN_DIMENSION = 100;
-    private static final int DEFAULT_MAX_DIMENSION = 3000;
+    private static final int DEFAULT_MAX_DIMENSION = 2000;
     private static final int DEFAULT_STEP_SIZE = 100;
 
     // holds url mapped to class instance hashes to make sure we're synced
     private static final SparseArray<Url> viewsInProgress = new SparseArray<>();
+
+    // fields
     private final Cloudinary cloudinary;
-    private final EnumSet<Dimension> dimensions;
     private final String cropMode;
     private final String gravity;
-    // fields
+    private final boolean autoWidth;
+    private final boolean autoHeight;
     private int stepSize = DEFAULT_STEP_SIZE;
     private int maxDimension = DEFAULT_MAX_DIMENSION;
     private int minDimension = DEFAULT_MIN_DIMENSION;
@@ -39,16 +40,15 @@ public class ResponsiveUrl {
      * Create a new responsive url generator instance.
      *
      * @param cloudinary The cloudinary instance to use.
-     * @param dimension  The dimensions to include in the responsive transformation. Specifying only
-     *                   one dimensions will adjust the image to the view size in this dimension and
-     *                   ignore the other. Specifying all will adjust both width and height.
-     *                   The end result will vary depending on the crop mode and gravity settings.
+     * @param autoWidth  Specifying true will adjust the image width to the view width
+     * @param autoHeight Specifying true will adjust the image height to the view height
      * @param cropMode   Crop mode to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
      * @param gravity    Gravity to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter">here</a>).
      */
-    ResponsiveUrl(@NonNull Cloudinary cloudinary, @NonNull Dimension dimension, @NonNull String cropMode, @NonNull String gravity) {
+    ResponsiveUrl(@NonNull Cloudinary cloudinary, boolean autoWidth, boolean autoHeight, @NonNull String cropMode, @NonNull String gravity) {
         this.cloudinary = cloudinary;
-        this.dimensions = buildSet(dimension);
+        this.autoWidth = autoWidth;
+        this.autoHeight = autoHeight;
         this.cropMode = cropMode;
         this.gravity = gravity;
     }
@@ -58,8 +58,8 @@ public class ResponsiveUrl {
      * parameter in the constructed url will always be a multiplication of step size and not the
      * exact view width/height.
      * For example, when using `width` with `stepSize` 100 on a view with width between 301 and 400
-     * will render as `w_400` in the url. This way we avoid generating a separate transformation
-     * for every possible width.
+     * will render as `w_400` in the url.
+     *
      * @param stepSize The step size to use.
      * @return Itself for chaining.
      */
@@ -120,12 +120,12 @@ public class ResponsiveUrl {
         assertViewValidForResponsive(view);
         final int key = view.hashCode();
 
-        final int width = getWidth(view);
-        final int height = getHeight(view);
+        int width = view.getWidth();
+        int height = view.getHeight();
 
-        if (conditionsAreMet(dimensions, width, height)) {
-            // The required dimension are already known, build url:
-            buildUrl(view, baseUrl, dimensions, width, height, callback);
+        if (conditionsAreMet(width, height)) {
+            // The required dimensions are already known, build url:
+            callback.onUrlReady(buildUrl(view, baseUrl));
             viewsInProgress.remove(key);
         } else {
             // save the link between the requested url and the specific view, so that
@@ -137,7 +137,7 @@ public class ResponsiveUrl {
                 public boolean onPreDraw() {
                     view.getViewTreeObserver().removeOnPreDrawListener(this);
                     if (baseUrl.equals(viewsInProgress.get(key))) {
-                        buildUrl(view, baseUrl, dimensions, view.getWidth(), view.getHeight(), callback);
+                        callback.onUrlReady(buildUrl(view, baseUrl));
                         viewsInProgress.remove(key);
                     }
 
@@ -147,72 +147,58 @@ public class ResponsiveUrl {
         }
     }
 
-    private EnumSet<Dimension> buildSet(Dimension dimension) {
-        if (dimension == Dimension.all) {
-            return EnumSet.allOf(Dimension.class);
-        }
-
-        return EnumSet.of(dimension);
-    }
-
+    /**
+     * Verify that the given view is properly configured to handle dynamically sized images.
+     *
+     * @param view The view to inspect.
+     */
     private void assertViewValidForResponsive(View view) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN &&
                 view instanceof ImageView &&
                 ((ImageView) view).getAdjustViewBounds()) {
-            // We can't get the size of a dynamically-sized container
-            throw new IllegalArgumentException("Cannot use responsive images with AdjustViewBounds");
+            // We can't determine the actual size of a dynamically-sized container, it's a circular
+            // dependency.
+            throw new IllegalArgumentException("Cannot use responsive Url with AdjustViewBounds");
         }
     }
 
-    private boolean conditionsAreMet(EnumSet<Dimension> dimensions, int width, int height) {
-        boolean widthOk = !dimensions.contains(Dimension.width) || width > 0;
-        boolean heightOk = !dimensions.contains(Dimension.height) || height > 0;
+    private boolean conditionsAreMet(int width, int height) {
+        boolean widthOk = !autoWidth || width > 0;
+        boolean heightOk = !autoHeight || height > 0;
 
         return widthOk && heightOk;
     }
 
-    private int getHeight(View view) {
-        if (view.getHeight() > 0) {
-            return view.getHeight();
-        }
+    /**
+     * @param view      The view to adapt the image size to.
+     * @param baseUrl   The base cloudinary Url to chain the transformation to.
+     */
 
-        if (view.getLayoutParams() != null) {
-            return view.getLayoutParams().height;
-        }
+    /**
+     * Construct the final url with the dimensions included as the last transformation in the url.
 
-        return 0;
-    }
-
-    private int getWidth(View view) {
-        if (view.getWidth() > 0) {
-            return view.getWidth();
-        }
-
-        if (view.getLayoutParams() != null) {
-            return view.getLayoutParams().width;
-        }
-
-        return 0;
-    }
-
-    private void buildUrl(View view, Url baseUrl, EnumSet<Dimension> dimensions, int width, int height, Callback callback) {
-        // add a new transformation on top of anything already there
+     * @param view      The view to adapt the image size to.
+     * @param baseUrl   The base cloudinary Url to chain the transformation to.
+     * @return The url with the responsive transformation.
+     */
+    private Url buildUrl(View view, Url baseUrl) {
+        // add a new transformation on top of anything already there:
         Url url = baseUrl.clone();
         url.transformation().chain();
 
-        if (dimensions.contains(Dimension.height)) {
-            int contentHeight = height - view.getPaddingTop() - view.getPaddingBottom();
-            url.transformation().height(trimAndRoundUp(contentHeight, stepSize));
+        if (autoHeight) {
+            int contentHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
+            url.transformation().height(trimAndRoundUp(contentHeight));
         }
 
-        if (dimensions.contains(Dimension.width)) {
-            int contentWidth = width - view.getPaddingLeft() - view.getPaddingRight();
-            url.transformation().width(trimAndRoundUp(contentWidth, stepSize));
+        if (autoWidth) {
+            int contentWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
+            url.transformation().width(trimAndRoundUp(contentWidth));
         }
 
         url.transformation().crop(cropMode).gravity(gravity);
 
-        callback.onUrlReady(url);
+        return url;
     }
 
     /**
@@ -220,40 +206,51 @@ public class ResponsiveUrl {
      * trimmed to max bounds.
      *
      * @param dimension The Requested size
-     * @param stepSize  The step size to round (up) to.
      * @return The rounded value
      */
-    private int trimAndRoundUp(int dimension, int stepSize) {
+    private int trimAndRoundUp(int dimension) {
         int value = ((dimension - 1) / stepSize + 1) * stepSize;
         return Math.max(minDimension, Math.min(value, maxDimension));
     }
 
     /**
-     * Dimensions to be modified in the url.
+     * Ready made presets for common responsive use cases
      */
-    public enum Dimension {
-        width,
-        height,
-        all
-    }
-
     public enum Preset {
-        THUMBNAIL(Dimension.all, "fill", "auto"),
-        FULL_PHOTO(Dimension.all, "fit", "center"),
-        FILL_WIDTH(Dimension.width, "fill", "center");
+        /**
+         * Adjusts both height and width of the image, retaining the aspect-ratio, to fill the
+         * ImageView, using automatic gravity to determine which part of the image is visible.
+         * Some cropping may occur. Similar to {@link ImageView.ScaleType#CENTER_CROP}
+         */
+        AUTO_FILL(true, true, "fill", "auto"),
 
-        private final Dimension dimension;
+        /**
+         * Adjusts both height and width of the image, retaining the aspect-ratio, to completely fit
+         * within the bounds of the ImageView. The whole image will be shown, however some blank
+         * space may be visible (letterbox). Similar {@link ImageView.ScaleType#CENTER_INSIDE}
+         */
+        FIT(true, true, "fit", "center");
+
+        private final boolean autoWidth;
+        private final boolean autoHeight;
         private final String cropMode;
         private final String gravity;
 
-        Preset(Dimension dimension, String cropMode, String gravity) {
-            this.dimension = dimension;
+        Preset(boolean autoWidth, boolean autoHeight, String cropMode, String gravity) {
+            this.autoWidth = autoWidth;
+            this.autoHeight = autoHeight;
             this.cropMode = cropMode;
             this.gravity = gravity;
         }
 
+        /**
+         * Build an instance of {@link ResponsiveUrl} pre-configured according to the preset.
+         *
+         * @param cloudinary Cloudinary instance to use.
+         * @return The {@link ResponsiveUrl} instance
+         */
         public ResponsiveUrl get(Cloudinary cloudinary) {
-            return new ResponsiveUrl(cloudinary, dimension, cropMode, gravity);
+            return new ResponsiveUrl(cloudinary, autoWidth, autoHeight, cropMode, gravity);
         }
     }
 

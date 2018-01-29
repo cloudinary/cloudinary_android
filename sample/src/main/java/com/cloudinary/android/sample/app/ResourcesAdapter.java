@@ -237,7 +237,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else {
             String publicId = resource.getCloudinaryPublicId();
             Url url = MediaManager.get().url().publicId(publicId).resourceType(resource.getResourceType()).format("webp");
-            MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.THUMBNAIL)
+            MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.AUTO_FILL)
                     .generate(url, holder.imageView, new ResponsiveUrl.Callback() {
                         @Override
                         public void onUrlReady(Url url) {

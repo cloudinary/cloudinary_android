@@ -17,6 +17,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import static com.cloudinary.android.ResponsiveUrl.Preset.AUTO_FILL;
+
 class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.ImageViewHolder> {
     private final int requiredSize;
     private final ItemClickListener listener;
@@ -62,7 +64,7 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
         holder.nameTextView.setText(data.getName());
 
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
-        MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.THUMBNAIL)
+        MediaManager.get().responsiveUrl(AUTO_FILL)
                 .stepSize(50)
                 .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {
                     @Override

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.View;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Configuration;
@@ -29,7 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static com.cloudinary.android.ResponsiveUrl.Dimension;
 import static com.cloudinary.android.ResponsiveUrl.Preset;
 
 /**
@@ -362,25 +362,51 @@ public class MediaManager {
     /**
      * Create a new responsive url generator instance.
      *
-     * @param dimension The dimensions to include in the responsive transformation. Specifying only
-     *                  one dimensions will adjust the image to the view size in this dimension and
-     *                  ignore the other. Specifying all will adjust both width and height.
-     *                  The end result will vary depending on the crop mode and gravity settings.
-     * @param cropMode  Crop mode to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
-     * @param gravity   Gravity to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter">here</a>).
-     * @return The responsive url generator. Use {@link ResponsiveUrl#generate} to build the final url.
+     * @param autoWidth  Specifying true will adjust the image width to the view width
+     * @param autoHeight Specifying true will adjust the image height to the view height
+     * @param cropMode   Crop mode to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
+     * @param gravity    Gravity to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter">here</a>).
      */
-    public ResponsiveUrl responsiveUrl(@NonNull Dimension dimension, @NonNull String cropMode, @NonNull String gravity) {
-        return new ResponsiveUrl(this.cloudinary, dimension, cropMode, gravity);
+    public ResponsiveUrl responsiveUrl(boolean autoWidth, boolean autoHeight, @NonNull String cropMode, @NonNull String gravity) {
+        return new ResponsiveUrl(this.cloudinary, autoWidth, autoHeight, cropMode, gravity);
     }
 
     /**
      * Create a new responsive url generator instance.
-     * @param preset Predefined set of responsive parameters, see {@link Preset}.
-     * @return The responsive url generator. Use {@link ResponsiveUrl#generate} to build the final url.
+     * @param preset A predefined set of responsive parameters, see {@link Preset}.
+     * @return The responsive url generator. Use {@link ResponsiveUrl#generate} to build the final
+     * url.
      */
     public ResponsiveUrl responsiveUrl(@NonNull Preset preset) {
         return preset.get(this.getCloudinary());
+    }
+
+    /**
+     * Create a new responsive url.
+     *
+     * @param view     The view to adapt the resource dimensions to.
+     * @param baseUrl  A url to be used as a base to the responsive transformation. This url can
+     *                 contain any configurations and transformations. The generated responsive
+     *                 transformation will be chained as the last transformation in the url.
+     *                 Important: When generating using a base url, it's preferable to not include
+     *                 any cropping/scaling in the original transformations.
+     * @param preset   A predefined set of responsive parameters, see {@link Preset}.
+     * @param callback Callback to called when the modified Url is ready.
+     */
+    public void responsiveUrl(View view, Url baseUrl, Preset preset, ResponsiveUrl.Callback callback) {
+        preset.get(this.getCloudinary()).generate(baseUrl, view, callback);
+    }
+
+    /**
+     * Create a new responsive url.
+     *
+     * @param view     The view to adapt the resource dimensions to.
+     * @param publicId The public id of the cloudinary resource
+     * @param preset   A predefined set of responsive parameters, see {@link Preset}.
+     * @param callback Callback to called when the modified Url is ready.
+     */
+    public void responsiveUrl(View view, String publicId, Preset preset, ResponsiveUrl.Callback callback) {
+        preset.get(this.getCloudinary()).generate(publicId, view, callback);
     }
 
     /**

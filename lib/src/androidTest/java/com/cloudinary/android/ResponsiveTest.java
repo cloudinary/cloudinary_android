@@ -2,7 +2,6 @@ package com.cloudinary.android;
 
 import android.support.test.InstrumentationRegistry;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Url;
@@ -29,9 +28,11 @@ public class ResponsiveTest extends AbstractTest {
      * Helper method to get an imageview with the given dimensions
      */
     private ImageView getImageView(int width, int height) {
-        ImageView imageView = new ImageView(InstrumentationRegistry.getTargetContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
-        imageView.setLayoutParams(params);
+        ImageView imageView = new ImageView(InstrumentationRegistry.getContext());
+        imageView.setLeft(0);
+        imageView.setRight(width);
+        imageView.setTop(0);
+        imageView.setBottom(height);
         return imageView;
     }
 
@@ -54,7 +55,7 @@ public class ResponsiveTest extends AbstractTest {
     private void twoDimensionTest(String gravity, String cropMode, int stepSize, int minDimension, int maxDimension, int viewWidth, int viewHeight, final String expectedUrlSuffix) {
         final StatefulCallback callback = new StatefulCallback();
 
-        new ResponsiveUrl(cloudinary, ResponsiveUrl.Dimension.all, cropMode, gravity)
+        new ResponsiveUrl(cloudinary, true, true, cropMode, gravity)
                 .stepSize(stepSize)
                 .minDimension(minDimension)
                 .maxDimension(maxDimension)
@@ -63,7 +64,7 @@ public class ResponsiveTest extends AbstractTest {
         Awaitility.await().atMost(Duration.ONE_SECOND).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                return callback.url.endsWith(expectedUrlSuffix);
+                return callback.url != null && callback.url.endsWith(expectedUrlSuffix);
             }
         });
     }
@@ -71,7 +72,7 @@ public class ResponsiveTest extends AbstractTest {
     private void onlyWidthTest(String gravity, String cropMode, int stepSize, int minDimension, int maxDimension, int viewWidth, int viewHeight, final String expectedUrlSuffix) {
         final StatefulCallback callback = new StatefulCallback();
 
-        new ResponsiveUrl(cloudinary, ResponsiveUrl.Dimension.width, cropMode, gravity)
+        new ResponsiveUrl(cloudinary, true, false, cropMode, gravity)
                 .stepSize(stepSize)
                 .minDimension(minDimension)
                 .maxDimension(maxDimension)
