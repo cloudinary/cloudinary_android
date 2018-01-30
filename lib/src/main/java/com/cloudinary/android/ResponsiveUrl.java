@@ -2,6 +2,7 @@ package com.cloudinary.android;
 
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -14,14 +15,14 @@ import com.cloudinary.Url;
  * This class is used to generate view-size aware cloudinary Urls. It takes any {@link View} and
  * a {@link Url} as input and returns a modified {@link Url} with the width/height transformation
  * included, according to the chosen parameters.
- * Important: When using this class, it's preferable to not include any cropping/scaling
- * transformation in the base {@link Url} used.
+ * Note: When using this class, it's preferable to not include any cropping/scaling/dpr
+ * transformation in the base {@link Url} used. This can lead to unexpected results.
  */
 public class ResponsiveUrl {
     // defaults
-    private static final int DEFAULT_MIN_DIMENSION = 100;
-    private static final int DEFAULT_MAX_DIMENSION = 2000;
-    private static final int DEFAULT_STEP_SIZE = 100;
+    private static final int DEFAULT_MIN_DIMENSION = 200;
+    private static final int DEFAULT_MAX_DIMENSION = 1000;
+    private static final int DEFAULT_STEP_SIZE = 200;
 
     // holds url mapped to class instance hashes to make sure we're synced
     private static final SparseArray<Url> viewsInProgress = new SparseArray<>();
@@ -45,7 +46,7 @@ public class ResponsiveUrl {
      * @param cropMode   Crop mode to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#crop_parameter">here</a>).
      * @param gravity    Gravity to use in the transformation. See <a href="https://cloudinary.com/documentation/image_transformation_reference#gravity_parameter">here</a>).
      */
-    ResponsiveUrl(@NonNull Cloudinary cloudinary, boolean autoWidth, boolean autoHeight, @NonNull String cropMode, @NonNull String gravity) {
+    ResponsiveUrl(@NonNull Cloudinary cloudinary, boolean autoWidth, boolean autoHeight, @Nullable String cropMode, @Nullable String gravity) {
         this.cloudinary = cloudinary;
         this.autoWidth = autoWidth;
         this.autoHeight = autoHeight;
@@ -54,13 +55,13 @@ public class ResponsiveUrl {
     }
 
     /**
-     * Step size is used to limit the number of generated transformations. The actual width/height
-     * parameter in the constructed url will always be a multiplication of step size and not the
-     * exact view width/height.
+     * Step size i pixels. This is used to limit the number of generated transformations.
+     * The actual width/height parameter in the constructed url will always be a multiplication of
+     * step size and not the exact view width/height.
      * For example, when using `width` with `stepSize` 100 on a view with width between 301 and 400
      * will render as `w_400` in the url.
      *
-     * @param stepSize The step size to use.
+     * @param stepSize The step size to use, in pixels.
      * @return Itself for chaining.
      */
     public ResponsiveUrl stepSize(int stepSize) {
@@ -69,11 +70,10 @@ public class ResponsiveUrl {
     }
 
     /**
-     * Limit the maximum allowed dimension. If the actual view dimensions are larger than
-     * the value chosen here, this value will be used instead. This is useful to limit the
-     * total number of generated transformations.
-     *
-     * @param maxDimension The highest allowed dimension.
+     * Limit the minimum allowed dimension, in pixels. If the actual view width or height are
+     * larger than the value chosen here, this value will be used instead. This is useful to
+     * limit the total number of generated transformations.
+     * @param maxDimension The highest allowed dimension, in pixels.
      * @return itself for chaining.
      */
     public ResponsiveUrl maxDimension(int maxDimension) {
@@ -82,11 +82,10 @@ public class ResponsiveUrl {
     }
 
     /**
-     * Limit the minimum allowed dimension. If the actual view dimensions are smaller than
-     * the value chosen here, this value will be used instead. This is useful to limit the
-     * total number of generated transformations.
-     *
-     * @param minDimension The smallest allowed dimension.
+     * Limit the minimum allowed dimension, in pixels. If the actual view width or height are
+     * smaller than the value chosen here, this value will be used instead. This is useful to
+     * limit the total number of generated transformations.
+     * @param minDimension The smallest allowed dimension, in pixels.
      * @return itself for chaining.
      */
     public ResponsiveUrl minDimension(int minDimension) {
@@ -168,11 +167,6 @@ public class ResponsiveUrl {
 
         return widthOk && heightOk;
     }
-
-    /**
-     * @param view      The view to adapt the image size to.
-     * @param baseUrl   The base cloudinary Url to chain the transformation to.
-     */
 
     /**
      * Construct the final url with the dimensions included as the last transformation in the url.

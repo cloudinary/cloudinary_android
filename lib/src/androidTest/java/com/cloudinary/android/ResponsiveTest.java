@@ -50,6 +50,9 @@ public class ResponsiveTest extends AbstractTest {
         onlyWidthTest("auto", "fill", 50, 0, 1100, 449, 821, "c_fill,g_auto,w_450/publicId");
         onlyWidthTest("auto", "fill", 50, 600, 1100, 449, 821, "c_fill,g_auto,w_600/publicId");
         onlyWidthTest("auto", "fill", 50, 100, 1100, 2000, 821, "c_fill,g_auto,w_1100/publicId");
+        onlyWidthTest(null, null, 50, 100, 1100, 2000, 821, "w_1100/publicId");
+        onlyWidthTest("center", null, 50, 100, 1100, 2000, 821, "g_center,w_1100/publicId");
+        onlyWidthTest(null, "scale", 50, 100, 1100, 2000, 821, "c_scale,w_1100/publicId");
     }
 
     private void twoDimensionTest(String gravity, String cropMode, int stepSize, int minDimension, int maxDimension, int viewWidth, int viewHeight, final String expectedUrlSuffix) {
