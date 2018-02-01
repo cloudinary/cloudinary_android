@@ -11,11 +11,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.cloudinary.Url;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.ResponsiveUrl;
 import com.cloudinary.android.sample.R;
-import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +30,16 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final List<Resource.UploadStatus> validStatuses;
     private List<ResourceWithMeta> resources;
     private Context context;
+    private int cardImageHeight;
+    private int cardImageWidth;
 
     ResourcesAdapter(Context context, List<Resource> resources, int requiredSize, List<Resource.UploadStatus> validStatuses, ImageClickedListener listener) {
         this.context = context;
         this.listener = listener;
         this.requiredSize = requiredSize;
         this.validStatuses = validStatuses;
+        cardImageWidth = context.getResources().getDimensionPixelSize(R.dimen.card_image_width);
+        cardImageHeight = context.getResources().getDimensionPixelSize(R.dimen.card_height);
 
         this.resources = new ArrayList<>(resources.size());
         for (Resource resource : resources) {
@@ -166,7 +171,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.filename.setText(resource.getName());
     }
 
-    private void bindRegularView(ResourceViewHolder holder, int position) {
+    private void bindRegularView(final ResourceViewHolder holder, int position) {
         ResourceWithMeta resourceWithMeta = resources.get(position);
         final Resource resource = resourceWithMeta.resource;
 
@@ -181,8 +186,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.cancelRequest.setVisibility(View.GONE);
         holder.statusText.setText(null);
         holder.name.setText(null);
-        String uriToLoad = resource.getLocalUri();
-        boolean localResize = true;
+        boolean local = true;
         boolean isVideo = resource.getResourceType().equals("video");
 
         switch (resource.getStatus()) {
@@ -212,10 +216,9 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case UPLOADED:
                 holder.blackOverlay.animate().cancel();
                 holder.blackOverlay.setVisibility(View.GONE);
-                uriToLoad = CloudinaryHelper.getCroppedThumbnailUrl(requiredSize, resource);
                 holder.videoIcon.setVisibility(isVideo ? View.VISIBLE : View.GONE);
                 holder.buttonsContainer.setVisibility(View.VISIBLE);
-                localResize = false;
+                local = false;
                 break;
             case RESCHEDULED:
                 holder.blackOverlay.animate().cancel();
@@ -227,15 +230,21 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
         }
 
-        int placeholder = resource.getResourceType().equals("image") ? R.drawable.placeholder : R.drawable.video_placeholder;
+        final int placeholder = resource.getResourceType().equals("image") ? R.drawable.placeholder : R.drawable.video_placeholder;
 
-        RequestCreator creator = Picasso.with(context).load(uriToLoad).placeholder(placeholder);
-
-        if (localResize) {
-            creator.resize(requiredSize, requiredSize).centerCrop();
+        if (local) {
+            Picasso.with(context).load(resource.getLocalUri()).placeholder(placeholder).centerCrop().resize(requiredSize, requiredSize).into(holder.imageView);
+        } else {
+            String publicId = resource.getCloudinaryPublicId();
+            Url url = MediaManager.get().url().publicId(publicId).resourceType(resource.getResourceType()).format("webp");
+            MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.AUTO_FILL)
+                    .generate(url, holder.imageView, new ResponsiveUrl.Callback() {
+                        @Override
+                        public void onUrlReady(Url url) {
+                            Picasso.with(context).load(url.generate()).placeholder(placeholder).into(holder.imageView);
+                        }
+                    });
         }
-
-        creator.into(holder.imageView);
 
         if (resourceWithMeta.totalBytes > 0) {
             double progressFraction = (double) resourceWithMeta.bytes / resourceWithMeta.totalBytes;

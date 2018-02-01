@@ -10,4 +10,6 @@
     <dimen name="try_now_end_margin">24dp</dimen>
     <dimen name="buttons_container_height">36dp</dimen>
     <dimen name="cancel_request_width">24dp</dimen>
+    <dimen name="effect_item_size">120dp</dimen>
+
 </resources>

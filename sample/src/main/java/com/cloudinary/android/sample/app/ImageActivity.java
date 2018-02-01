@@ -21,6 +21,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cloudinary.Url;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.ResponsiveUrl;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.EffectData;
@@ -52,6 +55,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import static com.cloudinary.android.ResponsiveUrl.Preset.FIT;
 
 public class ImageActivity extends AppCompatActivity {
     public static final int UPLOAD_IMAGE_REQUEST_CODE = 1001;
@@ -155,7 +160,7 @@ public class ImageActivity extends AppCompatActivity {
             public boolean onPreDraw() {
                 recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 thumbHeight = Math.round((float) (recyclerView.getWidth() / 4));
-                List<EffectData> data = CloudinaryHelper.generateEffectsList(ImageActivity.this, Utils.getScreenWidth(ImageActivity.this), thumbHeight, resource);
+                List<EffectData> data = CloudinaryHelper.generateEffectsList(ImageActivity.this, resource);
                 recyclerView.setAdapter(new EffectsGalleryAdapter(ImageActivity.this, data, thumbHeight, new EffectsGalleryAdapter.ItemClickListener() {
                     @Override
                     public void onClick(EffectData data) {
@@ -177,7 +182,7 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     private void updateMainImage(EffectData data) {
-        currentUrl = data.getImageUrl();
+        currentUrl = null;
         if (resource.getResourceType().equals("image")) {
             loadImage(data);
         } else {
@@ -187,36 +192,52 @@ public class ImageActivity extends AppCompatActivity {
         descriptionTextView.setText(data.getDescription());
     }
 
-    private void loadVideo(EffectData data) {
+    private void loadVideo(final EffectData data) {
         progressBar.setVisibility(View.VISIBLE);
         imageView.setVisibility(View.GONE);
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "yourApplicationName"), null);
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        MediaSource videoSource = new ExtractorMediaSource(Uri.parse(data.getImageUrl()), dataSourceFactory, extractorsFactory, null, null);
-
-        exoPlayer.addListener(listener);
-        exoPlayer.prepare(videoSource);
+        final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "Cloudinary Sample App"), null);
+        final ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
+        MediaManager.get().responsiveUrl(exoPlayerView, baseUrl, FIT, new ResponsiveUrl.Callback() {
+            @Override
+            public void onUrlReady(Url url) {
+                String urlString = url.generate();
+                currentUrl = urlString;
+                MediaSource videoSource = new ExtractorMediaSource(Uri.parse(urlString), dataSourceFactory, extractorsFactory, null, null);
+                exoPlayer.addListener(listener);
+                exoPlayer.prepare(videoSource);
+            }
+        });
     }
 
-    private void loadImage(EffectData data) {
+    private void loadImage(final EffectData data) {
         exoPlayer.removeListener(listener);
         exoPlayerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
-        imageView.setTag(data.getImageUrl());
-        new Picasso.Builder(this).listener(new Picasso.Listener() {
+        final Picasso picasso = new Picasso.Builder(this).listener(new Picasso.Listener() {
             @Override
             public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
                 showSnackBar("Error loading resource: " + exception.getMessage());
             }
-        }).build().load(Uri.parse(data.getImageUrl())).into(imageView, new Callback() {
-            @Override
-            public void onSuccess() {
-                progressBar.setVisibility(View.GONE);
-            }
+        }).build();
 
+        Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
+        MediaManager.get().responsiveUrl(imageView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override
-            public void onError() {
-                progressBar.setVisibility(View.GONE);
+            public void onUrlReady(Url url) {
+                String uriString = url.generate();
+                currentUrl = uriString;
+                picasso.load(Uri.parse(uriString)).into(imageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
             }
         });
     }

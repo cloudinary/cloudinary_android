@@ -1,31 +1,33 @@
 package com.cloudinary.android.sample.model;
 
+import com.cloudinary.Transformation;
+
 public class EffectData {
-    private final String thumbUrl;
-    private final String imageUrl;
+    private final String publicId;
+    private final Transformation transformation;
     private final String name;
     private final String description;
 
-    public EffectData(String thumbUrl, String imageUrl, String name, String description) {
-        this.thumbUrl = thumbUrl;
-        this.imageUrl = imageUrl;
+    public EffectData(String publicId, Transformation transformation, String name, String description) {
+        this.publicId = publicId;
+        this.transformation = transformation;
         this.name = name;
         this.description = description;
-    }
-
-    public String getThumbUrl() {
-        return thumbUrl;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public String getPublicId() {
+        return publicId;
+    }
+
+    public Transformation getTransformation() {
+        return transformation;
     }
 }
