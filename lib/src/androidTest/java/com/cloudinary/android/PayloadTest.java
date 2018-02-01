@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 import static junit.framework.Assert.assertEquals;
@@ -34,7 +35,7 @@ public class PayloadTest extends AbstractTest {
     @Test
     public void testFilePayload() throws PayloadNotFoundException {
         FilePayload filePayload = new FilePayload(assetFile.getAbsolutePath());
-        verifyLengthAndRecreation(filePayload, 3381);
+        verifyLengthAndRecreation(filePayload, assetFile.length());
     }
 
     @Test
@@ -45,9 +46,20 @@ public class PayloadTest extends AbstractTest {
     }
 
     @Test
-    public void testBytesPayload() throws PayloadNotFoundException {
-        ByteArrayPayload byteArrayPayload = new ByteArrayPayload(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
-        verifyLengthAndRecreation(byteArrayPayload, 10);
+    public void testBytesPayload() throws PayloadNotFoundException, IOException {
+        FileInputStream fileInputStream = null;
+        try {
+            byte[] buffer = new byte[(int) assetFile.length()];
+            fileInputStream = new FileInputStream(assetFile);
+            fileInputStream.read(buffer);
+            fileInputStream.close();
+            ByteArrayPayload byteArrayPayload = new ByteArrayPayload(buffer);
+            verifyLengthAndRecreation(byteArrayPayload, assetFile.length());
+        } finally {
+            if (fileInputStream != null) {
+                fileInputStream.close();
+            }
+        }
     }
 
     @Test
@@ -56,7 +68,7 @@ public class PayloadTest extends AbstractTest {
         verifyLengthAndRecreation(payload, 3381);
     }
 
-    private void verifyLengthAndRecreation(Payload payload, int expectedLength) throws PayloadNotFoundException {
+    private void verifyLengthAndRecreation(Payload payload, long expectedLength) throws PayloadNotFoundException {
         assertEquals(expectedLength, payload.getLength(InstrumentationRegistry.getContext()));
 
         String asUri = payload.toUri();
