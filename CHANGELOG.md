@@ -1,4 +1,17 @@
 
+1.24.0 / 2018-02-01
+===================
+
+New functionality
+-----------------
+
+  * Add support for responsive Url generation.
+
+Other changes
+-------------
+
+  * Fix byte array payload encoding and add more comprehensive tests. (#47)
+
 1.23.0 / 2018-01-04
 ===================
 
