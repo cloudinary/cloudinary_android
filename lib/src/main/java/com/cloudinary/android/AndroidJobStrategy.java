@@ -32,15 +32,25 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         UploadPolicy policy = request.getUploadPolicy();
 
-        return new JobRequest.Builder(JOB_TAG)
-                .setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
-                .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
+        JobRequest.Builder builder = new JobRequest.Builder(JOB_TAG)
                 .setBackoffCriteria(policy.getBackoffMillis(), adaptPolicy(policy.getBackoffPolicy()))
-                .setRequiresCharging(policy.isRequiresCharging())
-                .setRequiresDeviceIdle(policy.isRequiresIdle())
-                .setExtras(extras)
-                .setRequirementsEnforced(true)
-                .build();
+                .setExtras(extras);
+
+        if (request.getTimeWindow().isImmediate()) {
+            if (request.getUploadPolicy().hasRequirements()) {
+                Logger.i(TAG, "Note: Request marked to start immediately - all requirements will be ignored.");
+            }
+
+            builder.startNow();
+        } else {
+            builder.setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
+                    .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
+                    .setRequiresCharging(policy.isRequiresCharging())
+                    .setRequiresDeviceIdle(policy.isRequiresIdle())
+                    .setRequirementsEnforced(true);
+        }
+
+        return builder.build();
     }
 
     private static JobRequest.BackoffPolicy adaptPolicy(UploadPolicy.BackoffPolicy backoffPolicy) {

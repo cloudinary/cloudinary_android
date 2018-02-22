@@ -73,7 +73,7 @@ public class TimeWindow {
      */
     public static final class Builder{
         private long minLatencyOffsetMillis = 0;
-        private long maxExecutionDelayMillis = System.currentTimeMillis() + DEFAULT_TIME_WINDOW;
+        private long maxExecutionDelayMillis = DEFAULT_TIME_WINDOW;
 
         /**
          * Sets the minimum time to wait before executing a request. This is defined as offset to current time.
