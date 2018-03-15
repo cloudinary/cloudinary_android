@@ -370,14 +370,17 @@ public class UploaderTest extends AbstractTest {
 
     @Test
     public void testCategorizationRequest() {
+        String errorMessage = "";
         // should support requesting categorization
         if (cloudinary.config.apiSecret == null)
             return;
         try {
             cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("categorization", "illegal"));
         } catch (Exception e) {
-            assertTrue(e.getMessage().matches("(.*)(Illegal value|not a valid|invalid)(.*)"));
+            errorMessage = e.getMessage();
         }
+
+        assertTrue(errorMessage.contains("Categorization item illegal is not valid"));
     }
 
     @Test
