@@ -23,7 +23,7 @@ public class CloudinaryHelper {
     public static String uploadResource(Resource resource, boolean preprocess) {
         UploadRequest request = MediaManager.get().upload(Uri.parse(resource.getLocalUri()))
                 .unsigned("sample_app_preset")
-                .constrain(TimeWindow.immediate())
+                .constrain(TimeWindow.getDefault())
                 .option("resource_type", "auto")
                 .maxFileSize(100 * 1024 * 1024) // max 100mb
                 .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build());
