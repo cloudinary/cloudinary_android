@@ -38,7 +38,7 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         if (request.getTimeWindow().isImmediate()) {
             if (request.getUploadPolicy().hasRequirements()) {
-                Logger.i(TAG, "Note: Request marked to start immediately - all requirements will be ignored.");
+                Logger.d(TAG, "Note: Request marked to start immediately - all requirements will be ignored.");
             }
 
             builder.startNow();
