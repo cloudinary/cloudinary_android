@@ -70,6 +70,9 @@ public class UploadPolicy {
         return backoffMillis;
     }
 
+    public boolean hasRequirements() {
+        return requiresCharging || requiresIdle || networkType == NetworkType.UNMETERED;
+    }
     /**
      * Get a new builder with the configuration copied from this policy.
      */
