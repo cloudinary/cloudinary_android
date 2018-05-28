@@ -69,7 +69,7 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
                 .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {
                     @Override
                     public void onUrlReady(Url url) {
-                        Picasso.with(context).load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
+                        Picasso.get().load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
                     }
                 });
 
