@@ -13,7 +13,6 @@ import com.cloudinary.android.payload.ResourcePayload;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,13 +21,11 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 @RunWith(AndroidJUnit4.class)
 public class RequestProcessorTest extends AbstractTest {
-    @Test
-    public void testStuff() {
-        Assert.assertEquals(3, 3);
-    }
-
     /**
      * Centralize processor creation in case we want to test different implementations in the future.
      */
@@ -70,13 +67,16 @@ public class RequestProcessorTest extends AbstractTest {
         callbackDispatcher.registerCallback(statefulCallback);
         processor.processRequest(InstrumentationRegistry.getTargetContext(), params);
 
+        // wait for result
         Awaitility.await().atMost(Duration.TEN_SECONDS).until(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
-                return statefulCallback.lastSuccess != null &&
-                        id.equals(statefulCallback.lastSuccess.get("public_id"));
+            public Boolean call() {
+                return statefulCallback.hasResponse();
             }
         });
+
+        assertNotNull(statefulCallback.lastSuccess);
+        assertEquals(id, statefulCallback.lastSuccess.get("public_id"));
     }
 
     @Test

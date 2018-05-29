@@ -26,7 +26,7 @@ android {
     testVariants.all { variant ->
         variant.outputs.each { output ->
             output.processManifest.doLast {
-                def url = System.getenv('CLOUDINARY_URL') ?: project.findProperty("cloudinaryUrl")
+                def url = System.getenv('CLOUDINARY_URL') ?: project.findProperty("cloudinary.url")
                 if(!url) {
                     throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl build property.")
                 }
