@@ -33,6 +33,10 @@ final class StatefulCallback implements UploadCallback {
         this.lastErrorObject = errorObject;
     }
 
+    public boolean hasResponse(){
+        return lastErrorObject != null || lastSuccess != null;
+    }
+
     @Override
     public void onReschedule(String requestId, ErrorInfo error) {
         this.lastReschedule = error;

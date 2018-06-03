@@ -351,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     public void onDeleteAllLocally() {
         ResourceRepo.getInstance().clear();
         MediaManager.get().cancelAllRequests();
-        PicassoTools.clearCache(Picasso.with(this));
+        PicassoTools.clearCache(Picasso.get());
 
         for (AbstractPagerFragment fragment : getPages()) {
             fragment.clearData();
