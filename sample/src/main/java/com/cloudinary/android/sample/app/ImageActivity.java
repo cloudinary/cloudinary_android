@@ -234,7 +234,7 @@ public class ImageActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onError() {
+                    public void onError(Exception e) {
                         progressBar.setVisibility(View.GONE);
                     }
                 });

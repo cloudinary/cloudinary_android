@@ -364,7 +364,7 @@ public class UploaderTest extends AbstractTest {
         try {
             cloudinary.uploader().upload(getAssetStream("docx.docx"), ObjectUtils.asMap("raw_convert", "illegal", "resource_type", "raw"));
         } catch (Exception e) {
-            assertTrue(e.getMessage().matches(".*illegal is not a valid.*"));
+            assertEquals("Raw convert is invalid", e.getMessage());
         }
     }
 
