@@ -26,7 +26,7 @@ public class CloudinaryHelper {
                 .constrain(TimeWindow.getDefault())
                 .option("resource_type", "auto")
                 .maxFileSize(100 * 1024 * 1024) // max 100mb
-                .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(10).build());
+                .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(2).build());
         if (preprocess) {
             // scale down images above 2000 width/height, and re-encode as webp with 80 quality to save bandwidth
             request.preprocess(ImagePreprocessChain.limitDimensionsChain(2000, 2000)
