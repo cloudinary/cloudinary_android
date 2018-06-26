@@ -111,17 +111,14 @@ class DefaultRequestProcessor implements RequestProcessor {
                             error = new ErrorInfo(ErrorInfo.SIGNATURE_FAILURE, e.getMessage());
                         } catch (IOException e) {
                             Logger.e(TAG, String.format("IOException for request %s.", requestId), e);
-                            // one up error count (only relevant here because here we may want to
-                            // reschedule if we're not at max errors yet:
-                            int newErrorCount = errorCount + 1;
 
-                            if (newErrorCount > maxErrorRetries) {
+                            if (errorCount >= maxErrorRetries) {
                                 // failure
-                                error = getMaxRetryError(newErrorCount);
+                                error = getMaxRetryError(errorCount);
                                 requestResultStatus = FAILURE;
                             } else {
-                                // update params and reschedule
-                                params.putInt(ERROR_COUNT_PARAM, newErrorCount);
+                                // one up error count and reschedule
+                                params.putInt(ERROR_COUNT_PARAM, errorCount + 1);
                                 error = new ErrorInfo(ErrorInfo.NETWORK_ERROR, e.getMessage());
                                 requestResultStatus = RESCHEDULE;
                             }
@@ -174,11 +171,11 @@ class DefaultRequestProcessor implements RequestProcessor {
     }
 
     @NonNull
-    private ErrorInfo getMaxRetryError(int newErrorCount) {
+    private ErrorInfo getMaxRetryError(int errorCount) {
         ErrorInfo error;
         String message = String.format(Locale.getDefault(),
                 "Request reached max retries allowed (%d).",
-                newErrorCount - 1); // 5 errors mean we retried 4 times
+                errorCount);
         error = new ErrorInfo(ErrorInfo.TOO_MANY_ERRORS, message);
         return error;
     }
