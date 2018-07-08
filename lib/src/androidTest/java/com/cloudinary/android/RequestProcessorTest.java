@@ -181,6 +181,37 @@ public class RequestProcessorTest extends AbstractTest {
         });
     }
 
+    @Test
+    public void testMaxRetries() throws IOException {
+        RequestParams params = provideRequestParams();
+        params.putString("uri", new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath()).toUri());
+        HashMap<String, Object> options = new HashMap<>();
+        // verify that the parameter reaches all the way to the uploader inside:
+        final String id = UUID.randomUUID().toString();
+        options.put("public_id", id);
+        options.put("unsigned", true);
+        options.put("upload_preset", TEST_PRESET);
+        params.putString("options", UploadRequest.encodeOptions(options));
+        params.putInt("errorCount", 15);
+
+        DefaultCallbackDispatcher callbackDispatcher = provideCallbackDispatcher();
+        RequestProcessor processor = provideRequestProcessor(callbackDispatcher);
+        final StatefulCallback statefulCallback = new StatefulCallback();
+        callbackDispatcher.registerCallback(statefulCallback);
+        processor.processRequest(InstrumentationRegistry.getTargetContext(), params);
+
+        // wait for result
+        Awaitility.await().atMost(Duration.TEN_SECONDS).until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                return statefulCallback.hasResponse();
+            }
+        });
+
+        assertNotNull(statefulCallback.lastErrorObject);
+        assertEquals(ErrorInfo.TOO_MANY_ERRORS, statefulCallback.lastErrorObject.getCode());
+    }
+
     /**
      * Bundle based implementation for RequestParams, for testing purposes.
      */

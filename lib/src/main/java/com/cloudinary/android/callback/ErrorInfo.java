@@ -17,6 +17,7 @@ public class ErrorInfo {
     public static final int BYTE_ARRAY_PAYLOAD_EMPTY = 10;
     public static final int REQUEST_CANCELLED = 11;
     public static final int PREPROCESS_ERROR = 12;
+    public static final int TOO_MANY_ERRORS = 13;
 
     private final int code;
     private final String description;
