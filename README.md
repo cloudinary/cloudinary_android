@@ -134,7 +134,7 @@ The following examples uploads a `File`  using the default settings, a request u
    
 The returned `requestId` is used to identify the request in global callbacks and to cancel the request if needed. The callback should be any implementation of `UploadCallback`.
 
-The uploaded image is assigned a randomly generated public I. As soon as `onSuccess` is called, the image is immediately available for download through a CDN:
+The uploaded image is assigned a randomly generated public Id. As soon as `onSuccess` is called, the image is immediately available for download through a CDN:
 
     MediaManager.get().url().generate("abcfrmo8zul1mafopawefg.jpg")
       
