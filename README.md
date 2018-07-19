@@ -208,6 +208,10 @@ Contact us at [support@cloudinary.com](mailto:support@cloudinary.com)
 
 Or via Twitter: [@cloudinary](https://twitter.com/#!/cloudinary)
 
+## Join the Community ##########################################################
+
+Impact the product, hear updates, test drive new features and more! Join [here](https://www.facebook.com/groups/CloudinaryCommunity).
+
 ## License #######################################################################
 
 Released under the MIT license. 
