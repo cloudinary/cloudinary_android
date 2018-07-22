@@ -1,5 +1,5 @@
-Cloudinary
-==========
+Cloudinary Android SDK
+======================
 
 Cloudinary is a cloud service that offers a solution to a web application's entire image management pipeline.
 
@@ -11,7 +11,9 @@ Cloudinary offers comprehensive APIs and administration capabilities and is easy
 
 Cloudinary provides URL and HTTP based APIs that can be easily integrated with any Web development framework.
 
-For Android, Cloudinary provides a library for simplifying the integration even further. The library requires Android 2.3 or higher.
+## Requirements
+The library requires Android version 4.0.3 (Ice Cream Sandwich) and up.
+
 ## Gradle Integration
 Add the following dependency to your build.gradle:
 
@@ -132,7 +134,7 @@ The following examples uploads a `File`  using the default settings, a request u
    
 The returned `requestId` is used to identify the request in global callbacks and to cancel the request if needed. The callback should be any implementation of `UploadCallback`.
 
-The uploaded image is assigned a randomly generated public I. As soon as `onSuccess` is called, the image is immediately available for download through a CDN:
+The uploaded image is assigned a randomly generated public Id. As soon as `onSuccess` is called, the image is immediately available for download through a CDN:
 
     MediaManager.get().url().generate("abcfrmo8zul1mafopawefg.jpg")
       
@@ -205,6 +207,10 @@ You can [open an issue through GitHub](https://github.com/cloudinary/cloudinary_
 Contact us at [support@cloudinary.com](mailto:support@cloudinary.com)
 
 Or via Twitter: [@cloudinary](https://twitter.com/#!/cloudinary)
+
+## Join the Community ##########################################################
+
+Impact the product, hear updates, test drive new features and more! Join [here](https://www.facebook.com/groups/CloudinaryCommunity).
 
 ## License #######################################################################
 
