@@ -1,4 +1,14 @@
 
+1.24.1 / 2018-07-23
+===================
+
+  * Bump cloudinary-core library version to 1.19.0
+  * Refactor max error count handling for upload requests.
+  * Update libraries and tools versions, fix tests
+  * Add `consumerProguardFiles` to automatically generate proguard rules for consumers.
+  * Improve support for immediate time window in upload requests.
+  * Fix categorization request test case
+ 
 1.24.0 / 2018-02-01
 ===================
 
