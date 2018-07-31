@@ -11,9 +11,9 @@ import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.android.preprocess.PayloadDecodeException;
-import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.android.preprocess.PreprocessChain;
 import com.cloudinary.android.preprocess.PreprocessException;
+import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
@@ -171,24 +171,21 @@ public class UploadRequest<T extends Payload> {
     /**
      * Dispatch the request
      *
-     * @param context Android context. Needed if using preprocessing. Otherwise can be null.
+     * @param context Android context. Needed if using preprocessing or for immediate requests.
+     *               Otherwise can be null.
      * @return The unique id of the request.
      */
-    public synchronized String dispatch(final Context context) {
+    public synchronized String dispatch(@Nullable final Context context) {
         assertNotDispatched();
         verifyOptionsExist();
         this.dispatched = true;
-        try {
-            optionsAsString = encodeOptions(options);
-        } catch (IOException e) {
-            throw new InvalidParamsException("Parameters must be serializable", e);
-        }
+        serializeOptions();
 
         MediaManager.get().registerCallback(requestId, callback);
 
         boolean hasPreprocess = preprocessChain != null && !preprocessChain.isEmpty();
         if (!hasPreprocess && maxFileSize == null) {
-            uploadContext.getDispatcher().dispatch(this);
+            uploadContext.getDispatcher().dispatch(context, this);
         } else {
             if (context == null) {
                 throw new IllegalArgumentException("A valid android context must be supplied to UploadRequest.dispatch() when using preprocessing or setting maxFileSize");
@@ -209,7 +206,7 @@ public class UploadRequest<T extends Payload> {
                         if (maxFileSize != null && length > maxFileSize) {
                             MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, String.format("Payload size is too large, %d, max is %d", length, maxFileSize)));
                         } else {
-                            uploadContext.getDispatcher().dispatch(newRequest);
+                            uploadContext.getDispatcher().dispatch(context, newRequest);
                         }
                     } catch (RuntimeException e) {
                         Logger.e(TAG, "Error running preprocess for request", e);
@@ -224,6 +221,14 @@ public class UploadRequest<T extends Payload> {
         }
 
         return requestId;
+    }
+
+    synchronized void serializeOptions() {
+        try {
+            optionsAsString = encodeOptions(options);
+        } catch (IOException e) {
+            throw new InvalidParamsException("Parameters must be serializable", e);
+        }
     }
 
     /**

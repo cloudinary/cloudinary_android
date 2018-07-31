@@ -3,6 +3,7 @@ package com.cloudinary.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 
 import com.cloudinary.android.payload.FilePayload;
@@ -44,7 +45,7 @@ public class PreprocessTest extends AbstractTest {
         final UploadRequest[] requests = new UploadRequest[1];
         final UploadRequest<FilePayload> request = new UploadRequest<>(new UploadContext<>(filePayload, new RequestDispatcher() {
             @Override
-            public String dispatch(UploadRequest request) {
+            public String dispatch(@Nullable Context context, UploadRequest request) {
                 requests[0] = request;
                 return null;
             }

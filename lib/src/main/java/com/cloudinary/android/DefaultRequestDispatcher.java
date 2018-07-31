@@ -1,5 +1,8 @@
 package com.cloudinary.android;
 
+import android.content.Context;
+import android.support.annotation.Nullable;
+
 import com.cloudinary.android.callback.ErrorInfo;
 
 import java.util.HashSet;
@@ -14,21 +17,22 @@ class DefaultRequestDispatcher implements RequestDispatcher {
 
     private final Random rand = new Random();
     private final BackgroundRequestStrategy strategy;
+    private final ImmediateRequestsRunner immediateRequestsRunner;
     private final Set<String> abortedRequestIds = new HashSet<>();
     private final Object cancellationLock = new Object();
 
 
-    DefaultRequestDispatcher(BackgroundRequestStrategy strategy) {
+    DefaultRequestDispatcher(BackgroundRequestStrategy strategy, ImmediateRequestsRunner immediateRequestsRunner) {
         this.strategy = strategy;
+        this.immediateRequestsRunner = immediateRequestsRunner;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final String dispatch(UploadRequest request) {
+    public final String dispatch(@Nullable Context context, UploadRequest request) {
         String requestId = request.getRequestId();
-
 
         // If we are at max capacity and the request is not urgent defer this request by [10-20] minutes.
         // Requests will be started once there's more room
@@ -48,7 +52,17 @@ class DefaultRequestDispatcher implements RequestDispatcher {
                 return requestId;
             }
 
-            strategy.doDispatch(request);
+            if (request.getTimeWindow().isImmediate()) {
+                if (context != null) {
+                    immediateRequestsRunner.dispatchRequest(context, request);
+                } else {
+                    Logger.d(TAG, "An immediate job was dispatched without providing context, " +
+                            "falling back to background jobs");
+                    strategy.doDispatch(request);
+                }
+            } else {
+                strategy.doDispatch(request);
+            }
         }
 
         return requestId;

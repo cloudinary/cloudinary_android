@@ -51,6 +51,8 @@ public class MediaManager {
     private final RequestProcessor requestProcessor;
     private final CallbackDispatcher callbackDispatcher;
     private final SignatureProvider signatureProvider;
+    private final ImmediateRequestsRunner immediateRequestsRunner;
+
     private final ExecutorService executor;
 
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
@@ -63,8 +65,10 @@ public class MediaManager {
         // use context to initialize components but DO NOT store it
         BackgroundRequestStrategy strategy = BackgroundStrategyProvider.provideStrategy();
         callbackDispatcher = new DefaultCallbackDispatcher(context);
-        requestDispatcher = new DefaultRequestDispatcher(strategy);
         requestProcessor = new DefaultRequestProcessor(callbackDispatcher);
+        immediateRequestsRunner = new DefaultImmediateRequestsRunner(requestProcessor);
+        requestDispatcher = new DefaultRequestDispatcher(strategy, immediateRequestsRunner);
+
         strategy.init(context);
         this.signatureProvider = signatureProvider;
 
@@ -232,7 +236,7 @@ public class MediaManager {
      * @return True if the request was found and cancelled successfully.
      */
     public boolean cancelRequest(String requestId) {
-        return requestDispatcher.cancelRequest(requestId);
+        return immediateRequestsRunner.cancelRequest(requestId) || requestDispatcher.cancelRequest(requestId);
     }
 
     /**
@@ -241,7 +245,7 @@ public class MediaManager {
      * @return The count of canceled requests and running jobs.
      */
     public int cancelAllRequests() {
-        return requestDispatcher.cancelAllRequests();
+        return requestDispatcher.cancelAllRequests() + immediateRequestsRunner.cancelAllRequests();
     }
 
     /**
