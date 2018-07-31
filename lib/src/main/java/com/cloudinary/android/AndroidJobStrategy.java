@@ -317,6 +317,11 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         }
 
         @Override
+        public void putBoolean(String key, boolean value) {
+            this.bundle.putBoolean(key, value);
+        }
+
+        @Override
         public String getString(String key, String defaultValue) {
             return bundle.getString(key, defaultValue);
         }
@@ -329,6 +334,11 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         @Override
         public long getLong(String key, long defaultValue) {
             return bundle.getLong(key, defaultValue);
+        }
+
+        @Override
+        public boolean getBoolean(String key, boolean defaultValue) {
+            return bundle.getBoolean(key, defaultValue);
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.cloudinary.android;
 
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -26,33 +25,11 @@ import static org.junit.Assert.assertNotNull;
 
 @RunWith(AndroidJUnit4.class)
 public class RequestProcessorTest extends AbstractTest {
-    /**
-     * Centralize processor creation in case we want to test different implementations in the future.
-     */
-    protected RequestProcessor provideRequestProcessor(DefaultCallbackDispatcher callbackDispatcher) {
-        return new DefaultRequestProcessor(callbackDispatcher);
-    }
-
-    /**
-     * Centralize params creation in case we want to test different implementations in the future.
-     */
-    protected RequestParams provideRequestParams() {
-        TestParams testParams = new TestParams();
-        testParams.putString("requestId", UUID.randomUUID().toString());
-        return testParams;
-    }
-
-    /**
-     * Centralize callback dispatcher creation in case we want to test different implementations in the future.
-     */
-    protected DefaultCallbackDispatcher provideCallbackDispatcher() {
-        return new DefaultCallbackDispatcher(InstrumentationRegistry.getTargetContext());
-    }
 
     @Test
     public void testValidUploadWithParams() throws IOException {
         RequestParams params = provideRequestParams();
-        params.putString("uri", new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath()).toUri());
+        params.putString("uri", buildPayload().toUri());
         HashMap<String, Object> options = new HashMap<>();
         // verify that the parameter reaches all the way to the uploader inside:
         final String id = UUID.randomUUID().toString();
@@ -83,7 +60,7 @@ public class RequestProcessorTest extends AbstractTest {
     public void testInvalidOptions() throws IOException {
         RequestParams params = provideRequestParams();
         params.putString("options", "bad options string");
-        params.putString("uri", new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath()).toUri());
+        params.putString("uri", buildPayload().toUri());
 
         verifyError(params, ErrorInfo.OPTIONS_FAILURE);
     }
@@ -155,7 +132,7 @@ public class RequestProcessorTest extends AbstractTest {
         HashMap<String, Object> options = new HashMap<>();
 
         params.putString("options", UploadRequest.encodeOptions(options));
-        params.putString("uri", new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath()).toUri());
+        params.putString("uri", buildPayload().toUri());
 
         verifyError(params, ErrorInfo.SIGNATURE_FAILURE);
     }
@@ -184,7 +161,7 @@ public class RequestProcessorTest extends AbstractTest {
     @Test
     public void testMaxRetries() throws IOException {
         RequestParams params = provideRequestParams();
-        params.putString("uri", new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath()).toUri());
+        params.putString("uri", buildPayload().toUri());
         HashMap<String, Object> options = new HashMap<>();
         // verify that the parameter reaches all the way to the uploader inside:
         final String id = UUID.randomUUID().toString();
@@ -212,40 +189,4 @@ public class RequestProcessorTest extends AbstractTest {
         assertEquals(ErrorInfo.TOO_MANY_ERRORS, statefulCallback.lastErrorObject.getCode());
     }
 
-    /**
-     * Bundle based implementation for RequestParams, for testing purposes.
-     */
-    protected static final class TestParams implements RequestParams {
-        private final Bundle values = new Bundle();
-
-        @Override
-        public void putString(String key, String value) {
-            values.putString(key, value);
-        }
-
-        @Override
-        public void putInt(String key, int value) {
-            values.putInt(key, value);
-        }
-
-        @Override
-        public void putLong(String key, long value) {
-            values.putLong(key, value);
-        }
-
-        @Override
-        public String getString(String key, String defaultValue) {
-            return values.getString(key, defaultValue);
-        }
-
-        @Override
-        public int getInt(String key, int defaultValue) {
-            return values.getInt(key, defaultValue);
-        }
-
-        @Override
-        public long getLong(String key, long defaultValue) {
-            return values.getLong(key, defaultValue);
-        }
-    }
 }

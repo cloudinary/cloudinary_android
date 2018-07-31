@@ -21,6 +21,7 @@ import com.cloudinary.utils.StringUtils;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,7 +56,7 @@ class DefaultRequestProcessor implements RequestProcessor {
         final String optionsAsString = params.getString("options", null);
         final int maxErrorRetries = params.getInt("maxErrorRetries", MediaManager.get().getGlobalUploadPolicy().getMaxErrorRetries());
         final int errorCount = params.getInt(ERROR_COUNT_PARAM, 0);
-
+        final boolean isImmediate = params.getBoolean("immediate", false);
         Logger.i(TAG, String.format("Processing Request %s.", requestId));
 
         callbackDispatcher.dispatchStart(requestId);
@@ -68,7 +69,7 @@ class DefaultRequestProcessor implements RequestProcessor {
         boolean optionsLoadedSuccessfully = false;
         Map<String, Object> options = null;
         try {
-            options = UploadRequest.decodeOptions(optionsAsString);
+            options = StringUtils.isBlank(optionsAsString) ? new HashMap<String, Object>() : UploadRequest.decodeOptions(optionsAsString);
             optionsLoadedSuccessfully = true;
         } catch (Exception e) {
             Logger.e(TAG, String.format("Request %s, error loading options.", requestId), e);
@@ -112,7 +113,11 @@ class DefaultRequestProcessor implements RequestProcessor {
                         } catch (IOException e) {
                             Logger.e(TAG, String.format("IOException for request %s.", requestId), e);
 
-                            if (errorCount >= maxErrorRetries) {
+                            if (isImmediate) {
+                                // Don't reschedule immediate requests
+                                error = new ErrorInfo(ErrorInfo.NETWORK_ERROR, e.getMessage());
+                                requestResultStatus = FAILURE;
+                            } else if (errorCount >= maxErrorRetries) {
                                 // failure
                                 error = getMaxRetryError(errorCount);
                                 requestResultStatus = FAILURE;

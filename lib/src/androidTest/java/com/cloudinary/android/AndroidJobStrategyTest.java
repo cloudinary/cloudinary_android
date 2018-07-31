@@ -4,7 +4,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.policy.TimeWindow;
-import com.cloudinary.android.policy.UploadPolicy;
 import com.evernote.android.job.JobRequest;
 
 import org.junit.Test;
@@ -20,19 +19,10 @@ public class AndroidJobStrategyTest extends AbstractTest {
 
     @Test
     public void testAdapter() throws InterruptedException, IOException {
-        FilePayload payload = new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath());
+        FilePayload payload = buildPayload();
 
         int tenMinutes = 10 * 60 * 1000;
-        UploadRequest<FilePayload> request =
-                new UploadRequest<>(new UploadContext<>(payload, null), null)
-                        .constrain(new TimeWindow.Builder().minLatencyMillis(20).maxExecutionDelayMillis(tenMinutes).build())
-                        .policy(new UploadPolicy.Builder()
-                                .networkPolicy(UploadPolicy.NetworkType.UNMETERED)
-                                .requiresCharging(true)
-                                .requiresIdle(false)
-                                .backoffCriteria(100, UploadPolicy.BackoffPolicy.LINEAR)
-                                .maxRetries(9)
-                                .build());
+        UploadRequest<FilePayload> request = buildUploadRequest(payload, tenMinutes);
 
         JobRequest adapted = AndroidJobStrategy.adapt(request);
 
@@ -53,4 +43,5 @@ public class AndroidJobStrategyTest extends AbstractTest {
         assertEquals(adaptedExact.getStartMs(), 1);
         assertEquals(adaptedExact.getEndMs(), 1);
     }
+
 }
