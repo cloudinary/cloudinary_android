@@ -31,7 +31,7 @@ public class ImmediateRequestHandlerTest extends AbstractTest {
         RequestDispatcher dispatcher = new DefaultRequestDispatcher(new NOPStrategy(), requestsRunner);
         UploadRequest<FilePayload> uploadRequest = buildUploadRequest(buildPayload(), 1000);
         uploadRequest.serializeOptions();
-        dispatcher.dispatch(appContext, uploadRequest);
+        dispatcher.startNow(appContext, uploadRequest);
 
         // wait for result
         Awaitility.await().atMost(Duration.TEN_SECONDS).until(new Callable<Boolean>() {

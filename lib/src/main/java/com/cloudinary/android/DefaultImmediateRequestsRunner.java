@@ -4,10 +4,10 @@ import android.content.Context;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -19,15 +19,15 @@ public class DefaultImmediateRequestsRunner implements ImmediateRequestsRunner {
     private final RequestProcessor requestProcessor;
 
     DefaultImmediateRequestsRunner(RequestProcessor requestProcessor) {
-        this.executor = new ThreadPoolExecutor(3, 10,
+        this.executor = new ThreadPoolExecutor(4, 4,
                 60L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(200));
+                new LinkedBlockingQueue<Runnable>());
 
         this.requestProcessor = requestProcessor;
     }
 
     @Override
-    public synchronized void dispatchRequest(final Context context, final UploadRequest uploadRequest) {
+    public synchronized void runRequest(final Context context, final UploadRequest uploadRequest) {
         final ImmediateRequestParams params = new ImmediateRequestParams();
         uploadRequest.populateParamsFromFields(params);
 

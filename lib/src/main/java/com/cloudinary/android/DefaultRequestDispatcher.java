@@ -1,7 +1,6 @@
 package com.cloudinary.android;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import com.cloudinary.android.callback.ErrorInfo;
 
@@ -31,7 +30,7 @@ class DefaultRequestDispatcher implements RequestDispatcher {
      * {@inheritDoc}
      */
     @Override
-    public final String dispatch(@Nullable Context context, UploadRequest request) {
+    public final String dispatch(UploadRequest request) {
         String requestId = request.getRequestId();
 
         // If we are at max capacity and the request is not urgent defer this request by [10-20] minutes.
@@ -52,17 +51,22 @@ class DefaultRequestDispatcher implements RequestDispatcher {
                 return requestId;
             }
 
-            if (request.getTimeWindow().isImmediate()) {
-                if (context != null) {
-                    immediateRequestsRunner.dispatchRequest(context, request);
-                } else {
-                    Logger.d(TAG, "An immediate job was dispatched without providing context, " +
-                            "falling back to background jobs");
-                    strategy.doDispatch(request);
-                }
-            } else {
-                strategy.doDispatch(request);
+            strategy.doDispatch(request);
+        }
+
+        return requestId;
+    }
+
+    @Override
+    public String startNow(Context context, UploadRequest request) {
+        String requestId = request.getRequestId();
+        synchronized (cancellationLock) {
+            if (abortedRequestIds.remove(requestId)) {
+                MediaManager.get().dispatchRequestError(null, requestId, new ErrorInfo(ErrorInfo.REQUEST_CANCELLED, "Request cancelled"));
+                return requestId;
             }
+
+            immediateRequestsRunner.runRequest(context, request);
         }
 
         return requestId;
