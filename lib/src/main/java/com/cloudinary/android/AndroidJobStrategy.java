@@ -34,21 +34,12 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         JobRequest.Builder builder = new JobRequest.Builder(JOB_TAG)
                 .setBackoffCriteria(policy.getBackoffMillis(), adaptPolicy(policy.getBackoffPolicy()))
-                .setExtras(extras);
-
-        if (request.getTimeWindow().isImmediate()) {
-            if (request.getUploadPolicy().hasRequirements()) {
-                Logger.d(TAG, "Note: Request marked to start immediately - all requirements will be ignored.");
-            }
-
-            builder.startNow();
-        } else {
-            builder.setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
-                    .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
-                    .setRequiresCharging(policy.isRequiresCharging())
-                    .setRequiresDeviceIdle(policy.isRequiresIdle())
-                    .setRequirementsEnforced(true);
-        }
+                .setExtras(extras)
+                .setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
+                .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
+                .setRequiresCharging(policy.isRequiresCharging())
+                .setRequiresDeviceIdle(policy.isRequiresIdle())
+                .setRequirementsEnforced(true);
 
         return builder.build();
     }

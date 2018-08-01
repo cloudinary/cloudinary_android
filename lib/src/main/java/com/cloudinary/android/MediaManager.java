@@ -25,8 +25,8 @@ import com.cloudinary.android.signed.SignatureProvider;
 import com.cloudinary.utils.StringUtils;
 
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -58,9 +58,9 @@ public class MediaManager {
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
 
     private MediaManager(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map config) {
-        executor = new ThreadPoolExecutor(3, 10,
+        executor = new ThreadPoolExecutor(4, 4,
                 60L, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<Runnable>(200));
+                new LinkedBlockingQueue<Runnable>());
 
         // use context to initialize components but DO NOT store it
         BackgroundRequestStrategy strategy = BackgroundStrategyProvider.provideStrategy();
