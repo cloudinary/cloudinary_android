@@ -10,6 +10,7 @@ import com.cloudinary.android.payload.ByteArrayPayload;
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.LocalUriPayload;
 import com.cloudinary.android.payload.ResourcePayload;
+import com.cloudinary.strategies.AbstractUploaderStrategy;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -23,6 +24,7 @@ import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
 public class RequestProcessorTest extends AbstractTest {
@@ -60,11 +62,12 @@ public class RequestProcessorTest extends AbstractTest {
         options.put("unsigned", true);
         options.put("upload_preset", TEST_PRESET);
         params.putString("options", UploadRequest.encodeOptions(options));
-
+        params.putInt("maxErrorRetries", 0);
         DefaultCallbackDispatcher callbackDispatcher = provideCallbackDispatcher();
         RequestProcessor processor = provideRequestProcessor(callbackDispatcher);
         final StatefulCallback statefulCallback = new StatefulCallback();
         callbackDispatcher.registerCallback(statefulCallback);
+
         processor.processRequest(InstrumentationRegistry.getTargetContext(), params);
 
         // wait for result
@@ -182,7 +185,7 @@ public class RequestProcessorTest extends AbstractTest {
     }
 
     @Test
-    public void testMaxRetries() throws IOException {
+    public void testMaxRetries() throws IOException, NoSuchFieldException, IllegalAccessException {
         RequestParams params = provideRequestParams();
         params.putString("uri", new FilePayload(assetToFile(TEST_IMAGE).getAbsolutePath()).toUri());
         HashMap<String, Object> options = new HashMap<>();
@@ -192,12 +195,35 @@ public class RequestProcessorTest extends AbstractTest {
         options.put("unsigned", true);
         options.put("upload_preset", TEST_PRESET);
         params.putString("options", UploadRequest.encodeOptions(options));
-        params.putInt("errorCount", 15);
+        params.putInt("errorCount", 5);
+        params.putInt("maxErrorRetries", 6);
 
         DefaultCallbackDispatcher callbackDispatcher = provideCallbackDispatcher();
         RequestProcessor processor = provideRequestProcessor(callbackDispatcher);
         final StatefulCallback statefulCallback = new StatefulCallback();
         callbackDispatcher.registerCallback(statefulCallback);
+
+        AbstractUploaderStrategy prev = TestUtils.replaceWithTimeoutStrategy(MediaManager.get().getCloudinary());
+
+        // run once, expecting the request to fail but 'reschedule'
+        processor.processRequest(InstrumentationRegistry.getTargetContext(), params);
+
+        // wait for result
+        Awaitility.await().atMost(Duration.TEN_SECONDS).until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                return statefulCallback.lastReschedule != null;
+            }
+        });
+
+        assertNotNull(statefulCallback.lastReschedule);
+        assertNull(statefulCallback.lastSuccess);
+        assertEquals(6, params.getInt("errorCount", 0));
+
+        StatefulCallback anotherStateful = new StatefulCallback();
+        callbackDispatcher.registerCallback(anotherStateful);
+
+        // run a second time, expecting a failure (too many errors):
         processor.processRequest(InstrumentationRegistry.getTargetContext(), params);
 
         // wait for result
@@ -210,6 +236,10 @@ public class RequestProcessorTest extends AbstractTest {
 
         assertNotNull(statefulCallback.lastErrorObject);
         assertEquals(ErrorInfo.TOO_MANY_ERRORS, statefulCallback.lastErrorObject.getCode());
+
+
+        // put it back:
+        TestUtils.replaceStrategyForIntsance(MediaManager.get().getCloudinary(), prev);
     }
 
     /**
