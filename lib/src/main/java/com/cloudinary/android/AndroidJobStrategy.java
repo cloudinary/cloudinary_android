@@ -34,21 +34,12 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         JobRequest.Builder builder = new JobRequest.Builder(JOB_TAG)
                 .setBackoffCriteria(policy.getBackoffMillis(), adaptPolicy(policy.getBackoffPolicy()))
-                .setExtras(extras);
-
-        if (request.getTimeWindow().isImmediate()) {
-            if (request.getUploadPolicy().hasRequirements()) {
-                Logger.d(TAG, "Note: Request marked to start immediately - all requirements will be ignored.");
-            }
-
-            builder.startNow();
-        } else {
-            builder.setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
-                    .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
-                    .setRequiresCharging(policy.isRequiresCharging())
-                    .setRequiresDeviceIdle(policy.isRequiresIdle())
-                    .setRequirementsEnforced(true);
-        }
+                .setExtras(extras)
+                .setExecutionWindow(request.getTimeWindow().getMinLatencyOffsetMillis(), request.getTimeWindow().getMaxExecutionDelayMillis())
+                .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
+                .setRequiresCharging(policy.isRequiresCharging())
+                .setRequiresDeviceIdle(policy.isRequiresIdle())
+                .setRequirementsEnforced(true);
 
         return builder.build();
     }
@@ -317,6 +308,11 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         }
 
         @Override
+        public void putBoolean(String key, boolean value) {
+            this.bundle.putBoolean(key, value);
+        }
+
+        @Override
         public String getString(String key, String defaultValue) {
             return bundle.getString(key, defaultValue);
         }
@@ -329,6 +325,11 @@ class AndroidJobStrategy implements BackgroundRequestStrategy {
         @Override
         public long getLong(String key, long defaultValue) {
             return bundle.getLong(key, defaultValue);
+        }
+
+        @Override
+        public boolean getBoolean(String key, boolean defaultValue) {
+            return bundle.getBoolean(key, defaultValue);
         }
     }
 }

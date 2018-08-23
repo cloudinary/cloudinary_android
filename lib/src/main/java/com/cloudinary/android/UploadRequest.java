@@ -1,6 +1,7 @@
 package com.cloudinary.android;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.cloudinary.android.callback.ErrorInfo;
@@ -11,9 +12,9 @@ import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.android.preprocess.PayloadDecodeException;
-import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.android.preprocess.PreprocessChain;
 import com.cloudinary.android.preprocess.PreprocessException;
+import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class UploadRequest<T extends Payload> {
     private Map<String, Object> options;
     private String optionsAsString = null;
     private Long maxFileSize;
+    private boolean startNow = false;
 
     UploadRequest(UploadContext<T> uploadContext) {
         this.uploadContext = uploadContext;
@@ -169,26 +171,35 @@ public class UploadRequest<T extends Payload> {
     }
 
     /**
+     * Start the request immediately, ignoring all other constraints.
+     *
+     * @param context Android context
+     * @return The started request id.
+     */
+    public synchronized String startNow(@NonNull Context context) {
+        startNow = true;
+        return dispatch(context);
+    }
+
+    /**
      * Dispatch the request
      *
-     * @param context Android context. Needed if using preprocessing. Otherwise can be null.
+     * @param context Android context. Needed if using preprocessing.
+     *                Otherwise can be null.
      * @return The unique id of the request.
      */
-    public synchronized String dispatch(final Context context) {
+    public synchronized String dispatch(@Nullable final Context context) {
         assertNotDispatched();
         verifyOptionsExist();
         this.dispatched = true;
-        try {
-            optionsAsString = encodeOptions(options);
-        } catch (IOException e) {
-            throw new InvalidParamsException("Parameters must be serializable", e);
-        }
+        serializeOptions();
 
         MediaManager.get().registerCallback(requestId, callback);
 
+        final RequestDispatcher dispatcher = uploadContext.getDispatcher();
         boolean hasPreprocess = preprocessChain != null && !preprocessChain.isEmpty();
         if (!hasPreprocess && maxFileSize == null) {
-            uploadContext.getDispatcher().dispatch(this);
+            doDispatch(dispatcher, context, UploadRequest.this);
         } else {
             if (context == null) {
                 throw new IllegalArgumentException("A valid android context must be supplied to UploadRequest.dispatch() when using preprocessing or setting maxFileSize");
@@ -198,18 +209,14 @@ public class UploadRequest<T extends Payload> {
                 @Override
                 public void run() {
                     try {
-                        final UploadRequest newRequest;
-                        if (preprocessChain != null) {
-                            newRequest = preprocessAndClone(context);
-                        } else {
-                            newRequest = UploadRequest.this;
-                        }
+                        final UploadRequest newRequest = preprocessChain != null ?
+                                preprocessAndClone(context) : UploadRequest.this;
 
                         long length = newRequest.getPayload().getLength(context);
                         if (maxFileSize != null && length > maxFileSize) {
                             MediaManager.get().dispatchRequestError(context, requestId, new ErrorInfo(ErrorInfo.PREPROCESS_ERROR, String.format("Payload size is too large, %d, max is %d", length, maxFileSize)));
                         } else {
-                            uploadContext.getDispatcher().dispatch(newRequest);
+                            doDispatch(dispatcher, context, newRequest);
                         }
                     } catch (RuntimeException e) {
                         Logger.e(TAG, "Error running preprocess for request", e);
@@ -226,11 +233,32 @@ public class UploadRequest<T extends Payload> {
         return requestId;
     }
 
+    private void doDispatch(RequestDispatcher dispatcher, @Nullable Context context, UploadRequest<T> uploadRequest) {
+        if (startNow) {
+            if (context == null) {
+                throw new IllegalArgumentException("Context cannot be null when calling startNow()");
+            }
+
+            dispatcher.startNow(context, uploadRequest);
+
+        } else {
+            dispatcher.dispatch(uploadRequest);
+        }
+    }
+
+    synchronized void serializeOptions() {
+        try {
+            optionsAsString = encodeOptions(options);
+        } catch (IOException e) {
+            throw new InvalidParamsException("Parameters must be serializable", e);
+        }
+    }
+
     /**
      * Run all the preprocessing steps on the request and replicate a new request, with a file payload
      * containing the processed resource.
+     *
      * @param context Android context for preprocssing
-
      * @return A new request with the preprocessed resource
      * @throws PayloadNotFoundException
      * @throws PayloadDecodeException

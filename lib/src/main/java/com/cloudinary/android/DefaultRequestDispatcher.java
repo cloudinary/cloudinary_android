@@ -1,5 +1,7 @@
 package com.cloudinary.android;
 
+import android.content.Context;
+
 import com.cloudinary.android.callback.ErrorInfo;
 
 import java.util.HashSet;
@@ -14,12 +16,14 @@ class DefaultRequestDispatcher implements RequestDispatcher {
 
     private final Random rand = new Random();
     private final BackgroundRequestStrategy strategy;
+    private final ImmediateRequestsRunner immediateRequestsRunner;
     private final Set<String> abortedRequestIds = new HashSet<>();
     private final Object cancellationLock = new Object();
 
 
-    DefaultRequestDispatcher(BackgroundRequestStrategy strategy) {
+    DefaultRequestDispatcher(BackgroundRequestStrategy strategy, ImmediateRequestsRunner immediateRequestsRunner) {
         this.strategy = strategy;
+        this.immediateRequestsRunner = immediateRequestsRunner;
     }
 
     /**
@@ -28,7 +32,6 @@ class DefaultRequestDispatcher implements RequestDispatcher {
     @Override
     public final String dispatch(UploadRequest request) {
         String requestId = request.getRequestId();
-
 
         // If we are at max capacity and the request is not urgent defer this request by [10-20] minutes.
         // Requests will be started once there's more room
@@ -49,6 +52,21 @@ class DefaultRequestDispatcher implements RequestDispatcher {
             }
 
             strategy.doDispatch(request);
+        }
+
+        return requestId;
+    }
+
+    @Override
+    public String startNow(Context context, UploadRequest request) {
+        String requestId = request.getRequestId();
+        synchronized (cancellationLock) {
+            if (abortedRequestIds.remove(requestId)) {
+                MediaManager.get().dispatchRequestError(null, requestId, new ErrorInfo(ErrorInfo.REQUEST_CANCELLED, "Request cancelled"));
+                return requestId;
+            }
+
+            immediateRequestsRunner.runRequest(context, request);
         }
 
         return requestId;
