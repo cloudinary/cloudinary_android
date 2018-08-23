@@ -3,7 +3,6 @@ package com.cloudinary.android;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
@@ -20,7 +19,6 @@ import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -186,7 +184,7 @@ public class UploadRequest<T extends Payload> {
     /**
      * Dispatch the request
      *
-     * @param context Android context. Needed if using preprocessing or for immediate requests.
+     * @param context Android context. Needed if using preprocessing.
      *                Otherwise can be null.
      * @return The unique id of the request.
      */
@@ -237,14 +235,12 @@ public class UploadRequest<T extends Payload> {
 
     private void doDispatch(RequestDispatcher dispatcher, @Nullable Context context, UploadRequest<T> uploadRequest) {
         if (startNow) {
-            if (context != null) {
-                dispatcher.startNow(context, uploadRequest);
-            } else {
-                // fallback to regular dispatch
-                Log.d(TAG, String.format(Locale.getDefault(), "Immediate request %s falling back to" +
-                        " regular dispatching, no context provided", requestId));
-                dispatcher.dispatch(uploadRequest);
+            if (context == null) {
+                throw new IllegalArgumentException("Context cannot be null when calling startNow()");
             }
+
+            dispatcher.startNow(context, uploadRequest);
+
         } else {
             dispatcher.dispatch(uploadRequest);
         }

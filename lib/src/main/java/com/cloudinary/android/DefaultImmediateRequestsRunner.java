@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultImmediateRequestsRunner implements ImmediateRequestsRunner {
     private static final String TAG = "DefaultImmediateRequestsRunner";
 
-    private static final Map<String, Future> tasks = new ConcurrentHashMap<>();
+    protected static final Map<String, Future> tasks = new ConcurrentHashMap<>();
     private final ExecutorService executor;
     private final RequestProcessor requestProcessor;
 
