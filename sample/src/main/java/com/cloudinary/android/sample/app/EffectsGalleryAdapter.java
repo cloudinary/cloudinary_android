@@ -25,9 +25,11 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
     private List<EffectData> images;
     private Context context;
     private EffectData selected = null;
+    private String resourceType;
 
-    EffectsGalleryAdapter(Context context, List<EffectData> images, int requiredSize, ItemClickListener listener) {
+    EffectsGalleryAdapter(Context context, List<EffectData> images, String resourceType, int requiredSize, ItemClickListener listener) {
         this.context = context;
+        this.resourceType = resourceType;
         this.images = images;
         this.requiredSize = requiredSize;
         this.listener = listener;
@@ -63,7 +65,8 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
         holder.itemView.setTag(images.get(position));
         holder.nameTextView.setText(data.getName());
 
-        Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
+        // force image format (webp in this case) so that both video and images are downloaded as images.
+        Url baseUrl = MediaManager.get().url().format("webp").resourceType(resourceType).publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(AUTO_FILL)
                 .stepSize(50)
                 .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {

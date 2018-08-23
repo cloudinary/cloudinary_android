@@ -161,7 +161,7 @@ public class ImageActivity extends AppCompatActivity {
                 recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 thumbHeight = Math.round((float) (recyclerView.getWidth() / 4));
                 List<EffectData> data = CloudinaryHelper.generateEffectsList(ImageActivity.this, resource);
-                recyclerView.setAdapter(new EffectsGalleryAdapter(ImageActivity.this, data, thumbHeight, new EffectsGalleryAdapter.ItemClickListener() {
+                recyclerView.setAdapter(new EffectsGalleryAdapter(ImageActivity.this, data, resource.getResourceType(), thumbHeight, new EffectsGalleryAdapter.ItemClickListener() {
                     @Override
                     public void onClick(EffectData data) {
                         updateMainImage(data);
@@ -197,7 +197,7 @@ public class ImageActivity extends AppCompatActivity {
         imageView.setVisibility(View.GONE);
         final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "Cloudinary Sample App"), null);
         final ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
+        Url baseUrl = MediaManager.get().url().resourceType("video").publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(exoPlayerView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override
             public void onUrlReady(Url url) {
