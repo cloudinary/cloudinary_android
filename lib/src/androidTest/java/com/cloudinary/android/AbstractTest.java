@@ -115,7 +115,7 @@ public class AbstractTest {
     }
 
     protected UploadRequest<FilePayload> buildUploadRequest(FilePayload payload, int maxExecutionDisplay) {
-        return new UploadRequest<>(new UploadContext<>(payload, null), null)
+        return MediaManager.get().upload(payload)
                 .unsigned(TEST_PRESET)
                 .constrain(new TimeWindow.Builder().minLatencyMillis(20).maxExecutionDelayMillis(maxExecutionDisplay).build())
                 .policy(new UploadPolicy.Builder()
