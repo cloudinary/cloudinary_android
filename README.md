@@ -17,10 +17,10 @@ The library requires Android version 4.0.3 (Ice Cream Sandwich) and up.
 ## Gradle Integration
 Add the following dependency to your build.gradle:
 
-`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.24.1'`
+`compile group: 'com.cloudinary', name: 'cloudinary-android', version: '1.25.0'`
 
 ## Manual Setup ######################################################################
-Download cloudinary-android-1.24.1.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-android/1.24.1/cloudinary-android-1.24.1.aar) and cloudinary-core-1.14.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-core/1.14.0/cloudinary-core-1.14.0.jar) and put them in your libs folder.
+Download cloudinary-android-1.25.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-android/1.25.0/cloudinary-android-1.25.0.aar) and cloudinary-core-1.14.0.jar from [here](http://central.maven.org/maven2/com/cloudinary/cloudinary-core/1.14.0/cloudinary-core-1.14.0.jar) and put them in your libs folder.
 
 ## Maven Integration ######################################################################
 The cloudinary_android library is available in [Maven Central](http://repo1.maven.org/maven/). To use it, add the following dependency to your pom.xml:
@@ -28,7 +28,7 @@ The cloudinary_android library is available in [Maven Central](http://repo1.mave
     <dependency>
         <groupId>com.cloudinary</groupId>
         <artifactId>cloudinary-android</artifactId>
-        <version>1.24.1</version>
+        <version>1.25.0</version>
     </dependency>
 
 

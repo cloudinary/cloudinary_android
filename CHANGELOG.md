@@ -1,4 +1,10 @@
 
+1.25.0 / 2018-08-23
+===================
+
+  * Add `UploadRequest.startNow()` api to support immediate upload requests
+  * Remove a check from `DefaultRequestProcessor`, improve tests
+
 1.24.1 / 2018-07-23
 ===================
 
