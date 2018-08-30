@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -533,5 +534,15 @@ public class UploaderTest extends AbstractTest {
         assertEquals("image", resource.getString("resource_type"));
         assertEquals(1400L, resource.getLong("width"));
         assertEquals(1400L, resource.getLong("height"));
+    }
+
+    @Test(expected = SocketTimeoutException.class)
+    public void testConnectTimeout() throws IOException {
+        cloudinary.uploader().unsignedUpload(getAssetStream(TEST_IMAGE), TEST_PRESET, ObjectUtils.asMap("connect_timeout", 1));
+    }
+
+    @Test(expected = SocketTimeoutException.class)
+    public void testReadTimeout() throws IOException {
+        cloudinary.uploader().unsignedUpload(getAssetStream(TEST_IMAGE), TEST_PRESET, ObjectUtils.asMap("read_timeout", 1));
     }
 }

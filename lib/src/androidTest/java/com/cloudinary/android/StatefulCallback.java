@@ -34,7 +34,7 @@ final class StatefulCallback implements UploadCallback {
     }
 
     public boolean hasResponse(){
-        return lastErrorObject != null || lastSuccess != null;
+        return lastErrorObject != null || lastSuccess != null || lastReschedule != null;
     }
 
     @Override

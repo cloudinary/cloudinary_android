@@ -76,7 +76,9 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
         HttpURLConnection connection;
 
         try {
-            multipart = new MultipartUtility(apiUrl, "UTF-8", this.cloudinary().randomPublicId(), (Map<String, String>) options.get("extra_headers"), multipartCallback);
+            int connectTimeout = options.get("connect_timeout") != null ? (int) options.get("connect_timeout") : 0;
+            int readTimeout = options.get("read_timeout") != null ? (int) options.get("read_timeout") : 0;
+            multipart = new MultipartUtility(apiUrl, "UTF-8", this.cloudinary().randomPublicId(), (Map<String, String>) options.get("extra_headers"), multipartCallback, connectTimeout, readTimeout);
 
             // Remove blank parameters
             for (Map.Entry<String, Object> param : params.entrySet()) {
