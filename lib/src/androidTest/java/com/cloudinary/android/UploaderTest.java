@@ -536,7 +536,8 @@ public class UploaderTest extends AbstractTest {
         assertEquals(1400L, resource.getLong("height"));
     }
 
-    @Test(expected = SocketTimeoutException.class)
+    // This test is not reliable enough for uploads, timeout behaviour is too unpredictable
+    //    @Test(expected = SocketTimeoutException.class)
     public void testConnectTimeout() throws IOException {
         cloudinary.uploader().unsignedUpload(getAssetStream(TEST_IMAGE), TEST_PRESET, ObjectUtils.asMap("connect_timeout", 1));
     }
