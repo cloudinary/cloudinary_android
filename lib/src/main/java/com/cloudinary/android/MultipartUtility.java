@@ -46,12 +46,22 @@ public class MultipartUtility {
     }
 
     public MultipartUtility(String requestURL, String charset, String boundary, Map<String, String> headers, MultipartCallback multipartCallback) throws IOException {
+        this(requestURL, charset, boundary, headers, multipartCallback, 0, 0);
+    }
+
+    public MultipartUtility(String requestURL, String charset, String boundary, Map<String, String> headers, MultipartCallback multipartCallback, int connectTimeout, int readTimeout) throws IOException {
         this.charset = charset;
         this.boundary = boundary;
         this.multipartCallback = multipartCallback;
 
         URL url = new URL(requestURL);
         httpConn = (HttpURLConnection) url.openConnection();
+        if (connectTimeout > 0) {
+            httpConn.setConnectTimeout(connectTimeout);
+        }
+        if (readTimeout > 0) {
+            httpConn.setReadTimeout(readTimeout);
+        }
         httpConn.setDoOutput(true); // indicates POST method
         httpConn.setChunkedStreamingMode(0);
         httpConn.setDoInput(true);
@@ -153,8 +163,8 @@ public class MultipartUtility {
      * Closes the internal connection's output stream.
      * Closing a previously closed stream has no effect.
      */
-    public void close(){
-        if (writer != null){
+    public void close() {
+        if (writer != null) {
             writer.close();
         }
     }

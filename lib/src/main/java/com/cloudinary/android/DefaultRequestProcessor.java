@@ -21,6 +21,7 @@ import com.cloudinary.utils.StringUtils;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -101,30 +102,34 @@ class DefaultRequestProcessor implements RequestProcessor {
                         Logger.e(TAG, String.format("EmptyByteArrayException for request %s.", requestId), e);
                         requestResultStatus = FAILURE;
                         error = new ErrorInfo(ErrorInfo.BYTE_ARRAY_PAYLOAD_EMPTY, e.getMessage());
-                    } catch (InterruptedIOException e) {
-                        Logger.e(TAG, String.format("InterruptedIO exception for request %s.", requestId), e);
-                        error = new ErrorInfo(ErrorInfo.REQUEST_CANCELLED, "Request cancelled.");
-                        requestResultStatus = FAILURE;
                     } catch (ErrorRetrievingSignatureException e) {
                         Logger.e(TAG, String.format("Error retrieving signature for request %s.", requestId), e);
                         requestResultStatus = FAILURE;
                         error = new ErrorInfo(ErrorInfo.SIGNATURE_FAILURE, e.getMessage());
                     } catch (IOException e) {
-                        Logger.e(TAG, String.format("IOException for request %s.", requestId), e);
-
-                        if (isImmediate) {
-                            // Don't reschedule immediate requests
-                            error = new ErrorInfo(ErrorInfo.NETWORK_ERROR, e.getMessage());
-                            requestResultStatus = FAILURE;
-                        } else if (errorCount >= maxErrorRetries) {
-                            // failure
-                            error = getMaxRetryError(errorCount);
+                        if (e instanceof InterruptedIOException && !(e instanceof SocketTimeoutException)) {
+                            // The thread was forcibly aborted but not due to timeout => cancelled
+                            // upload request:
+                            Logger.e(TAG, String.format("InterruptedIO exception for request %s.", requestId), e);
+                            error = new ErrorInfo(ErrorInfo.REQUEST_CANCELLED, "Request cancelled.");
                             requestResultStatus = FAILURE;
                         } else {
-                            // one up error count and reschedule
-                            params.putInt(ERROR_COUNT_PARAM, errorCount + 1);
-                            error = new ErrorInfo(ErrorInfo.NETWORK_ERROR, e.getMessage());
-                            requestResultStatus = RESCHEDULE;
+                            Logger.e(TAG, String.format("IOException for request %s.", requestId), e);
+
+                            if (isImmediate) {
+                                // Don't reschedule immediate requests
+                                error = new ErrorInfo(ErrorInfo.NETWORK_ERROR, e.getMessage());
+                                requestResultStatus = FAILURE;
+                            } else if (errorCount >= maxErrorRetries) {
+                                // failure
+                                error = getMaxRetryError(errorCount);
+                                requestResultStatus = FAILURE;
+                            } else {
+                                // one up error count and reschedule
+                                params.putInt(ERROR_COUNT_PARAM, errorCount + 1);
+                                error = new ErrorInfo(ErrorInfo.NETWORK_ERROR, e.getMessage());
+                                requestResultStatus = RESCHEDULE;
+                            }
                         }
                     } catch (Exception e) {
                         Logger.e(TAG, String.format("Unexpected exception for request %s.", requestId), e);

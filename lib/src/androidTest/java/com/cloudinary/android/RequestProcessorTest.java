@@ -60,6 +60,38 @@ public class RequestProcessorTest extends AbstractTest {
     }
 
     @Test
+    public void testTimeout() throws IOException {
+        RequestParams params = provideRequestParams();
+        params.putString("uri", buildPayload().toUri());
+        HashMap<String, Object> options = new HashMap<>();
+        // verify that the parameter reaches all the way to the uploader inside:
+        final String id = UUID.randomUUID().toString();
+        options.put("public_id", id);
+        options.put("read_timeout", 1);
+        options.put("unsigned", true);
+        options.put("upload_preset", TEST_PRESET);
+        params.putString("options", UploadRequest.encodeOptions(options));
+        params.putInt("maxErrorRetries", 3);
+        DefaultCallbackDispatcher callbackDispatcher = provideCallbackDispatcher();
+        RequestProcessor processor = provideRequestProcessor(callbackDispatcher);
+        final StatefulCallback statefulCallback = new StatefulCallback();
+        callbackDispatcher.registerCallback(statefulCallback);
+
+        processor.processRequest(InstrumentationRegistry.getTargetContext(), params);
+
+        // wait for result
+        Awaitility.await().atMost(Duration.TEN_SECONDS).until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                return statefulCallback.hasResponse();
+            }
+        });
+
+        assertNotNull(statefulCallback.lastReschedule);
+        assertEquals(ErrorInfo.NETWORK_ERROR, statefulCallback.lastReschedule.getCode());
+    }
+
+    @Test
     public void testInvalidOptions() throws IOException {
         RequestParams params = provideRequestParams();
         params.putString("options", "bad options string");
