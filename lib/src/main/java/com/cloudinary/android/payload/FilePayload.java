@@ -30,15 +30,11 @@ public class FilePayload extends Payload<String> {
     }
 
     private File getFile(Context context) throws FileNotFoundException {
-        File file = new File(data);
+        // check if data is an absolute path or a local app path and check if file exists:
+        File file = data.contains(File.separator) ? new File(data) : context.getFileStreamPath(data);
 
         if (!file.exists()) {
-
-            // check if it's a local app file:
-            file = context.getFileStreamPath(data);
-            if (!file.exists()) {
-                throw new FileNotFoundException(String.format("File '%s' does not exist", data));
-            }
+            throw new FileNotFoundException(String.format("File '%s' does not exist", data));
         }
 
         return file;
