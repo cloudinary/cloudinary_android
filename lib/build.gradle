@@ -1,38 +1,38 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        // filter in the api credentials before building but without changing original source
+        // files - to make sure the credentials are not checked into source control.
+        // The url is taken from a property or environment variable:
+        manifestPlaceholders = [cloudinaryUrl:project.properties["cloudinary.url"].toString()]
     }
+
+    // set a project property based on the env variable (if it doesn't already exist);
+    def url = project.properties["cloudinary.url"]
+    if (!url){
+        print ("Cloudinary URL property not found, checking environment variable...")
+        url = System.getenv('CLOUDINARY_URL')
+        project.properties["cloudinary.url"] = url
+    }
+
+    if(!url) {
+        throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl build property.")
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.pro'
-        }
-    }
-
-    // filter in the api credentials before building but without changing original source files - to make sure the
-    // credentials are not checked into source control. This is used by the tests only, the credentials
-    // are taken from the CLOUDINARY_URL environment variable or the cloudinaryUrl property
-    testVariants.all { variant ->
-        variant.outputs.each { output ->
-            output.processManifest.doLast {
-                def url = System.getenv('CLOUDINARY_URL') ?: project.findProperty("cloudinary.url")
-                if(!url) {
-                    throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl build property.")
-                }
-                filterManifest("${buildDir}/intermediates/manifest/${variant.dirName}/AndroidManifest.xml", url)
-            }
         }
     }
 }

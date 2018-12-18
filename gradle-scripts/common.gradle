@@ -12,7 +12,7 @@ allprojects {
         }
 
         dependencies {
-            classpath 'com.android.tools.build:gradle:3.1.2'
+            classpath 'com.android.tools.build:gradle:3.2.1'
         }
     }
 
@@ -30,17 +30,6 @@ allprojects {
     }
 
     project.ext.set("publishGroupId", group)
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.5'
-}
-
-ext.filterManifest = {manifestPath, newValue ->
-    def manifestFile = new File(manifestPath)
-    def content = manifestFile.getText()
-    def updatedContent = content.replaceAll("cloudinary_do_not_modify", newValue)
-    manifestFile.write(updatedContent)
 }
 
 ext.loadExtraProperties = {fileName ->
