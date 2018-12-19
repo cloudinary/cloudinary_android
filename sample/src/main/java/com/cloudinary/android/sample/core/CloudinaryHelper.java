@@ -22,7 +22,7 @@ import java.util.Map;
 public class CloudinaryHelper {
     public static String uploadResource(Resource resource, boolean preprocess) {
         UploadRequest request = MediaManager.get().upload(Uri.parse(resource.getLocalUri()))
-                .unsigned("sample_app_preset")
+                .unsigned("android_sample")
                 .constrain(TimeWindow.getDefault())
                 .option("resource_type", "auto")
                 .maxFileSize(100 * 1024 * 1024) // max 100mb

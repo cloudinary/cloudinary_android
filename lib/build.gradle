@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 
+
+
 android {
     compileSdkVersion 28
 
@@ -13,19 +15,7 @@ android {
         // filter in the api credentials before building but without changing original source
         // files - to make sure the credentials are not checked into source control.
         // The url is taken from a property or environment variable:
-        manifestPlaceholders = [cloudinaryUrl:project.properties["cloudinary.url"].toString()]
-    }
-
-    // set a project property based on the env variable (if it doesn't already exist);
-    def url = project.properties["cloudinary.url"]
-    if (!url){
-        print ("Cloudinary URL property not found, checking environment variable...")
-        url = System.getenv('CLOUDINARY_URL')
-        project.properties["cloudinary.url"] = url
-    }
-
-    if(!url) {
-        throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl build property.")
+        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: "no_url_configured"]
     }
 
     buildTypes {
@@ -37,11 +27,25 @@ android {
     }
 }
 
+
+task verifyCloudinaryCredentials {
+    doFirst {
+        if (!getCloudinaryUrl()) {
+            throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianry.url build property.")
+        }
+    }
+}
+
+// Force cloudinary credentials when running unit tests and connected device tests
+tasks.matching { it.name.startsWith("connected") || it.name.startsWith("test")}.all { task ->
+    task.dependsOn verifyCloudinaryCredentials
+}
+
 dependencies {
     api "com.cloudinary:cloudinary-core:${cloudinaryLibsVersion}"
 
     implementation "com.android.support:support-compat:${androidSupportVersion}"
-    implementation ('com.evernote:android-job:1.2.6', {
+    implementation('com.evernote:android-job:1.2.6', {
         exclude group: 'com.android.support', module: 'support-compat'
     })
 

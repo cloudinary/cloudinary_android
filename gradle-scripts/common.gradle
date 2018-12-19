@@ -32,13 +32,17 @@ allprojects {
     project.ext.set("publishGroupId", group)
 }
 
-ext.loadExtraProperties = {fileName ->
+ext.loadExtraProperties = { fileName ->
     def props = new Properties()
     props.load(new FileInputStream(fileName))
 
     props.each { key, val ->
         project.ext[key] = val
     }
+}
+
+ext.getCloudinaryUrl = { ->
+    return findProperty("cloudinary.url") ?: System.getenv('CLOUDINARY_URL')
 }
 
 ext.generateAndLoadLocalGradleProperties = { rootPath ->
