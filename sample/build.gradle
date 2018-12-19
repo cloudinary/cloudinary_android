@@ -14,7 +14,7 @@ android {
         // files - to make sure the  credentials are not checked into source control.
         // The url (without api secret!) is taken from a gradle property  defined in
         // gradle-local.properties in the project root.
-        manifestPlaceholders = [cloudinaryUrl: project.getCloudinaryUrl() ?: "cloudinary://@demo"]
+        manifestPlaceholders = [cloudinaryUrl: project.getCloudinaryUrl() ?: "cloudinary://@not-configured"]
     }
 
     buildTypes {

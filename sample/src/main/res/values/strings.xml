@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Cloudinary</string>
     <string name="action_settings">Settings</string>
+    <string name="no_cloud_error_message">Please configure your cloudinary url in your gradle-local.properties file to use this sample app.</string>
+    <string name="dialog_ok">OK</string>
     <string name="sync">Sync local media with cloud.</string>
     <string name="upload_successfully">Image uploaded successfully.</string>
     <string name="upload_error">Error: %s</string>
