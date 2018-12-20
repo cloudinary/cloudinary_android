@@ -10,6 +10,7 @@ import com.cloudinary.ProgressCallback;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.utils.Rectangle;
+import com.cloudinary.utils.StringUtils;
 
 import junit.framework.Assert;
 
@@ -49,8 +50,20 @@ public class UploaderTest extends AbstractTest {
         String url = Utils.cloudinaryUrlFromContext(InstrumentationRegistry.getContext());
         cloudinary = new Cloudinary(url);
 
-        if (cloudinary.config.apiSecret == null) {
-            Log.e("UploaderTest", "Please CLOUDINARY_URL in AndroidManifest for Upload test to run");
+        if (StringUtils.isBlank(url)){
+            throw new IllegalArgumentException("UploaderTest - No cloudinary url configured");
+        }
+
+        if (StringUtils.isBlank(cloudinary.config.cloudName)){
+            throw new IllegalArgumentException("UploaderTest - No cloud name configured");
+        }
+
+        if (StringUtils.isBlank(cloudinary.config.apiKey)){
+            throw new IllegalArgumentException("UploaderTest - No api Key configured");
+        }
+
+        if (StringUtils.isBlank(cloudinary.config.apiSecret)){
+            throw new IllegalArgumentException("UploaderTest - No api secret configured");
         }
     }
 
