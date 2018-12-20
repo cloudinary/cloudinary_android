@@ -15,7 +15,7 @@ android {
         // filter in the api credentials before building but without changing original source
         // files - to make sure the credentials are not checked into source control.
         // The url is taken from a property or environment variable:
-        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: "no_url_configured"]
+        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: ""]
     }
 
     buildTypes {

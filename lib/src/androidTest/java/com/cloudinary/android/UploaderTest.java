@@ -50,7 +50,7 @@ public class UploaderTest extends AbstractTest {
         String url = Utils.cloudinaryUrlFromContext(InstrumentationRegistry.getContext());
         cloudinary = new Cloudinary(url);
 
-        if (StringUtils.isBlank(url)){
+        if (StringUtils.isBlank(url)) {
             throw new IllegalArgumentException("UploaderTest - No cloudinary url configured");
         }
 
