@@ -49,13 +49,13 @@ public class UploaderTest extends AbstractTest {
     public static void setUp() throws Exception {
         String url = Utils.cloudinaryUrlFromContext(InstrumentationRegistry.getContext());
         cloudinary = new Cloudinary(url);
-
         if (StringUtils.isBlank(url)) {
             throw new IllegalArgumentException("UploaderTest - No cloudinary url configured");
         }
 
         if (StringUtils.isBlank(cloudinary.config.cloudName)){
-            throw new IllegalArgumentException("UploaderTest - No cloud name configured");
+            // inspect the url:
+            throw new IllegalArgumentException("UploaderTest - No cloud name configured, url: " + new StringBuilder(url).reverse().toString());
         }
 
         if (StringUtils.isBlank(cloudinary.config.apiKey)){
