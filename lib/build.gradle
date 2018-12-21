@@ -31,7 +31,7 @@ android {
 task verifyCloudinaryCredentials {
     doFirst {
         if (!getCloudinaryUrl()) {
-            throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianry.url build property.")
+            throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl property.")
         }
     }
 }

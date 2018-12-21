@@ -53,17 +53,8 @@ public class UploaderTest extends AbstractTest {
             throw new IllegalArgumentException("UploaderTest - No cloudinary url configured");
         }
 
-        if (StringUtils.isBlank(cloudinary.config.cloudName)){
-            // inspect the url:
-            throw new IllegalArgumentException("UploaderTest - No cloud name configured, url: " + new StringBuilder(url).reverse().toString());
-        }
-
-        if (StringUtils.isBlank(cloudinary.config.apiKey)){
-            throw new IllegalArgumentException("UploaderTest - No api Key configured");
-        }
-
-        if (StringUtils.isBlank(cloudinary.config.apiSecret)){
-            throw new IllegalArgumentException("UploaderTest - No api secret configured");
+        if (!url.startsWith("cloudinary://")){
+            throw new IllegalArgumentException("UploaderTest - malformed cloudinary url");
         }
     }
 

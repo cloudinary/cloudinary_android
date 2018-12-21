@@ -101,8 +101,10 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         handlerThread.start();
 
         backgroundHandler = new Handler(handlerThread.getLooper());
-
-        setTitle(getTitle() + " (" + CloudinaryHelper.getCloudName() + ")");
+        String cloudName = CloudinaryHelper.getCloudName();
+        if (StringUtils.isNotBlank(cloudName)) {
+            setTitle(getTitle() + " (" + cloudName + ")");
+        }
         registerLocalReceiver();
         onNewIntent(getIntent());
         startService(new Intent(this, CloudinaryService.class));
@@ -112,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     protected void onResume() {
         super.onResume();
 
-        if ("not-configured".equals(MediaManager.get().getCloudinary().config.cloudName)){
+        if (StringUtils.isBlank(CloudinaryHelper.getCloudName())) {
             new AlertDialog.Builder(this)
                     .setMessage(R.string.no_cloud_error_message)
                     .setPositiveButton(R.string.dialog_ok, null)
