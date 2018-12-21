@@ -1,18 +1,23 @@
 apply plugin: 'com.android.library'
 
+
+
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        // filter in the api credentials before building but without changing original source
+        // files - to make sure the credentials are not checked into source control.
+        // The url is taken from a property or environment variable:
+        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: ""]
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -20,28 +25,27 @@ android {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
+}
 
-    // filter in the api credentials before building but without changing original source files - to make sure the
-    // credentials are not checked into source control. This is used by the tests only, the credentials
-    // are taken from the CLOUDINARY_URL environment variable or the cloudinaryUrl property
-    testVariants.all { variant ->
-        variant.outputs.each { output ->
-            output.processManifest.doLast {
-                def url = System.getenv('CLOUDINARY_URL') ?: project.findProperty("cloudinary.url")
-                if(!url) {
-                    throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl build property.")
-                }
-                filterManifest("${buildDir}/intermediates/manifest/${variant.dirName}/AndroidManifest.xml", url)
-            }
+
+task verifyCloudinaryCredentials {
+    doFirst {
+        if (!getCloudinaryUrl()) {
+            throw new GradleException("Missing credentials: please set CLOUDINARY_URL environment variable or cloudianryUrl property.")
         }
     }
+}
+
+// Force cloudinary credentials when running unit tests and connected device tests
+tasks.matching { it.name.startsWith("connected") || it.name.startsWith("test")}.all { task ->
+    task.dependsOn verifyCloudinaryCredentials
 }
 
 dependencies {
     api "com.cloudinary:cloudinary-core:${cloudinaryLibsVersion}"
 
     implementation "com.android.support:support-compat:${androidSupportVersion}"
-    implementation ('com.evernote:android-job:1.2.6', {
+    implementation('com.evernote:android-job:1.2.6', {
         exclude group: 'com.android.support', module: 'support-compat'
     })
 

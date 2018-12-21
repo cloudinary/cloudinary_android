@@ -28,6 +28,6 @@
         </activity>
         <meta-data
             android:name="CLOUDINARY_URL"
-            android:value="cloudinary_do_not_modify" />
+            android:value="${cloudinaryUrl}" />
     </application>
 </manifest>

@@ -12,7 +12,7 @@ allprojects {
         }
 
         dependencies {
-            classpath 'com.android.tools.build:gradle:3.1.2'
+            classpath 'com.android.tools.build:gradle:3.2.1'
         }
     }
 
@@ -32,18 +32,7 @@ allprojects {
     project.ext.set("publishGroupId", group)
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.5'
-}
-
-ext.filterManifest = {manifestPath, newValue ->
-    def manifestFile = new File(manifestPath)
-    def content = manifestFile.getText()
-    def updatedContent = content.replaceAll("cloudinary_do_not_modify", newValue)
-    manifestFile.write(updatedContent)
-}
-
-ext.loadExtraProperties = {fileName ->
+ext.loadExtraProperties = { fileName ->
     def props = new Properties()
     props.load(new FileInputStream(fileName))
 
@@ -52,11 +41,15 @@ ext.loadExtraProperties = {fileName ->
     }
 }
 
+ext.getCloudinaryUrl = { ->
+    return findProperty("cloudinaryUrl") ?: System.getenv('CLOUDINARY_URL')
+}
+
 ext.generateAndLoadLocalGradleProperties = { rootPath ->
     // Create default local gradle properties (ignored by git)
     def file = new File(rootPath + 'gradle-local.properties')
     if (file.createNewFile()) {
-        file.text = '# Fill in your cloudinary url from cloudinary.com/console.  *** IMPORTANT - This should be the url WITHOUT the api secret.\ncloudinary.url=fill_in_your_cloudinary_url'
+        file.text = '# Uncomment and fill in your cloudinary url from cloudinary.com/console.  *** IMPORTANT - This should be the url WITHOUT the api secret.\n# cloudinaryUrl=fill_in_your_cloudinary_url'
     }
     loadExtraProperties file.absoluteFile
 }

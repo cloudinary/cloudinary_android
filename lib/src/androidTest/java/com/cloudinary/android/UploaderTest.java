@@ -10,6 +10,7 @@ import com.cloudinary.ProgressCallback;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.cloudinary.utils.Rectangle;
+import com.cloudinary.utils.StringUtils;
 
 import junit.framework.Assert;
 
@@ -48,9 +49,12 @@ public class UploaderTest extends AbstractTest {
     public static void setUp() throws Exception {
         String url = Utils.cloudinaryUrlFromContext(InstrumentationRegistry.getContext());
         cloudinary = new Cloudinary(url);
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalArgumentException("UploaderTest - No cloudinary url configured");
+        }
 
-        if (cloudinary.config.apiSecret == null) {
-            Log.e("UploaderTest", "Please CLOUDINARY_URL in AndroidManifest for Upload test to run");
+        if (!url.startsWith("cloudinary://")){
+            throw new IllegalArgumentException("UploaderTest - malformed cloudinary url");
         }
     }
 

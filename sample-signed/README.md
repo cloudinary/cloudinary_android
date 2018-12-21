@@ -7,7 +7,7 @@ This samples demonstrates the mechanism of signed uploads using a Google cloud e
 Once you clone this repository you need to open the advanced-samples folder (not the root!) and follow these steps:
 1. Configure your Cloudinary cloud name for the sample app:
     * Once you open the project a file named `gradle-local.properies` should be automatically created in the repository root (you can manually create it if it's not there). Note: This file is ignored by git and should never be checked in. 
-    * The file should contain a single property with your cloudinary url, stripped to cloud name only: `cloudinary.url=cloudinary://@myCloudName`
+    * The file should contain a single property with your cloudinary url, stripped to cloud name only: `cloudinaryUrl=cloudinary://@myCloudName`
     * Run `./gradlew clean` (`gradlew clean` on Windows) from the repository root before proceeding. 
 2. Configure the full credentials for the backend module. The best practice is to create an environment variable with your Cloudinary credentials:
 

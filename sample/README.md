@@ -6,7 +6,7 @@ Cloudinary Sample App
 Once you clone this repository there are two required steps to build the sample app:
 1. Configure your Cloudinary cloud name for the app:
     * Once you open the project (from the repository root) a file named `gradle-local.properies` should be automatically created in the repository root (you can manually create it if it's not there). Note: This file is ignored by git and should never be checked in. 
-    * The file should contain a single property with your cloudinary url, stripped to cloud name only: `cloudinary.url=cloudinary://@myCloudName`
+    * The file should contain a single property with your cloudinary url, stripped to cloud name only: `cloudinaryUrl=cloudinary://@myCloudName`
     * Run `./gradlew clean` (`gradlew clean` on Windows) from the repository root before proceeding. 
 2. Create an upload preset named 'sample_app_preset' in your cloudinary account console:
     *  Login to your [Cloudinary console](https://cloudinary.com/console), go to settings>upload, scroll down
