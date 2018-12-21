@@ -239,7 +239,7 @@ class DefaultRequestProcessor implements RequestProcessor {
 
         ProcessorCallback(long totalBytes, long offset, CallbackDispatcher dispatcher, final String requestId) {
             // calculate step size for progress - prevent flooding the user with callbacks.
-            this.notifyThrottlingStepSize = totalBytes > 0 ? totalBytes / 100 : 500 * 1024 * 1024;
+            this.notifyThrottlingStepSize = totalBytes > 0 ? totalBytes / 100 : 500 * 1024;
             this.totalBytes = totalBytes;
             this.bytesNotified = offset;
             this.bytesUploaded = offset;

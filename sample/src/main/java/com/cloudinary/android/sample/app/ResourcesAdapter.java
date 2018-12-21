@@ -198,20 +198,10 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
             case UPLOADING:
                 holder.cancelRequest.setVisibility(View.VISIBLE);
-                double progressFraction = (double) resourceWithMeta.bytes / resourceWithMeta.totalBytes;
-                int progress = (int) Math.round(progressFraction * 1000);
-                holder.progressBar.setVisibility(View.VISIBLE);
-                holder.progressBar.setMax(1000);
-                holder.progressBar.setProgress(progress);
-                if (holder.blackOverlay.getVisibility() != View.VISIBLE) {
-                    holder.blackOverlay.setAlpha(0);
-                    holder.blackOverlay.setVisibility(View.VISIBLE);
-                    holder.blackOverlay.animate().alpha(1f);
-                }
+                setProgress(holder, resourceWithMeta);
                 if (isVideo) {
                     holder.name.setText(resource.getName());
                 }
-                setProgressText(progressFraction, holder.statusText);
                 break;
             case UPLOADED:
                 holder.blackOverlay.animate().cancel();
@@ -245,25 +235,36 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         }
                     });
         }
-
-        if (resourceWithMeta.totalBytes > 0) {
-            double progressFraction = (double) resourceWithMeta.bytes / resourceWithMeta.totalBytes;
-            int progress = (int) Math.round(progressFraction * 1000);
-            holder.progressBar.setVisibility(View.VISIBLE);
-            holder.progressBar.setMax(1000);
-            holder.progressBar.setProgress(progress);
-        } else {
-            holder.progressBar.setProgress(0);
-            holder.progressBar.setVisibility(View.INVISIBLE);
-        }
     }
 
-    private void setProgressText(double progressFraction, TextView statusText) {
-        String progressStr = String.valueOf(Math.round(progressFraction * 100));
-        String text = statusText.getContext().getString(R.string.uploading, progressStr);
+    private void setProgress(ResourceViewHolder holder, ResourceWithMeta resourceWithMeta) {
+        holder.progressBar.setVisibility(View.VISIBLE);
+        ((ViewGroup)holder.progressBar.getParent()).findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
+
+        if (holder.blackOverlay.getVisibility() != View.VISIBLE) {
+            holder.blackOverlay.setAlpha(0);
+            holder.blackOverlay.setVisibility(View.VISIBLE);
+            holder.blackOverlay.animate().alpha(1f);
+        }
+
+        final String progressStr;
+        double bytesAsDouble = resourceWithMeta.bytes;
+        if (resourceWithMeta.totalBytes > 0) {
+            double progressFraction = bytesAsDouble / resourceWithMeta.totalBytes;
+            int progress = (int) Math.round(progressFraction * 1000);
+            holder.progressBar.setIndeterminate(false);
+            holder.progressBar.setMax(1000);
+            holder.progressBar.setProgress(progress);
+            progressStr = String.valueOf(Math.round(progressFraction * 100)) + "%";
+        } else {
+            holder.progressBar.setIndeterminate(true);
+            progressStr = String.format("%.2f[MB]", bytesAsDouble/ 1000000);
+        }
+
+        String text = holder.statusText.getContext().getString(R.string.uploading, progressStr);
         SpannableString spannableString = new SpannableString(text);
-        spannableString.setSpan(new ForegroundColorSpan(statusText.getContext().getResources().getColor(R.color.buttonColor)), text.indexOf(progressStr), text.length(), 0);
-        statusText.setText(spannableString);
+        spannableString.setSpan(new ForegroundColorSpan(holder.statusText.getContext().getResources().getColor(R.color.buttonColor)), text.indexOf(progressStr), text.length(), 0);
+        holder.statusText.setText(spannableString);
     }
 
     private void addResource(Resource resource) {

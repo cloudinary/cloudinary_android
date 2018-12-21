@@ -34,7 +34,7 @@
     <string name="unknown_error">Unknown error.</string>
     <string name="effect_video_rotate">\u25CF Rotate the video by 20 degrees (automatically adds a bounding box)</string>
     <string name="effect_desc_video_round_corners">\u25CF Add rounded corners</string>
-    <string name="uploading">Uploading %s%%</string>
+    <string name="uploading">Uploading %s</string>
     <string name="rescheduled">Rescheduled</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
