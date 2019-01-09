@@ -15,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
+import static com.cloudinary.Cloudinary.VERSION;
+
 /**
  * This utility class provides an abstraction layer for sending multipart HTTP
  * POST requests to a web server.
@@ -23,7 +25,9 @@ import java.util.Map;
  * @author Cloudinary
  */
 public class MultipartUtility {
-    public final static String USER_AGENT = "CloudinaryAndroid/" + MediaManager.VERSION + " (Android " + Build.VERSION.RELEASE + "; " + Build.MODEL + " Build/" + Build.DISPLAY + ") " + Cloudinary.USER_AGENT;
+    public final static String USER_AGENT = "CloudinaryAndroid/" + MediaManager.VERSION +
+            " (Android " + Build.VERSION.RELEASE + "; " + Build.MODEL + " Build/" + Build.DISPLAY
+            + ") CloudinaryJava/" + VERSION;
     private static final String LINE_FEED = "\r\n";
     private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     private final String boundary;
