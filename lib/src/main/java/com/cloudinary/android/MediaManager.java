@@ -3,6 +3,7 @@ package com.cloudinary.android;
 import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -226,7 +227,15 @@ public class MediaManager {
      * Get a Cloudinary Url object used to construct urls to access and transform pre-uploaded resources.
      */
     public Url url() {
-        return cloudinary.url();
+        Url url = cloudinary.url();
+
+        // set https as default for android P and up - in P the default policy fails all http
+        // requests
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            url.secure(true);
+        }
+
+        return url;
     }
 
     /**
