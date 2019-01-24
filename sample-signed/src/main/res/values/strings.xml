@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">Cloudinary Signed Uploads Sample App</string>
-    <string name="upload_successfully">Image uploaded successfully.</string>
-    <string name="upload_error">Error: %s</string>
-    <string name="upload_image">Upload resource</string>
-</resources>
