@@ -93,7 +93,7 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
                 }
             }
 
-            if (file instanceof String && !((String) file).matches("(?s)ftp:.*|https?:.*|s3:.*|data:[^;]*;base64,([a-zA-Z0-9/+\n=]+)")) {
+            if (file instanceof String && !((String) file).matches("(?s)ftp:.*|https?:.*|s3:.*|gs:.*|data:[^;]*;base64,([a-zA-Z0-9/+\n=]+)")) {
                 file = new File((String) file);
             }
             String filename = (String) options.get("filename");
