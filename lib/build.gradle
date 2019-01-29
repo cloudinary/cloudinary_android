@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
 
-
-
 android {
     compileSdkVersion 28
 
@@ -26,7 +24,6 @@ android {
         }
     }
 }
-
 
 task verifyCloudinaryCredentials {
     doFirst {

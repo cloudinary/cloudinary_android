@@ -1,8 +1,0 @@
-rootProject.name = 'advanced-samples'
-
-include(':lib')
-project(':lib').projectDir = new File('../lib')
-include(':backend')
-project(':backend').projectDir = new File('../backend')
-include(':sample-signed')
-project(':sample-signed').projectDir = new File('../sample-signed')

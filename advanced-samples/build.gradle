@@ -1,2 +1,0 @@
-apply from: '../gradle-scripts/common.gradle'
-apply from: '../gradle-scripts/sub-module-common.gradle'
