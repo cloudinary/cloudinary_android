@@ -1,4 +1,25 @@
 
+1.26.0 / 2019-02-13
+===================
+
+New functionality
+-----------------
+
+  * Generate https urls by default when running on Android 9 and above. (#81)
+  * Add support for gs:// urls in uploader (#87)
+  * Add support for `read_timeout` and `connect_timeout` in uploads.
+
+Other changes
+-------------
+
+  * Remove advanced samples and bump gradle plugin version (#85)
+  * Bump cloudinary-core version to 1.22 (#86)
+  * Update README.md (#84)
+  * Fix exception type thrown for non-existing absolute paths. (#83)
+  * Modify user agent to explicitly use cloudinary-core version (#82)
+  * Fix upload progress callback step size when file size is unknown. (#80)
+  * Update tools versions and fix project setup (#79)
+
 1.25.0 / 2018-08-23
 ===================
 
