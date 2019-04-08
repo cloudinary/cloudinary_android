@@ -44,7 +44,8 @@ ext.getCloudinaryUrl = { ->
 
 ext.generateAndLoadLocalGradleProperties = { rootPath ->
     // Create default local gradle properties (ignored by git)
-    def file = new File( 'gradle-local.properties')
+    def file = new File( "$rootDir/gradle-local.properties")
+
     if (file.createNewFile()) {
         file.text = '# Uncomment and fill in your cloudinary url from cloudinary.com/console.  *** IMPORTANT - This should be the url WITHOUT the api secret.\n# cloudinaryUrl=fill_in_your_cloudinary_url'
     }
