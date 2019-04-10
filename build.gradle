@@ -18,12 +18,9 @@ allprojects {
     }
 
     repositories {
-        maven {
-            url "https://maven.google.com"
-        }
-
         jcenter()
         mavenCentral()
+        google()
     }
 
     project.ext.set("publishGroupId", group)
