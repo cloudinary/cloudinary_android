@@ -24,6 +24,9 @@ android {
         }
     }
 
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -37,7 +40,8 @@ dependencies {
     implementation ('com.squareup.picasso:picasso:2.71828', {
         exclude group: "com.android.support", module: "exifinterface"
     })
-    implementation "com.google.android.exoplayer:exoplayer:r2.4.4"
+
+    implementation 'com.google.android.exoplayer:exoplayer:2.9.5'
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
