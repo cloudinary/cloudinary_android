@@ -114,9 +114,6 @@ public class ImageActivity extends AppCompatActivity {
         exoPlayerView.setPlayer(exoPlayer);
 
         listener = new ExoPlayer.EventListener() {
-            @Override
-            public void onTimelineChanged(Timeline timeline, Object o) {
-            }
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
@@ -139,11 +136,6 @@ public class ImageActivity extends AppCompatActivity {
             public void onPlayerError(ExoPlaybackException e) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(ImageActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onPositionDiscontinuity() {
-
             }
 
             @Override
