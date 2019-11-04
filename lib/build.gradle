@@ -127,7 +127,7 @@ task sourcesJar(type: Jar) {
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    android.libraryVariants.all { var -> classpath += var.javaCompiler.classpath }
+    android.libraryVariants.all { var -> classpath += var.javaCompileProvider.get().classpath}
 }
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
