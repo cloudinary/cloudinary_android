@@ -1,6 +1,7 @@
 package com.cloudinary.android.preprocess;
 
 import android.graphics.Bitmap;
+import android.graphics.Point;
 
 /**
  * A preprocess chain to run on images before uploading. Pass an instance of a populated chain to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
@@ -22,6 +23,20 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
         return (ImagePreprocessChain) new ImagePreprocessChain()
                 .loadWith(new BitmapDecoder(maxWidth, maxHeight))
                 .addStep(new Limit(maxWidth, maxHeight));
+    }
+
+    /**
+     * Convenience method for building a cropping chain.
+     * Use this in {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
+     * The cropping points must form a within the image bounds.
+     * Note: If the points form the same diagonal size as the original image, it will be returned unchanged
+     * @param p1 First point that form the diagonal.
+     * @param p2 Second point that form the diagonal.
+     * @return The prepared chain to pass on to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}
+     */
+    public static ImagePreprocessChain cropChain(Point p1, Point p2) {
+        return (ImagePreprocessChain) new ImagePreprocessChain()
+                .addStep(new Crop(p1, p2));
     }
 
     @Override

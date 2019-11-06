@@ -3,11 +3,13 @@ package com.cloudinary.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
+import com.cloudinary.android.preprocess.Crop;
 import com.cloudinary.android.preprocess.DimensionsValidator;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.preprocess.Limit;
@@ -131,6 +133,43 @@ public class PreprocessTest extends AbstractTest {
         bitmap = new Limit(300, 630).execute(context, bitmap);
         Assert.assertEquals(300, bitmap.getWidth());
         Assert.assertEquals(360, bitmap.getHeight());
+    }
+
+    @Test
+    public void testCrop() throws PreprocessException {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        Bitmap originalBitmap = Bitmap.createBitmap(BitmapFactory.decodeFile(assetFile.getAbsolutePath()));
+
+        Point p1 = new Point(0, 0);
+        Point p2 = new Point(originalBitmap.getWidth(), originalBitmap.getHeight());
+        Bitmap bitmap = new Crop(p1, p2).execute(context, originalBitmap);
+        Assert.assertEquals(bitmap.getWidth(), originalBitmap.getWidth());
+        Assert.assertEquals(bitmap.getHeight(), originalBitmap.getHeight());
+        Assert.assertEquals(bitmap, originalBitmap);
+
+        p1 = new Point(100, 50);
+        p2 = new Point(originalBitmap.getWidth(), originalBitmap.getHeight());
+        bitmap = new Crop(p1, p2).execute(context, originalBitmap);
+        Assert.assertEquals(bitmap.getWidth(), originalBitmap.getWidth() - 100);
+        Assert.assertEquals(bitmap.getHeight(), originalBitmap.getHeight() - 50);
+
+        p1 = new Point(0, 0);
+        p2 = new Point(originalBitmap.getWidth() + 1, originalBitmap.getHeight());
+        try {
+            new Crop(p1, p2).execute(context, originalBitmap);
+            Assert.fail("Out of bound exception should have been thrown");
+        } catch (Throwable t) {
+            Assert.assertTrue(t instanceof PreprocessException);
+        }
+
+        p1 = new Point(0, 0);
+        p2 = new Point(0, originalBitmap.getHeight());
+        try {
+            new Crop(p1, p2).execute(context, originalBitmap);
+            Assert.fail("Points do not make a diagonal exception should have been thrown");
+        } catch (Throwable t) {
+            Assert.assertTrue(t instanceof PreprocessException);
+        }
     }
 
     @Test
