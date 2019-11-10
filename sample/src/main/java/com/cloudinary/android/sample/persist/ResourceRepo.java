@@ -46,7 +46,7 @@ public class ResourceRepo {
         return helper.findByRequestId(requestId);
     }
 
-    private Resource resourceQueued(Resource resource) {
+    public Resource resourceQueued(Resource resource) {
         String localUri = resource.getLocalUri();
         String requestId = resource.getRequestId();
         helper.insertOrUpdateQueuedResource(localUri, resource.getName(), requestId, resource.getResourceType(), Resource.UploadStatus.QUEUED);

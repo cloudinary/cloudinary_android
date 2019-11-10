@@ -222,13 +222,25 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
                 // if the user chose to upload right now we want to schedule an immediate upload:
                 uploadImage((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
             } else if (requestCode == UPLOAD_WIDGET_REQUEST_CODE) {
-                UploadRequest uploadRequest = UploadWidget.processResult(data);
-                uploadRequest.dispatch(MainApplication.get());
-                // TODO: Update adapter
+                handleUploadWidgetResult(data);
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
                 UploadWidget.startActivity(this, UPLOAD_WIDGET_REQUEST_CODE, data.getData());
             }
         }
+    }
+
+    private void handleUploadWidgetResult(final Intent data) {
+        backgroundHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                UploadRequest uploadRequest = UploadWidget.preprocessResult(data);
+                String requestId = uploadRequest.dispatch(MainApplication.get());
+
+                Resource resource = createResourceFromUri(data.getData(), data.getFlags());
+                resource.setRequestId(requestId);
+                ResourceRepo.getInstance().resourceQueued(resource);
+            }
+        });
     }
 
     private void syncCloudinary() {
@@ -273,17 +285,13 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     }
 
     private void uploadImageFromIntentUri(Intent data) {
-        final int takeFlags = data.getFlags()
-                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
         Uri uri = data.getData();
         if (uri != null) {
-            handleUri(uri, takeFlags);
+            handleUri(uri, data.getFlags());
         } else if (data.getClipData() != null) {
             ClipData clip = data.getClipData();
             for (int i = 0; i < clip.getItemCount(); i++) {
-                handleUri(clip.getItemAt(i).getUri(), takeFlags);
+                handleUri(clip.getItemAt(i).getUri(), data.getFlags());
             }
         }
     }
@@ -292,16 +300,23 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         backgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (DocumentsContract.isDocumentUri(MainActivity.this, uri)) {
-                    getContentResolver().takePersistableUriPermission(uri, flags);
-                }
-
-                Pair<String, String> pair = Utils.getResourceNameAndType(MainActivity.this, uri);
-                Resource resource = new Resource(uri.toString(), pair.first, pair.second);
-                uploadImage(resource);
+                uploadImage(createResourceFromUri(uri, flags));
             }
         });
     }
+
+    private Resource createResourceFromUri(final Uri uri, final int flags) {
+        final int takeFlags = flags & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        if (DocumentsContract.isDocumentUri(MainActivity.this, uri)) {
+            getContentResolver().takePersistableUriPermission(uri, takeFlags);
+        }
+
+        Pair<String, String> pair = Utils.getResourceNameAndType(MainActivity.this, uri);
+
+        return new Resource(uri.toString(), pair.first, pair.second);
+    }
+
 
     private void uploadImage(Resource resource) {
         resourceUpdated(ResourceRepo.getInstance().uploadResource(resource));

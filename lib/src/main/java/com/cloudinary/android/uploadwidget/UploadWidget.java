@@ -13,7 +13,7 @@ import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity;
 
 /**
- * TODO: Document this
+ * Helper class to start the UploadWidget and preprocess its results.
  */
 public class UploadWidget {
 
@@ -29,20 +29,20 @@ public class UploadWidget {
      * @param requestCode A request code to start the upload widget with.
      * @param uri         The image uri to be displayed.
      */
-    public static void startActivity(@NonNull Activity activity, int requestCode, Uri uri) {
+    public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull Uri uri) {
         Intent intent = new Intent(activity, UploadWidgetActivity.class);
         intent.setData(uri);
         activity.startActivityForResult(intent, requestCode);
     }
 
     /**
-     * Create a new {@link UploadRequest} from the upload widget results.
+     * Create a new {@link UploadRequest} with the upload widget's preprocess results.
      *
      * @param data Result data from the upload widget.
      * @return Newly created {@link UploadRequest}.
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link ActivityResult}.
      */
-    public static UploadRequest processResult(@NonNull Intent data) {
+    public static UploadRequest preprocessResult(@NonNull Intent data) {
         checkDataNotNull(data);
         Uri uri = data.getData();
         UploadWidget.ActivityResult result = data.getParcelableExtra(RESULT_EXTRA);
@@ -61,7 +61,7 @@ public class UploadWidget {
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link ActivityResult}.
      * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
      */
-    public static UploadRequest processResult(@NonNull UploadRequest uploadRequest, @NonNull Intent data) {
+    public static UploadRequest preprocessResult(@NonNull UploadRequest uploadRequest, @NonNull Intent data) {
         checkDataNotNull(data);
         UploadWidget.ActivityResult result = data.getParcelableExtra(RESULT_EXTRA);
         CropPoints cropPoints = result.getCropPoints();
