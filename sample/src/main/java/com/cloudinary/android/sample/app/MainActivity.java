@@ -30,10 +30,12 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.android.sample.persist.ResourceRepo;
+import com.cloudinary.android.uploadwidget.UploadWidget;
 import com.cloudinary.utils.StringUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.PicassoTools;
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     public static final int FAILED_PAGE_POSITION = 3;
 
     private static final int CHOOSE_IMAGE_REQUEST_CODE = 1000;
+    private static final int UPLOAD_WIDGET_REQUEST_CODE = 1002;
     private FloatingActionButton fab;
     private BroadcastReceiver receiver;
     private ViewPager pager;
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Utils.openMediaChooser(MainActivity.this, CHOOSE_IMAGE_REQUEST_CODE);
+                UploadWidget.openMediaChooser(MainActivity.this, CHOOSE_IMAGE_REQUEST_CODE);
             }
         });
 
@@ -218,8 +221,12 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             if (requestCode == ImageActivity.UPLOAD_IMAGE_REQUEST_CODE) {
                 // if the user chose to upload right now we want to schedule an immediate upload:
                 uploadImage((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
+            } else if (requestCode == UPLOAD_WIDGET_REQUEST_CODE) {
+                UploadRequest uploadRequest = UploadWidget.processResult(data);
+                uploadRequest.dispatch(MainApplication.get());
+                // TODO: Update adapter
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
-                uploadImageFromIntentUri(data);
+                UploadWidget.startActivity(this, UPLOAD_WIDGET_REQUEST_CODE, data.getData());
             }
         }
     }
