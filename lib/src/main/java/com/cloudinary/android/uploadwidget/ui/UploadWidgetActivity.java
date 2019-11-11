@@ -1,58 +1,49 @@
 package com.cloudinary.android.uploadwidget.ui;
 
 import android.content.Intent;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.WindowManager;
 
 import com.cloudinary.android.R;
-import com.cloudinary.android.uploadwidget.CropPoints;
 import com.cloudinary.android.uploadwidget.UploadWidget;
 
 /**
- * TODO: Document this
+ * Provides a solution out of the box for developers who want to use the Upload Widget.
  */
-public class UploadWidgetActivity extends AppCompatActivity {
-
-    private Uri imageUri;
+public class UploadWidgetActivity extends AppCompatActivity implements UploadWidgetFragment.UploadWidgetListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_widget);
+        enterFullscreen();
 
-        /**
-         * TODO: This should come from the fragment
-         */
-        imageUri = getIntent().getData();
-        ImagePreviewFragment imagePreviewFragment = ImagePreviewFragment.newInstance(imageUri);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
+        Uri imageUri = getIntent().getData();
+        UploadWidgetFragment uploadWidgetFragment = UploadWidgetFragment.newInstance(imageUri, this);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, imagePreviewFragment)
+                .replace(R.id.container, uploadWidgetFragment)
                 .commit();
     }
 
     @Override
-    public void onBackPressed() {
-        // TODO: uncomment this
-//        setResultCancel();
-        setResult(imageUri, new CropPoints(new Point(0, 0), new Point(200, 200)));
-        super.onBackPressed();
-    }
-
-    public void setResult(Uri imageUri, CropPoints cropPoints) {
-        UploadWidget.ActivityResult result = new UploadWidget.ActivityResult(cropPoints);
-
+    public void onConfirm(Uri imageUri, UploadWidget.Result result) {
         Intent data = new Intent();
         data.setData(imageUri);
         data.putExtra(UploadWidget.RESULT_EXTRA, result);
 
         setResult(RESULT_OK, data);
-    }
-
-    private void setResultCancel() {
-        setResult(RESULT_CANCELED);
         finish();
     }
 
+    private void enterFullscreen() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
 }

@@ -40,12 +40,12 @@ public class UploadWidget {
      *
      * @param data Result data from the upload widget.
      * @return Newly created {@link UploadRequest}.
-     * @throws IllegalArgumentException if data does not contain an image uri or an {@link ActivityResult}.
+     * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      */
     public static UploadRequest preprocessResult(@NonNull Intent data) {
         checkDataNotNull(data);
         Uri uri = data.getData();
-        UploadWidget.ActivityResult result = data.getParcelableExtra(RESULT_EXTRA);
+        Result result = data.getParcelableExtra(RESULT_EXTRA);
         CropPoints cropPoints = result.getCropPoints();
 
         return MediaManager.get().upload(uri)
@@ -58,12 +58,12 @@ public class UploadWidget {
      * @param uploadRequest Already constructed upload request.
      * @param data          Result data from the upload widget.
      * @return Preprocessed {@link UploadRequest}
-     * @throws IllegalArgumentException if data does not contain an image uri or an {@link ActivityResult}.
+     * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
      */
     public static UploadRequest preprocessResult(@NonNull UploadRequest uploadRequest, @NonNull Intent data) {
         checkDataNotNull(data);
-        UploadWidget.ActivityResult result = data.getParcelableExtra(RESULT_EXTRA);
+        Result result = data.getParcelableExtra(RESULT_EXTRA);
         CropPoints cropPoints = result.getCropPoints();
 
         return uploadRequest.preprocess(ImagePreprocessChain.cropChain(cropPoints.getPoint1(), cropPoints.getPoint2()));
@@ -84,7 +84,7 @@ public class UploadWidget {
 
     private static void checkDataNotNull(Intent data) {
         Uri uri = data.getData();
-        UploadWidget.ActivityResult result = data.getParcelableExtra(RESULT_EXTRA);
+        Result result = data.getParcelableExtra(RESULT_EXTRA);
 
         if (uri == null || result == null) {
             throw new IllegalArgumentException("Data must contain an image uri and an upload widget result");
@@ -94,11 +94,11 @@ public class UploadWidget {
     /**
      * Result data of the upload widget activity
      */
-    public static final class ActivityResult implements Parcelable {
+    public static final class Result implements Parcelable {
 
-        private CropPoints cropPoints;
+        private final CropPoints cropPoints;
 
-        public ActivityResult(CropPoints cropPoints) {
+        private Result(CropPoints cropPoints) {
             this.cropPoints = cropPoints;
         }
 
@@ -107,19 +107,19 @@ public class UploadWidget {
             dest.writeParcelable(cropPoints, flags);
         }
 
-        public static final Creator<ActivityResult> CREATOR = new Creator<ActivityResult>() {
+        public static final Creator<Result> CREATOR = new Creator<Result>() {
             @Override
-            public ActivityResult createFromParcel(Parcel in) {
-                return new ActivityResult(in);
+            public Result createFromParcel(Parcel in) {
+                return new Result(in);
             }
 
             @Override
-            public ActivityResult[] newArray(int size) {
-                return new ActivityResult[size];
+            public Result[] newArray(int size) {
+                return new Result[size];
             }
         };
 
-        protected ActivityResult(Parcel in) {
+        protected Result(Parcel in) {
             cropPoints = in.readParcelable(CropPoints.class.getClassLoader());
         }
 
@@ -130,6 +130,32 @@ public class UploadWidget {
 
         public CropPoints getCropPoints() {
             return cropPoints;
+        }
+
+        /**
+         * Construct an {@link UploadWidget.Result} instance
+         */
+        public static final class Builder {
+
+            private CropPoints cropPoints;
+
+            /**
+             * Sets the cropping points to crop the image. If the points make the same diagonal size
+             * as the original image, it will be returned unchanged.
+             * @param cropPoints Pair of points that make a diagonal to crop the image.
+             * @return Itself for chaining operation.
+             */
+            public Builder cropPoints(CropPoints cropPoints) {
+                this.cropPoints = cropPoints;
+                return this;
+            }
+
+            /**
+             * @return Instance of {@link UploadWidget.Result} based on the requested parameters.
+             */
+            public UploadWidget.Result build() {
+                return new UploadWidget.Result(cropPoints);
+            }
         }
     }
 
