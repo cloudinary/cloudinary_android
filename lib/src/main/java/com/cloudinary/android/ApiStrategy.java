@@ -14,4 +14,9 @@ public class ApiStrategy extends AbstractApiStrategy {
         throw new Exception("Administration API is not supported for mobile applications.");
     }
 
+    @Override
+    public ApiResponse callAccountApi(HttpMethod method, Iterable<String> uri, Map<String, ?> params, Map options) throws Exception {
+        throw new Exception("Account API is not supported for mobile applications.");
+    }
+
 }
