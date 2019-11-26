@@ -8,18 +8,18 @@ import android.view.MotionEvent;
  */
 public class CropOverlayGestureDetector {
 
-    private final GestureHandler gestureHandler;
+    private final CropGestureHandler cropGestureHandler;
 
     public CropOverlayGestureDetector(Rect overlay, CropOverlayGestureCallback listener) {
-        GestureHandler cropLeftSideHandler = new CropLeftSideHandler(overlay, listener);
-        GestureHandler cropTopLeftCornerHandler = new CropTopLeftCornerHandler(overlay, listener);
-        GestureHandler cropTopSideHandler = new CropTopSideHandler(overlay, listener);
-        GestureHandler cropTopRightCornerHandler = new CropTopRightCornerHandler(overlay, listener);
-        GestureHandler cropRightSideHandler = new CropRightSideHandler(overlay, listener);
-        GestureHandler cropBottomRightCornerHandler = new CropBottomRightCornerHandler(overlay, listener);
-        GestureHandler cropBottomSideHandler = new CropBottomSideHandler(overlay, listener);
-        GestureHandler cropBottomLeftCornerHandler = new CropBottomLeftCornerHandler(overlay, listener);
-        GestureHandler cropDraggingHandler = new CropDraggingHandler(overlay, listener);
+        CropGestureHandler cropLeftSideHandler = new CropLeftSideHandler(overlay, listener);
+        CropGestureHandler cropTopLeftCornerHandler = new CropTopLeftCornerHandler(overlay, listener);
+        CropGestureHandler cropTopSideHandler = new CropTopSideHandler(overlay, listener);
+        CropGestureHandler cropTopRightCornerHandler = new CropTopRightCornerHandler(overlay, listener);
+        CropGestureHandler cropRightSideHandler = new CropRightSideHandler(overlay, listener);
+        CropGestureHandler cropBottomRightCornerHandler = new CropBottomRightCornerHandler(overlay, listener);
+        CropGestureHandler cropBottomSideHandler = new CropBottomSideHandler(overlay, listener);
+        CropGestureHandler cropBottomLeftCornerHandler = new CropBottomLeftCornerHandler(overlay, listener);
+        CropGestureHandler cropDraggingHandler = new CropDraggingHandler(overlay, listener);
 
         cropLeftSideHandler.setNext(cropTopLeftCornerHandler);
         cropTopLeftCornerHandler.setNext(cropTopSideHandler);
@@ -30,7 +30,7 @@ public class CropOverlayGestureDetector {
         cropBottomSideHandler.setNext(cropBottomLeftCornerHandler);
         cropBottomLeftCornerHandler.setNext(cropDraggingHandler);
 
-        gestureHandler = cropLeftSideHandler;
+        cropGestureHandler = cropLeftSideHandler;
     }
 
     /**
@@ -39,6 +39,6 @@ public class CropOverlayGestureDetector {
      * @param isAspectRatioLocked
      */
     public void onTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
-        gestureHandler.handleGesture(event, isAspectRatioLocked);
+        cropGestureHandler.handleGesture(event, isAspectRatioLocked);
     }
 }

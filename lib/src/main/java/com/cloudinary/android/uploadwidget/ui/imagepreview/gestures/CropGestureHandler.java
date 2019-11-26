@@ -2,9 +2,9 @@ package com.cloudinary.android.uploadwidget.ui.imagepreview.gestures;
 
 import android.view.MotionEvent;
 
-interface GestureHandler {
+interface CropGestureHandler {
 
-    void setNext(GestureHandler nextHandler);
+    void setNext(CropGestureHandler nextHandler);
 
     void handleGesture(MotionEvent event, boolean isAspectRatioLocked);
 }

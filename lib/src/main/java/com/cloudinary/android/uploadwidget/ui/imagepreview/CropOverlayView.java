@@ -29,8 +29,7 @@ class CropOverlayView extends View implements CropOverlayGestureCallback {
     private static final int SIDE_HANDLE_LENGTH = 40;
     private static final int HANDLE_OFFSET_FROM_OVERLAY = 5;
     private static final int HANDLE_THICKNESS = 10;
-    private static final int MIN_OVERLAY_WIDTH = 100;
-    private static final int MIN_OVERLAY_HEIGHT = 100;
+    private static final int MIN_OVERLAY_SIZE = 5;
 
     private final Path dottedPath = new Path();
 
@@ -305,7 +304,8 @@ class CropOverlayView extends View implements CropOverlayGestureCallback {
 
     @Override
     public void onOverlaySizeChanged(int left, int top, int right, int bottom) {
-        if (left >= imageBounds.left && top >= imageBounds.top && right <= imageBounds.right && bottom <= imageBounds.bottom && right - left > MIN_OVERLAY_WIDTH && bottom - top > MIN_OVERLAY_HEIGHT) {
+        if (left >= imageBounds.left && top >= imageBounds.top && right <= imageBounds.right && bottom <= imageBounds.bottom
+                && right - left > MIN_OVERLAY_SIZE && bottom - top > MIN_OVERLAY_SIZE) {
             overlay.set(left, top, right, bottom);
             invalidate();
         }

@@ -6,19 +6,18 @@ import android.view.MotionEvent;
 
 class CropDraggingHandler extends CropOverlayGestureHandler {
 
-    private final Rect overlay;
     private final CropOverlayGestureCallback listener;
     private final PointF prevPoint = new PointF();
 
     CropDraggingHandler(Rect overlay, CropOverlayGestureCallback listener) {
-        this.overlay = overlay;
+        super(overlay);
         this.listener = listener;
     }
 
     @Override
     public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
         bounds.set(overlay);
-        bounds.inset(RESIZING_OFFSET, RESIZING_OFFSET);
+        bounds.inset(getGestureRegionWidth(), getGestureRegionHeight());
 
         super.handleGesture(event, isAspectRatioLocked);
     }

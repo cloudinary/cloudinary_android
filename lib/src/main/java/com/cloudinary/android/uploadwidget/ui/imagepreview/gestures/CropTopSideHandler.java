@@ -5,17 +5,16 @@ import android.view.MotionEvent;
 
 class CropTopSideHandler extends CropOverlayGestureHandler {
 
-    private final Rect overlay;
     private final CropOverlayGestureCallback listener;
 
     CropTopSideHandler(Rect overlay, CropOverlayGestureCallback listener) {
-        this.overlay = overlay;
+        super(overlay);
         this.listener = listener;
     }
 
     @Override
     public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
-        bounds.set(overlay.left + RESIZING_OFFSET, overlay.top - RESIZING_OFFSET, overlay.right - RESIZING_OFFSET, overlay.top + RESIZING_OFFSET);
+        bounds.set(overlay.left + getGestureRegionWidth(), overlay.top - getGestureRegionHeight(), overlay.right - getGestureRegionWidth(), overlay.top + getGestureRegionHeight());
 
         super.handleGesture(event, isAspectRatioLocked);
     }

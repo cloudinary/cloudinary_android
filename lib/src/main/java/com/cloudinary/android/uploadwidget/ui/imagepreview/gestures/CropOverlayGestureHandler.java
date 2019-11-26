@@ -6,15 +6,21 @@ import android.view.MotionEvent;
 /**
  * Base class for the crop overlay handlers.
  */
-abstract class CropOverlayGestureHandler implements GestureHandler {
+abstract class CropOverlayGestureHandler implements CropGestureHandler {
 
-    protected static final int RESIZING_OFFSET = 100;
+    protected static final float GESTURE_REGION = 0.25f;
+    protected static final int MIN_GESTURE_REGION = 30;
 
-    private boolean isStartedGesture;
-    private GestureHandler nextHandler;
+    protected final Rect overlay;
     protected final Rect bounds = new Rect();
+    private CropGestureHandler nextHandler;
+    private boolean isStartedGesture;
 
-    public void setNext(GestureHandler nextHandler) {
+    public CropOverlayGestureHandler(Rect overlay) {
+        this.overlay = overlay;
+    }
+
+    public void setNext(CropGestureHandler nextHandler) {
         this.nextHandler = nextHandler;
     }
 
@@ -48,4 +54,12 @@ abstract class CropOverlayGestureHandler implements GestureHandler {
     }
 
     protected abstract void handleCropGesture(MotionEvent event, boolean isAspectRatioLocked);
+
+    protected int getGestureRegionWidth() {
+        return Math.max((int) (GESTURE_REGION * overlay.width()), MIN_GESTURE_REGION);
+    }
+
+    protected int getGestureRegionHeight() {
+        return Math.max((int) (GESTURE_REGION * overlay.height()), MIN_GESTURE_REGION);
+    }
 }
