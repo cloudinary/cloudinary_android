@@ -292,11 +292,15 @@ class CropOverlayView extends View implements CropOverlayGestureCallback {
 
     @Override
     public void onOverlayDragged(int distanceX, int distanceY) {
-        if (overlay.left + distanceX >= imageBounds.left && overlay.right + distanceX <= imageBounds.right
-                && overlay.top + distanceY >= imageBounds.top && overlay.bottom + distanceY <= imageBounds.bottom) {
-            overlay.offset(distanceX, distanceY);
-            invalidate();
+        if (overlay.left + distanceX <= imageBounds.left || overlay.right + distanceX >= imageBounds.right) {
+            distanceX = 0;
         }
+        if (overlay.top + distanceY <= imageBounds.top || overlay.bottom + distanceY >= imageBounds.bottom) {
+            distanceY = 0;
+        }
+
+        overlay.offset(distanceX, distanceY);
+        invalidate();
     }
 
     @Override
