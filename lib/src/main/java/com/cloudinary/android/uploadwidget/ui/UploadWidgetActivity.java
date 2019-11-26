@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.WindowManager;
 
 import com.cloudinary.android.R;
 import com.cloudinary.android.uploadwidget.UploadWidget;
@@ -19,7 +18,6 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_widget);
-        enterFullscreen();
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -41,9 +39,5 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
 
         setResult(RESULT_OK, data);
         finish();
-    }
-
-    private void enterFullscreen() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 }

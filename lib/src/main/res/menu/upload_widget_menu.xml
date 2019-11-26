@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/crop_action"
+        android:title="@string/menu_item_crop"
+        app:actionLayout="@layout/crop_menu_item"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/aspect_ratio_action"
+        android:visible="false"
+        app:actionLayout="@layout/aspect_ratio_menu_item"
+        app:showAsAction="always" />
+
+</menu>

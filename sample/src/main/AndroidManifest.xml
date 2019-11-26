@@ -39,7 +39,8 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <activity android:name="com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity" />
+        <activity android:name="com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <service android:name=".app.CloudinaryService" />
 

@@ -3,22 +3,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/black"
     tools:context=".uploadwidget.ui.UploadWidgetFragment">
 
-    <Button
-        android:id="@+id/confirmButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
         android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:text="@string/confirm" />
+        android:theme="@style/UploadWidgetTheme.ActionBar"
+        android:background="@android:color/transparent" />
 
-    <ImageView
-        android:layout_below="@id/confirmButton"
+    <com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView
         android:id="@+id/imageUriImageView"
+        android:layout_below="@id/toolbar"
+        android:layout_above="@id/doneButton"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/doneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="invisible"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:text="@string/done" />
+
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:visibility="invisible"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:text="@string/cancel" />
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/uploadFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        app:backgroundTint="@android:color/holo_blue_dark"
+        android:src="@drawable/check" />
+
 
 </RelativeLayout>
