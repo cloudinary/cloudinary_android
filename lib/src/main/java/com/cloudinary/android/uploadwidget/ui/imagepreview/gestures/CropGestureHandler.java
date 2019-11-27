@@ -6,5 +6,5 @@ interface CropGestureHandler {
 
     void setNext(CropGestureHandler nextHandler);
 
-    void handleGesture(MotionEvent event, boolean isAspectRatioLocked);
+    void handleTouchEvent(MotionEvent event, boolean isAspectRatioLocked);
 }

@@ -1,13 +1,11 @@
 package com.cloudinary.android.uploadwidget.ui.imagepreview.gestures;
 
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 
 class CropDraggingHandler extends CropOverlayGestureHandler {
 
     private final CropOverlayGestureCallback listener;
-    private final PointF prevPoint = new PointF();
 
     CropDraggingHandler(Rect overlay, CropOverlayGestureCallback listener) {
         super(overlay);
@@ -15,28 +13,20 @@ class CropDraggingHandler extends CropOverlayGestureHandler {
     }
 
     @Override
-    public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
+    public void handleTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
         bounds.set(overlay);
         bounds.inset(getGestureRegionWidth(), getGestureRegionHeight());
 
-        super.handleGesture(event, isAspectRatioLocked);
+        super.handleTouchEvent(event, isAspectRatioLocked);
     }
 
     @Override
-    public void handleCropGesture(MotionEvent event, boolean isAspectRatioLocked) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                prevPoint.set(event.getX(), event.getY());
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float distanceX = event.getX() - prevPoint.x;
-                float distanceY = event.getY() - prevPoint.y;
-                prevPoint.set(event.getX(), event.getY());
+    public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
+        float distanceX = event.getX() - prevTouchEventPoint.x;
+        float distanceY = event.getY() - prevTouchEventPoint.y;
 
-                if (listener != null) {
-                    listener.onOverlayDragged((int) distanceX, (int) distanceY);
-                }
-                break;
+        if (listener != null) {
+            listener.onOverlayDragged((int) distanceX, (int) distanceY);
         }
     }
 

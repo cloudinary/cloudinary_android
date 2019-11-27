@@ -13,16 +13,16 @@ class CropTopLeftCornerHandler extends CropOverlayGestureHandler {
     }
 
     @Override
-    public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
+    public void handleTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
         bounds.set(overlay.left - getGestureRegionWidth(), overlay.top - getGestureRegionHeight(), overlay.left + getGestureRegionWidth(), overlay.top + getGestureRegionHeight());
 
-        super.handleGesture(event, isAspectRatioLocked);
+        super.handleTouchEvent(event, isAspectRatioLocked);
     }
 
     @Override
-    public void handleCropGesture(MotionEvent event, boolean isAspectRatioLocked) {
-        int left = (int) event.getX();
-        int top = (int) event.getY();
+    public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
+        int left = overlay.left + (int) (event.getX() - prevTouchEventPoint.x);
+        int top = overlay.top + (int) (event.getY() - prevTouchEventPoint.y);
         int right = overlay.right;
         int bottom = overlay.bottom;
 

@@ -1,5 +1,6 @@
 package com.cloudinary.android.uploadwidget.ui.imagepreview.gestures;
 
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 
@@ -13,6 +14,7 @@ abstract class CropOverlayGestureHandler implements CropGestureHandler {
 
     protected final Rect overlay;
     protected final Rect bounds = new Rect();
+    protected final PointF prevTouchEventPoint = new PointF();
     private CropGestureHandler nextHandler;
     private boolean isStartedGesture;
 
@@ -24,36 +26,37 @@ abstract class CropOverlayGestureHandler implements CropGestureHandler {
         this.nextHandler = nextHandler;
     }
 
-    public void handleGesture(MotionEvent event, boolean isAspectRatioLocked) {
-        if (bounds.contains((int) event.getX(), (int) event.getY())) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
+    public void handleTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (bounds.contains((int) event.getX(), (int) event.getY())) {
                     isStartedGesture = true;
-                    handleCropGesture(event, isAspectRatioLocked);
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (isStartedGesture) {
-                        handleCropGesture(event, isAspectRatioLocked);
-                    } else {
-                        if (nextHandler != null) {
-                            nextHandler.handleGesture(event, isAspectRatioLocked);
-                        }
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
+                    prevTouchEventPoint.set(event.getX(), event.getY());
+                    handleGesture(event, isAspectRatioLocked);
+                } else {
                     isStartedGesture = false;
-                    break;
-            }
-        } else {
-            isStartedGesture = false;
-
-            if (nextHandler != null) {
-                nextHandler.handleGesture(event, isAspectRatioLocked);
-            }
+                    if (nextHandler != null) {
+                        nextHandler.handleTouchEvent(event, isAspectRatioLocked);
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (isStartedGesture) {
+                    handleGesture(event, isAspectRatioLocked);
+                    prevTouchEventPoint.set(event.getX(), event.getY());
+                } else {
+                    if (nextHandler != null) {
+                        nextHandler.handleTouchEvent(event, isAspectRatioLocked);
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                isStartedGesture = false;
+                break;
         }
     }
 
-    protected abstract void handleCropGesture(MotionEvent event, boolean isAspectRatioLocked);
+    protected abstract void handleGesture(MotionEvent event, boolean isAspectRatioLocked);
 
     protected int getGestureRegionWidth() {
         return Math.max((int) (GESTURE_REGION * overlay.width()), MIN_GESTURE_REGION);

@@ -39,6 +39,6 @@ public class CropOverlayGestureDetector {
      * @param isAspectRatioLocked
      */
     public void onTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
-        cropGestureHandler.handleGesture(event, isAspectRatioLocked);
+        cropGestureHandler.handleTouchEvent(event, isAspectRatioLocked);
     }
 }
