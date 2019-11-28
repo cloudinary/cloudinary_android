@@ -40,6 +40,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity android:name="com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity"
+            android:configChanges="orientation"
             android:theme="@style/AppTheme.NoActionBar"/>
 
         <service android:name=".app.CloudinaryService" />
