@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -26,11 +25,12 @@ public class UploadWidgetImageView extends FrameLayout {
     private CropOverlayView cropOverlayView;
     private ImageView imageView;
     private Uri imageUri;
-    private Bitmap bitmap;
-    private Rect scaledBitmapBounds;
+    private Bitmap scaledBitmap;
+    private Rect scaledBitmapBounds = new Rect();
     private int originalWidth;
     private int originalHeight;
-    private boolean isCropping;
+    private boolean isCropStarted;
+    private boolean isCroppedBitmapDisplayed;
 
     public UploadWidgetImageView(@NonNull Context context) {
         super(context);
@@ -62,16 +62,20 @@ public class UploadWidgetImageView extends FrameLayout {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        if (imageUri != null) {
-            Bitmap originalBitmap = decodeBitmapFromUri(getContext(), imageUri);
-            originalWidth = originalBitmap.getWidth();
-            originalHeight = originalBitmap.getHeight();
-
-            bitmap = scaleBitmap(originalBitmap, w, h);
-            imageView.setImageBitmap(bitmap);
-
-            adjustCropOverlayBounds();
+        if (imageUri != null && !isCroppedBitmapDisplayed) {
+            setScaledBitmap(w, h);
         }
+    }
+
+    private void setScaledBitmap(int w, int h) {
+        Bitmap originalBitmap = decodeBitmapFromUri(getContext(), imageUri);
+        originalWidth = originalBitmap.getWidth();
+        originalHeight = originalBitmap.getHeight();
+
+        scaledBitmap = scaleBitmap(originalBitmap, w, h);
+        imageView.setImageBitmap(scaledBitmap);
+
+        setScaledBitmapBounds();
     }
 
     /**
@@ -97,7 +101,6 @@ public class UploadWidgetImageView extends FrameLayout {
      */
     public void setImageUri(Uri imageUri) {
         this.imageUri = imageUri;
-        requestLayout();
     }
 
     /**
@@ -105,17 +108,22 @@ public class UploadWidgetImageView extends FrameLayout {
      */
     public void startCropping() {
         cropOverlayView.setVisibility(VISIBLE);
-        isCropping = true;
+        isCropStarted = true;
     }
 
     /**
-     * Stop the cropping, hiding the crop overlay and setting the original bitmap.
+     * Stop the cropping, hiding the crop overlay and setting the original scaledBitmap.
      */
     public void stopCropping() {
-        isCropping = false;
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setImageBitmap(bitmap);
+        isCropStarted = false;
         setAspectRatioLocked(false);
+        imageView.setScaleType(ImageView.ScaleType.CENTER);
+        imageView.setImageBitmap(scaledBitmap);
+
+        if (isCroppedBitmapDisplayed) {
+            setScaledBitmap(getWidth(), getHeight());
+            isCroppedBitmapDisplayed = false;
+        }
         cropOverlayView.setVisibility(INVISIBLE);
         cropOverlayView.reset();
     }
@@ -125,8 +133,8 @@ public class UploadWidgetImageView extends FrameLayout {
      *
      * @return true if {@link UploadWidgetImageView#startCropping()} was called, and false if cropping was never started or {@link UploadWidgetImageView#stopCropping()} was called.
      */
-    public boolean isCropping() {
-        return isCropping;
+    public boolean isCropStarted() {
+        return isCropStarted;
     }
 
     /**
@@ -135,8 +143,8 @@ public class UploadWidgetImageView extends FrameLayout {
      * @return Crop points that make the crop overlay diagonal.
      */
     public CropPoints getCropPoints() {
-        float widthRatio = (float) originalWidth / bitmap.getWidth();
-        float heightRatio = (float) originalHeight / bitmap.getHeight();
+        float widthRatio = (float) originalWidth / scaledBitmap.getWidth();
+        float heightRatio = (float) originalHeight / scaledBitmap.getHeight();
 
         CropPoints cropPoints = cropOverlayView.getCropPoints();
         Point p1 = cropPoints.getPoint1();
@@ -150,25 +158,25 @@ public class UploadWidgetImageView extends FrameLayout {
     }
 
     /**
-     * Performs the crop, displaying the cropped image, hiding the crop overlay.
+     * Display the cropped image, hiding the crop overlay.
      */
     public void cropImage() {
         CropPoints cropPoints = cropOverlayView.getCropPoints();
-        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap,
+        Bitmap croppedBitmap = Bitmap.createBitmap(scaledBitmap,
                 cropPoints.getPoint1().x - scaledBitmapBounds.left,
                 cropPoints.getPoint1().y - scaledBitmapBounds.top,
                 cropPoints.getPoint2().x - cropPoints.getPoint1().x,
                 cropPoints.getPoint2().y - cropPoints.getPoint1().y);
+        isCroppedBitmapDisplayed = true;
         imageView.setImageBitmap(croppedBitmap);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
         cropOverlayView.setVisibility(INVISIBLE);
     }
 
-    private void adjustCropOverlayBounds() {
-        int left = (getWidth() - bitmap.getWidth()) / 2;
-        int top = (getHeight() - bitmap.getHeight()) / 2;
-        scaledBitmapBounds = new Rect(left, top, left + bitmap.getWidth(), top + bitmap.getHeight());
+    private void setScaledBitmapBounds() {
+        int left = (getWidth() - scaledBitmap.getWidth()) / 2;
+        int top = (getHeight() - scaledBitmap.getHeight()) / 2;
+        scaledBitmapBounds.set(left, top, left + scaledBitmap.getWidth(), top + scaledBitmap.getHeight());
         cropOverlayView.set(scaledBitmapBounds);
     }
 
@@ -186,24 +194,21 @@ public class UploadWidgetImageView extends FrameLayout {
 
 
     private Bitmap scaleBitmap(Bitmap bitmap, int reqWidth, int reqHeight) {
-        try {
-            if (reqWidth > 0 && reqHeight > 0) {
-                Bitmap resized;
-                int width = bitmap.getWidth();
-                int height = bitmap.getHeight();
-                float scale = Math.max(width / (float) reqWidth, height / (float) reqHeight);
+        if (reqWidth > 0 && reqHeight > 0) {
+            Bitmap resized;
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            float scale = Math.max(width / (float) reqWidth, height / (float) reqHeight);
 
-                resized = Bitmap.createScaledBitmap(bitmap, (int) (width / scale), (int) (height / scale), false);
-                if (resized != null) {
-                    if (resized != bitmap) {
-                        bitmap.recycle();
-                    }
-                    return resized;
+            resized = Bitmap.createScaledBitmap(bitmap, (int) (width / scale), (int) (height / scale), false);
+            if (resized != null) {
+                if (resized != bitmap) {
+                    bitmap.recycle();
                 }
+                return resized;
             }
-        } catch (Exception e) {
-            Log.w("AIC", "Failed to resize cropped image, return bitmap before resize", e);
         }
+
         return bitmap;
     }
 

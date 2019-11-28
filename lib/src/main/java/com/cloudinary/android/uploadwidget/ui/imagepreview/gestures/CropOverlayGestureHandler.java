@@ -9,8 +9,8 @@ import android.view.MotionEvent;
  */
 abstract class CropOverlayGestureHandler implements CropGestureHandler {
 
-    protected static final float GESTURE_REGION = 0.25f;
-    protected static final int MIN_GESTURE_REGION = 30;
+    private static final float GESTURE_REGION = 0.25f;
+    private static final int MIN_GESTURE_REGION = 30;
 
     protected final Rect overlay;
     protected final Rect bounds = new Rect();
@@ -26,6 +26,13 @@ abstract class CropOverlayGestureHandler implements CropGestureHandler {
         this.nextHandler = nextHandler;
     }
 
+    /**
+     * Detects whether the handler should handle this event or pass it along the chain.
+     * Child handlers should call this method after updating its bounds in order to avoid inconsistencies.
+     *
+     * @param event Motion event which triggered the event.
+     * @param isAspectRatioLocked Whether the crop overlay's aspect ratio is locked or not.
+     */
     public void handleTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -56,6 +63,13 @@ abstract class CropOverlayGestureHandler implements CropGestureHandler {
         }
     }
 
+    /**
+     * Override this method to handle the touch gesture that occurred on the crop overlay.
+     * This method is invoked only if the {@link MotionEvent#ACTION_DOWN} event was handled by the handler.
+     *
+     * @param event Motion event which triggered the gesture's touch event.
+     * @param isAspectRatioLocked Whether the crop overlay's aspect ratio is locked or not.
+     */
     protected abstract void handleGesture(MotionEvent event, boolean isAspectRatioLocked);
 
     protected int getGestureRegionWidth() {

@@ -73,12 +73,12 @@ public class UploadWidgetFragment extends Fragment {
         if (arguments != null) {
             imageUri = Uri.parse(arguments.getString(IMAGE_URI_ARG));
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_upload_widget, container, false);
         uploadWidgetImageView = view.findViewById(R.id.imageUriImageView);
         uploadWidgetImageView.setImageUri(imageUri);
@@ -152,20 +152,20 @@ public class UploadWidgetFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.upload_widget_menu, menu);
-        final MenuItem aspectRationItem = menu.findItem(R.id.aspect_ratio_action);
+        final MenuItem aspectRatioItem = menu.findItem(R.id.aspect_ratio_action);
         final MenuItem cropItem = menu.findItem(R.id.crop_action);
 
         if (isEditable) {
             final View cropActionView = cropItem.getActionView();
-            final View aspectRatioActionView = aspectRationItem.getActionView();
+            final View aspectRatioActionView = aspectRatioItem.getActionView();
             cropActionView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    aspectRationItem.setVisible(true);
+                    aspectRatioItem.setVisible(true);
                     uploadFab.hide();
                     doneButton.setVisibility(View.VISIBLE);
                     cancelButton.setVisibility(View.VISIBLE);
-                    cropActionView.setVisibility(View.INVISIBLE);
+                    cropItem.setVisible(false);
                     uploadWidgetImageView.startCropping();
                 }
             });
@@ -189,7 +189,7 @@ public class UploadWidgetFragment extends Fragment {
             });
         } else {
             cropItem.setVisible(false);
-            aspectRationItem.setVisible(false);
+            aspectRatioItem.setVisible(false);
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -218,7 +218,7 @@ public class UploadWidgetFragment extends Fragment {
     }
 
     private void onBackPressed() {
-        if (uploadWidgetImageView.isCropping()) {
+        if (uploadWidgetImageView.isCropStarted()) {
             uploadWidgetImageView.stopCropping();
             setPreviewMode(true);
         } else {

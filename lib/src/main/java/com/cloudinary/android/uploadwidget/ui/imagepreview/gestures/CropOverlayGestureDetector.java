@@ -4,12 +4,19 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 
 /**
- * Gesture detector for the crop overlay. Fires a {@link CropOverlayGestureCallback} for the corresponding gestures.
+ * Detects various gestures on the crop overlay, firing a {@link CropOverlayGestureCallback} for the corresponding gestures.
  */
 public class CropOverlayGestureDetector {
 
     private final CropGestureHandler cropGestureHandler;
 
+    /**
+     * Creates a CropOverlayGestureDetector with the supplied crop overlay rectangle, and a listener
+     * to respond for the detected gestures.
+     *
+     * @param overlay  Crop overlay rectangle.
+     * @param listener Notified with the callbacks for the corresponding gestures.
+     */
     public CropOverlayGestureDetector(Rect overlay, CropOverlayGestureCallback listener) {
         CropGestureHandler cropLeftSideHandler = new CropLeftSideHandler(overlay, listener);
         CropGestureHandler cropTopLeftCornerHandler = new CropTopLeftCornerHandler(overlay, listener);
@@ -34,9 +41,9 @@ public class CropOverlayGestureDetector {
     }
 
     /**
-     *
-     * @param event
-     * @param isAspectRatioLocked
+     * Handles touch events on the crop overlay.
+     * @param event Motion event which triggered the event.
+     * @param isAspectRatioLocked Whether the crop overlay's aspect ratio is locked or not.
      */
     public void onTouchEvent(MotionEvent event, boolean isAspectRatioLocked) {
         cropGestureHandler.handleTouchEvent(event, isAspectRatioLocked);

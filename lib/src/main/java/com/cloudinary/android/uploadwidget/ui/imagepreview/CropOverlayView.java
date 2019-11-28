@@ -20,7 +20,7 @@ import com.cloudinary.android.uploadwidget.ui.imagepreview.gestures.CropOverlayG
 import com.cloudinary.android.uploadwidget.ui.imagepreview.gestures.CropOverlayGestureDetector;
 
 /**
- * Represents the crop overlay which covers the image with the crop rectangle, while dimming the surrounding area.
+ * Represents the crop overlay which covers the image with the cropping rectangle, while dimming the surrounding area.
  */
 class CropOverlayView extends View implements CropOverlayGestureCallback {
 
