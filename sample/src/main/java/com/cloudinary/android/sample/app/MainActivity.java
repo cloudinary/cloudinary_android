@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     public static final int IN_PROGRESS_PAGE_POSITION = 2;
     public static final int FAILED_PAGE_POSITION = 3;
 
-    private static final int CHOOSE_IMAGE_REQUEST_CODE = 1000;
+    public static final int CHOOSE_IMAGE_REQUEST_CODE = 1000;
     private static final int UPLOAD_WIDGET_REQUEST_CODE = 1002;
     private FloatingActionButton fab;
     private BroadcastReceiver receiver;
