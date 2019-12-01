@@ -27,8 +27,8 @@ class CropTopSideHandler extends CropOverlayGestureHandler {
         int bottom = overlay.bottom;
 
         if (isAspectRatioLocked) {
-            left += top - overlay.top;
-            right -= top - overlay.top;
+            left += ((float) top - overlay.top) / 2;
+            right -= ((float) top - overlay.top) / 2;
         }
 
         if (listener != null) {
