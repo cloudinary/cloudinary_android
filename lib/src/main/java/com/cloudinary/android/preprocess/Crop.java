@@ -27,7 +27,7 @@ public class Crop implements Preprocess<Bitmap> {
 
     /**
      * Execute the preprocessing phase. This will crop the image if needed, making sure that the points form a
-     * diagonal withing the bounds of the bitmap.
+     * diagonal within the bounds of the bitmap.
      *
      * @param context  Android context
      * @param resource The Bitmap to crop
@@ -68,16 +68,14 @@ public class Crop implements Preprocess<Bitmap> {
         boolean isOutOfBounds = false;
         if (startX < 0 || startX > resource.getWidth()) {
             isOutOfBounds = true;
-        }
-        if (width > resource.getWidth() || startX + width > resource.getWidth()) {
+        } else if (width > resource.getWidth() || startX + width > resource.getWidth()) {
+            isOutOfBounds = true;
+        } else if (startY < 0 || startY > resource.getHeight()) {
+            isOutOfBounds = true;
+        } else if (height > resource.getHeight() || startY + height > resource.getHeight()) {
             isOutOfBounds = true;
         }
-        if (startY < 0 || startY > resource.getHeight()) {
-            isOutOfBounds = true;
-        }
-        if (height > resource.getHeight() || startY + height > resource.getHeight()) {
-            isOutOfBounds = true;
-        }
+
         if (isOutOfBounds) {
             throw new PreprocessException("Out of bounds");
         }

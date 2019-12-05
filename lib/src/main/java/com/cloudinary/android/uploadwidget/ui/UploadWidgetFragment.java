@@ -27,8 +27,6 @@ import com.cloudinary.android.uploadwidget.CropPoints;
 import com.cloudinary.android.uploadwidget.UploadWidget;
 import com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView;
 
-import java.lang.ref.WeakReference;
-
 /**
  * Previews an image and lets the user to optionally edit it.
  */
@@ -42,7 +40,6 @@ public class UploadWidgetFragment extends Fragment {
     private Button cancelButton;
 
     private Uri imageUri;
-    private WeakReference<UploadWidgetListener> uploadWidgetListener;
     private boolean isEditable = true;
 
     public UploadWidgetFragment() { }
@@ -50,9 +47,8 @@ public class UploadWidgetFragment extends Fragment {
     /**
      * Instantiates a new {@link UploadWidgetFragment} with an image uri argument and an {@link UploadWidgetListener}.
      * @param imageUri Uri of the image to be displayed.
-     * @param listener Listener for the Upload Widget.
      */
-    public static UploadWidgetFragment newInstance(Uri imageUri, UploadWidgetListener listener) {
+    public static UploadWidgetFragment newInstance(Uri imageUri) {
         if (imageUri == null) {
             throw new IllegalArgumentException("Image uri must be provided");
         }
@@ -61,7 +57,6 @@ public class UploadWidgetFragment extends Fragment {
         Bundle args = new Bundle();
         args.putString(IMAGE_URI_ARG, imageUri.toString());
         fragment.setArguments(args);
-        fragment.setUploadWidgetListener(listener);
 
         return fragment;
     }
@@ -110,9 +105,8 @@ public class UploadWidgetFragment extends Fragment {
                         .cropPoints(cropPoints)
                         .build();
 
-                UploadWidgetListener listener = uploadWidgetListener.get();
-                if (listener != null) {
-                    listener.onConfirm(imageUri, result);
+                if (getActivity() instanceof UploadWidgetListener) {
+                    ((UploadWidgetListener) getActivity()).onConfirm(imageUri, result);
                 }
             }
         });
@@ -227,13 +221,6 @@ public class UploadWidgetFragment extends Fragment {
                 activity.onBackPressed();
             }
         }
-    }
-
-    /**
-     * Sets a uploadWidgetListener for the Upload Widget.
-     */
-    public void setUploadWidgetListener(UploadWidgetListener listener) {
-        this.uploadWidgetListener = new WeakReference<>(listener);
     }
 
     /**

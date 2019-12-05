@@ -8,13 +8,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/menu_item_crop"
-        android:textColor="@android:color/white" />
+        android:textColor="?android:attr/textColorPrimary"
+        android:text="@string/menu_item_crop" />
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="12dp"
+        android:padding="@dimen/menu_item_icon_padding"
         android:src="@drawable/crop" />
 
 </LinearLayout>

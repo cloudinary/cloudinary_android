@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="imageview_top_margin">10dp</dimen>
+    <dimen name="imageview_bottom_margin">10dp</dimen>
+    <dimen name="done_button_right_margin">10dp</dimen>
+    <dimen name="cancel_button_left_margin">10dp</dimen>
+    <dimen name="upload_fab_margin">16dp</dimen>
+    <dimen name="menu_item_icon_padding">12dp</dimen>
+</resources>

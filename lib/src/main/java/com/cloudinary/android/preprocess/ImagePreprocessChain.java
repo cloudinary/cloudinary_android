@@ -28,7 +28,7 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
     /**
      * Convenience method for building a cropping chain using {@link Crop}.
      * Use this in {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
-     * The cropping points must form a within the image bounds.
+     * The cropping points must form a diagonal within the image bounds.
      * Note: If the points form the same diagonal size as the original image, it will be returned unchanged
      * @param p1 First point that form the diagonal.
      * @param p2 Second point that form the diagonal.

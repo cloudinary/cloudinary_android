@@ -12,15 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         android:layout_alignParentTop="true"
-        android:theme="@style/UploadWidgetTheme.ActionBar"
         android:background="@android:color/transparent" />
 
     <com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView
         android:id="@+id/imageUriImageView"
         android:layout_below="@id/toolbar"
         android:layout_above="@id/doneButton"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="@dimen/imageview_top_margin"
+        android:layout_marginBottom="@dimen/imageview_bottom_margin"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -31,11 +30,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginRight="@dimen/done_button_right_margin"
+        android:layout_marginEnd="@dimen/done_button_right_margin"
         android:visibility="invisible"
         android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
+        android:textColor="?android:attr/textColorPrimary"
         android:text="@string/done" />
 
     <Button
@@ -45,11 +44,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginLeft="@dimen/cancel_button_left_margin"
+        android:layout_marginStart="@dimen/cancel_button_left_margin"
         android:visibility="invisible"
         android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
+        android:textColor="?android:attr/textColorPrimary"
         android:text="@string/cancel" />
 
 
@@ -60,8 +59,8 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        app:backgroundTint="@android:color/holo_blue_dark"
+        android:layout_margin="@dimen/upload_fab_margin"
+        app:backgroundTint="@color/buttonColor"
         android:src="@drawable/check" />
 
 

@@ -32,7 +32,7 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag(UPLOAD_WIDGET_FRAGMENT_ID);
         if (fragment == null) {
-            fragment = UploadWidgetFragment.newInstance(imageUri, this);
+            fragment = UploadWidgetFragment.newInstance(imageUri);
         }
         fragmentManager.beginTransaction()
                 .replace(R.id.container, fragment, UPLOAD_WIDGET_FRAGMENT_ID)

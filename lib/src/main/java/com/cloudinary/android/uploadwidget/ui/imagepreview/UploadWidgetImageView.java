@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import com.cloudinary.android.uploadwidget.CropPoints;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -68,11 +69,11 @@ public class UploadWidgetImageView extends FrameLayout {
     }
 
     private void setScaledBitmap(int w, int h) {
-        Bitmap originalBitmap = decodeBitmapFromUri(getContext(), imageUri);
-        originalWidth = originalBitmap.getWidth();
-        originalHeight = originalBitmap.getHeight();
-
-        scaledBitmap = scaleBitmap(originalBitmap, w, h);
+        try {
+            scaledBitmap = decodeSampledBitmapFromUri(imageUri, w, h);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         imageView.setImageBitmap(scaledBitmap);
 
         setScaledBitmapBounds();
@@ -180,18 +181,6 @@ public class UploadWidgetImageView extends FrameLayout {
         cropOverlayView.set(scaledBitmapBounds);
     }
 
-    private Bitmap decodeBitmapFromUri(Context context, Uri uri) {
-        InputStream is = null;
-
-        try {
-            is = context.getContentResolver().openInputStream(uri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return BitmapFactory.decodeStream(is);
-    }
-
 
     private Bitmap scaleBitmap(Bitmap bitmap, int reqWidth, int reqHeight) {
         if (reqWidth > 0 && reqHeight > 0) {
@@ -210,6 +199,67 @@ public class UploadWidgetImageView extends FrameLayout {
         }
 
         return bitmap;
+    }
+
+    private Bitmap decodeSampledBitmapFromUri(Uri uri, int reqWidth, int reqHeight) throws FileNotFoundException {
+        Bitmap bitmap;
+        InputStream justDecodeBoundsStream = null;
+        InputStream sampledBitmapStream = null;
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        try {
+            justDecodeBoundsStream = getUriInputStream(uri);
+            BitmapFactory.decodeStream(justDecodeBoundsStream, null, options);
+            originalWidth = options.outWidth;
+            originalHeight = options.outHeight;
+
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+            options.inJustDecodeBounds = false;
+            sampledBitmapStream = getUriInputStream(uri);
+            Bitmap sampledBitmap = BitmapFactory.decodeStream(sampledBitmapStream, null, options);
+            bitmap = scaleBitmap(sampledBitmap, reqWidth, reqHeight);
+        } finally {
+            try {
+                if (justDecodeBoundsStream != null) {
+                    justDecodeBoundsStream.close();
+                }
+            } catch (IOException ignored) {
+            }
+            try {
+                if (sampledBitmapStream != null) {
+                    sampledBitmapStream.close();
+                }
+            } catch (IOException ignored) {
+            }
+        }
+
+        return bitmap;
+    }
+
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    private InputStream getUriInputStream(Uri uri) throws FileNotFoundException {
+        return getContext().getContentResolver().openInputStream(uri);
     }
 
 }
