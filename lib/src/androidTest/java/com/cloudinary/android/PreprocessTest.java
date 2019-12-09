@@ -14,6 +14,7 @@ import com.cloudinary.android.preprocess.DimensionsValidator;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.preprocess.Limit;
 import com.cloudinary.android.preprocess.PreprocessException;
+import com.cloudinary.android.preprocess.Rotate;
 import com.cloudinary.android.preprocess.ValidationException;
 
 import junit.framework.Assert;
@@ -170,6 +171,23 @@ public class PreprocessTest extends AbstractTest {
         } catch (Throwable t) {
             Assert.assertTrue(t instanceof PreprocessException);
         }
+    }
+
+    @Test
+    public void testRotate() {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        Bitmap originalBitmap = Bitmap.createBitmap(BitmapFactory.decodeFile(assetFile.getAbsolutePath()));
+
+        Bitmap bitmap = new Rotate(90).execute(context, originalBitmap);
+        Assert.assertEquals(bitmap.getWidth(), originalBitmap.getHeight());
+        Assert.assertEquals(bitmap.getHeight(), originalBitmap.getWidth());
+
+        bitmap = new Rotate(180).execute(context, originalBitmap);
+        Assert.assertEquals(bitmap.getWidth(), originalBitmap.getWidth());
+        Assert.assertEquals(bitmap.getHeight(), originalBitmap.getHeight());
+
+        bitmap = new Rotate(360).execute(context, originalBitmap);
+        Assert.assertEquals(bitmap.getGenerationId(), originalBitmap.getGenerationId());
     }
 
     @Test
