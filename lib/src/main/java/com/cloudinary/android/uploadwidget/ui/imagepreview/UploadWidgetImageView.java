@@ -27,8 +27,8 @@ public class UploadWidgetImageView extends FrameLayout {
     private CropOverlayView cropOverlayView;
     private ImageView imageView;
     private Uri imageUri;
-    private Bitmap scaledBitmap;
-    private Rect scaledBitmapBounds = new Rect();
+    private Bitmap bitmap;
+    private Rect bitmapBounds = new Rect();
     private int originalWidth;
     private boolean isCropStarted;
     private boolean isCroppedBitmapDisplayed;
@@ -65,23 +65,26 @@ public class UploadWidgetImageView extends FrameLayout {
         super.onSizeChanged(w, h, oldw, oldh);
 
         if (imageUri != null && !isCroppedBitmapDisplayed) {
-            setScaledBitmap(w, h);
-
-            if (rotationAngle != 0) {
-                rotateBitmapBy(rotationAngle);
-            }
+            setBitmap(w, h);
         }
     }
 
-    private void setScaledBitmap(int w, int h) {
+    private void setBitmap(int w, int h) {
         try {
-            scaledBitmap = decodeSampledBitmapFromUri(imageUri, w, h);
+            bitmap = decodeSampledBitmapFromUri(imageUri, w, h);
+            if (rotationAngle != 0) {
+                rotateBitmapBy(rotationAngle);
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        imageView.setImageBitmap(scaledBitmap);
+        updateImageViewBitmap();
+    }
 
-        setScaledBitmapBounds();
+    private void updateImageViewBitmap() {
+        imageView.setImageBitmap(bitmap);
+        setBitmapBounds();
+        cropOverlayView.reset();
     }
 
     /**
@@ -123,20 +126,18 @@ public class UploadWidgetImageView extends FrameLayout {
     public void stopCropping() {
         isCropStarted = false;
         setAspectRatioLocked(false);
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setImageBitmap(scaledBitmap);
+        cropOverlayView.setVisibility(INVISIBLE);
 
         if (isCroppedBitmapDisplayed) {
-            setScaledBitmap(getWidth(), getHeight());
+            setBitmap(getWidth(), getHeight());
             isCroppedBitmapDisplayed = false;
-        } else {
-            if (rotationAngle != 0) {
-                rotateBitmapBy(-rotationAngle);
-            }
+        }
+        if (rotationAngle != 0) {
+            rotateBitmapBy(-rotationAngle);
         }
         rotationAngle = 0;
-        cropOverlayView.setVisibility(INVISIBLE);
-        cropOverlayView.reset();
+        imageView.setScaleType(ImageView.ScaleType.CENTER);
+        updateImageViewBitmap();
     }
 
     /**
@@ -154,36 +155,37 @@ public class UploadWidgetImageView extends FrameLayout {
      * @return Crop points that make the crop overlay diagonal.
      */
     public CropPoints getCropPoints() {
-        float ratio = (float) originalWidth / scaledBitmap.getWidth();
+        float ratio = (float) originalWidth / bitmap.getWidth();
         if (rotationAngle % 180 != 0) {
-            ratio = (float) originalWidth / scaledBitmap.getHeight();
+            ratio = (float) originalWidth / bitmap.getHeight();
         }
 
         CropPoints cropPoints = cropOverlayView.getCropPoints();
         Point p1 = cropPoints.getPoint1();
         Point p2 = cropPoints.getPoint2();
-        p1.x = (int) ((p1.x - scaledBitmapBounds.left) * ratio);
-        p1.y = (int) ((p1.y - scaledBitmapBounds.top) * ratio);
-        p2.x = (int) ((p2.x - scaledBitmapBounds.left) * ratio);
-        p2.y = (int) ((p2.y - scaledBitmapBounds.top) * ratio);
+        p1.x = (int) ((p1.x - bitmapBounds.left) * ratio);
+        p1.y = (int) ((p1.y - bitmapBounds.top) * ratio);
+        p2.x = (int) ((p2.x - bitmapBounds.left) * ratio);
+        p2.y = (int) ((p2.y - bitmapBounds.top) * ratio);
 
         return cropPoints;
     }
 
     /**
-     * Display the cropped image, hiding the crop overlay.
+     * Crop the image, hiding the crop overlay.
      */
     public void cropImage() {
         CropPoints cropPoints = cropOverlayView.getCropPoints();
-        Bitmap croppedBitmap = Bitmap.createBitmap(scaledBitmap,
-                cropPoints.getPoint1().x - scaledBitmapBounds.left,
-                cropPoints.getPoint1().y - scaledBitmapBounds.top,
+        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap,
+                cropPoints.getPoint1().x - bitmapBounds.left,
+                cropPoints.getPoint1().y - bitmapBounds.top,
                 cropPoints.getPoint2().x - cropPoints.getPoint1().x,
                 cropPoints.getPoint2().y - cropPoints.getPoint1().y);
-        isCroppedBitmapDisplayed = true;
+
         imageView.setImageBitmap(croppedBitmap);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         cropOverlayView.setVisibility(INVISIBLE);
+        isCroppedBitmapDisplayed = true;
     }
 
     /**
@@ -192,44 +194,45 @@ public class UploadWidgetImageView extends FrameLayout {
     public void rotateImage() {
         rotationAngle += 90 % 360;
         rotateBitmapBy(90);
+        updateImageViewBitmap();
     }
 
+    /**
+     * Returns the current image rotation angle.
+     */
     public int getRotationAngle() {
         return rotationAngle;
     }
 
     private void rotateBitmapBy(int degrees) {
         Matrix matrix = new Matrix();
-        matrix.setRotate(degrees, scaledBitmap.getWidth() / 2, scaledBitmap.getHeight() / 2);
+        matrix.setRotate(degrees, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
 
         float scale;
         if (degrees % 180 != 0) {
-            scale = Math.max(scaledBitmap.getWidth() / (float) getHeight(), scaledBitmap.getHeight() / (float) getWidth());
+            scale = Math.max(bitmap.getWidth() / (float) getHeight(), bitmap.getHeight() / (float) getWidth());
         } else {
-            scale = Math.max(scaledBitmap.getWidth() / (float) getWidth(), scaledBitmap.getHeight() / (float) getHeight());
+            scale = Math.max(bitmap.getWidth() / (float) getWidth(), bitmap.getHeight() / (float) getHeight());
         }
 
-        float dstWidth = scaledBitmap.getWidth() / scale;
-        float dstHeight = scaledBitmap.getHeight() / scale;
-        if (scaledBitmap.getWidth() != dstWidth || scaledBitmap.getHeight() != dstHeight) {
-            final float sx = dstWidth / (float) scaledBitmap.getWidth();
-            final float sy = dstHeight / (float) scaledBitmap.getHeight();
+        float dstWidth = bitmap.getWidth() / scale;
+        float dstHeight = bitmap.getHeight() / scale;
+        if (bitmap.getWidth() != dstWidth || bitmap.getHeight() != dstHeight) {
+            final float sx = dstWidth / (float) bitmap.getWidth();
+            final float sy = dstHeight / (float) bitmap.getHeight();
             matrix.postScale(sx, sy);
         }
-        scaledBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, false);
-        imageView.setImageBitmap(scaledBitmap);
-        setScaledBitmapBounds();
-        cropOverlayView.reset();
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
     }
 
-    private void setScaledBitmapBounds() {
-        int left = (getWidth() - scaledBitmap.getWidth()) / 2;
-        int top = (getHeight() - scaledBitmap.getHeight()) / 2;
-        scaledBitmapBounds.set(left, top, left + scaledBitmap.getWidth(), top + scaledBitmap.getHeight());
-        cropOverlayView.set(scaledBitmapBounds);
+    private void setBitmapBounds() {
+        int left = (getWidth() - bitmap.getWidth()) / 2;
+        int top = (getHeight() - bitmap.getHeight()) / 2;
+        bitmapBounds.set(left, top, left + bitmap.getWidth(), top + bitmap.getHeight());
+        cropOverlayView.set(bitmapBounds);
     }
 
-    private Bitmap scaleBitmap(Bitmap bitmap, int reqWidth, int reqHeight) {
+    private Bitmap getScaledBitmap(Bitmap bitmap, int reqWidth, int reqHeight) {
         if (reqWidth > 0 && reqHeight > 0) {
             Bitmap resized;
             int width = bitmap.getWidth();
@@ -263,7 +266,8 @@ public class UploadWidgetImageView extends FrameLayout {
             options.inJustDecodeBounds = false;
             sampledBitmapStream = getUriInputStream(uri);
             Bitmap sampledBitmap = BitmapFactory.decodeStream(sampledBitmapStream, null, options);
-            bitmap = scaleBitmap(sampledBitmap, reqWidth, reqHeight);
+
+            bitmap = getScaledBitmap(sampledBitmap, reqWidth, reqHeight);
         } finally {
             try {
                 if (justDecodeBoundsStream != null) {

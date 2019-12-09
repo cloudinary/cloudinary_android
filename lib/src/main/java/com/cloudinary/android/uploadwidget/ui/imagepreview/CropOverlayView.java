@@ -280,7 +280,6 @@ class CropOverlayView extends View implements CropOverlayGestureCallback {
      */
     public void set(Rect imageBounds) {
         this.imageBounds = imageBounds;
-        reset();
     }
 
     @Override
