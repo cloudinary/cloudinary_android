@@ -46,10 +46,9 @@ public class UploadWidget {
         checkDataNotNull(data);
         Uri uri = data.getData();
         Result result = data.getParcelableExtra(RESULT_EXTRA);
-        CropPoints cropPoints = result.getCropPoints();
 
         return MediaManager.get().upload(uri)
-                .preprocess(ImagePreprocessChain.cropChain(cropPoints.getPoint1(), cropPoints.getPoint2()));
+                .preprocess(ImagePreprocessChain.uploadWidgetChain(result));
     }
 
     /**
@@ -64,9 +63,8 @@ public class UploadWidget {
     public static UploadRequest preprocessResult(@NonNull UploadRequest uploadRequest, @NonNull Intent data) {
         checkDataNotNull(data);
         Result result = data.getParcelableExtra(RESULT_EXTRA);
-        CropPoints cropPoints = result.getCropPoints();
 
-        return uploadRequest.preprocess(ImagePreprocessChain.cropChain(cropPoints.getPoint1(), cropPoints.getPoint2()));
+        return uploadRequest.preprocess(ImagePreprocessChain.uploadWidgetChain(result));
     }
 
     /**
@@ -97,14 +95,17 @@ public class UploadWidget {
     public static final class Result implements Parcelable {
 
         private final CropPoints cropPoints;
+        private int rotationAngle;
 
-        private Result(CropPoints cropPoints) {
+        private Result(CropPoints cropPoints, int rotationAngle) {
             this.cropPoints = cropPoints;
+            this.rotationAngle = rotationAngle;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeParcelable(cropPoints, flags);
+            dest.writeInt(rotationAngle);
         }
 
         public static final Creator<Result> CREATOR = new Creator<Result>() {
@@ -121,6 +122,7 @@ public class UploadWidget {
 
         protected Result(Parcel in) {
             cropPoints = in.readParcelable(CropPoints.class.getClassLoader());
+            rotationAngle = in.readInt();
         }
 
         @Override
@@ -132,12 +134,17 @@ public class UploadWidget {
             return cropPoints;
         }
 
+        public int getRotationAngle() {
+            return rotationAngle;
+        }
+
         /**
          * Construct an {@link UploadWidget.Result} instance
          */
         public static final class Builder {
 
             private CropPoints cropPoints;
+            private int rotationAngle;
 
             /**
              * Sets the cropping points to crop the image. If the points make the same diagonal size
@@ -150,11 +157,16 @@ public class UploadWidget {
                 return this;
             }
 
+            public Builder rotationAngle(int rotationAngle) {
+                this.rotationAngle = rotationAngle;
+                return this;
+            }
+
             /**
              * @return Instance of {@link UploadWidget.Result} based on the requested parameters.
              */
             public UploadWidget.Result build() {
-                return new UploadWidget.Result(cropPoints);
+                return new UploadWidget.Result(cropPoints, rotationAngle);
             }
         }
     }

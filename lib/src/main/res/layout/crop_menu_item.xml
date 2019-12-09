@@ -15,6 +15,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/menu_item_icon_padding"
-        android:src="@drawable/crop" />
+        android:src="@drawable/crop_rotate" />
 
 </LinearLayout>

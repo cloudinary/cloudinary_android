@@ -17,40 +17,61 @@
     <com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView
         android:id="@+id/imageUriImageView"
         android:layout_below="@id/toolbar"
-        android:layout_above="@id/doneButton"
+        android:layout_above="@id/buttonsContainer"
         android:layout_marginTop="@dimen/imageview_top_margin"
         android:layout_marginBottom="@dimen/imageview_bottom_margin"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <Button
-        android:id="@+id/doneButton"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/buttonsContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="@dimen/done_button_right_margin"
-        android:layout_marginEnd="@dimen/done_button_right_margin"
-        android:visibility="invisible"
-        android:background="@android:color/transparent"
-        android:textColor="?android:attr/textColorPrimary"
-        android:text="@string/done" />
+        android:layout_alignParentBottom="true">
 
-    <Button
-        android:id="@+id/cancelButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="@dimen/cancel_button_left_margin"
-        android:layout_marginStart="@dimen/cancel_button_left_margin"
-        android:visibility="invisible"
-        android:background="@android:color/transparent"
-        android:textColor="?android:attr/textColorPrimary"
-        android:text="@string/cancel" />
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/cancel_button_left_margin"
+            android:layout_marginStart="@dimen/cancel_button_left_margin"
+            android:padding="@dimen/button_padding"
+            android:visibility="invisible"
+            android:background="@android:color/transparent"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/cancel" />
 
+        <ImageView
+            android:id="@+id/rotateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:padding="@dimen/button_padding"
+            android:focusable="true"
+            android:clickable="true"
+            android:visibility="invisible"
+            android:src="@drawable/rotate_90" />
+
+        <Button
+            android:id="@+id/doneButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/done_button_right_margin"
+            android:layout_marginEnd="@dimen/done_button_right_margin"
+            android:padding="@dimen/button_padding"
+            android:visibility="invisible"
+            android:background="@android:color/transparent"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/done" />
+
+    </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/uploadFab"

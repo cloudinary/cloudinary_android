@@ -41,6 +41,7 @@ public class UploadWidgetFragment extends Fragment {
 
     private Uri imageUri;
     private boolean isEditable = true;
+    private ImageView rotateButton;
 
     public UploadWidgetFragment() { }
 
@@ -96,6 +97,14 @@ public class UploadWidgetFragment extends Fragment {
             }
         });
 
+        rotateButton = view.findViewById(R.id.rotateButton);
+        rotateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadWidgetImageView.rotateImage();
+            }
+        });
+
         uploadFab = view.findViewById(R.id.uploadFab);
         uploadFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +112,7 @@ public class UploadWidgetFragment extends Fragment {
                 CropPoints cropPoints = uploadWidgetImageView.getCropPoints();
                 UploadWidget.Result result = new UploadWidget.Result.Builder()
                         .cropPoints(cropPoints)
+                        .rotationAngle(uploadWidgetImageView.getRotationAngle())
                         .build();
 
                 if (getActivity() instanceof UploadWidgetListener) {
@@ -157,6 +167,7 @@ public class UploadWidgetFragment extends Fragment {
                 public void onClick(View v) {
                     aspectRatioItem.setVisible(true);
                     uploadFab.hide();
+                    rotateButton.setVisibility(View.VISIBLE);
                     doneButton.setVisibility(View.VISIBLE);
                     cancelButton.setVisibility(View.VISIBLE);
                     cropItem.setVisible(false);
@@ -200,6 +211,7 @@ public class UploadWidgetFragment extends Fragment {
         this.isEditable = isEditable;
         cancelButton.setVisibility(View.INVISIBLE);
         doneButton.setVisibility(View.INVISIBLE);
+        rotateButton.setVisibility(View.INVISIBLE);
         uploadFab.show();
         invalidateOptionsMenu();
     }
