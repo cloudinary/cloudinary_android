@@ -192,7 +192,7 @@ public class UploadWidgetImageView extends FrameLayout {
      * Rotate the image by 90 degrees.
      */
     public void rotateImage() {
-        rotationAngle += 90 % 360;
+        rotationAngle = (rotationAngle + 90) % 360;
         rotateBitmapBy(90);
         updateImageViewBitmap();
     }
