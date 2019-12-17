@@ -224,21 +224,39 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             } else if (requestCode == UPLOAD_WIDGET_REQUEST_CODE) {
                 handleUploadWidgetResult(data);
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
-                UploadWidget.startActivity(this, UPLOAD_WIDGET_REQUEST_CODE, data.getData());
+                UploadWidget.startActivity(this, UPLOAD_WIDGET_REQUEST_CODE, extractImageUris(data));
             }
         }
+    }
+
+    private ArrayList<Uri> extractImageUris(Intent data) {
+        ArrayList<Uri> imageUris = new ArrayList<>();
+
+        ClipData clipData = data.getClipData();
+        if (clipData != null) {
+            for (int i = 0; i < clipData.getItemCount(); i++) {
+                imageUris.add(clipData.getItemAt(i).getUri());
+            }
+        } else if (data.getData() != null) {
+            imageUris.add(data.getData());
+        }
+
+        return imageUris;
     }
 
     private void handleUploadWidgetResult(final Intent data) {
         backgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                UploadRequest uploadRequest = UploadWidget.preprocessResult(data);
-                String requestId = uploadRequest.dispatch(MainApplication.get());
+                ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
+                for (UploadWidget.Result result : results) {
+                    UploadRequest uploadRequest = UploadWidget.preprocessResult(result);
+                    String requestId = uploadRequest.dispatch(MainApplication.get());
 
-                Resource resource = createResourceFromUri(data.getData(), data.getFlags());
-                resource.setRequestId(requestId);
-                ResourceRepo.getInstance().resourceQueued(resource);
+                    Resource resource = createResourceFromUri(result.getImageUri(), data.getFlags());
+                    resource.setRequestId(requestId);
+                    ResourceRepo.getInstance().resourceQueued(resource);
+                }
             }
         });
     }

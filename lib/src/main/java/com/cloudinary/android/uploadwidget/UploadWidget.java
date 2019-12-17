@@ -12,6 +12,8 @@ import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity;
 
+import java.util.ArrayList;
+
 /**
  * Helper class to start the UploadWidget and preprocess its results.
  */
@@ -22,32 +24,30 @@ public class UploadWidget {
      */
     public static final String RESULT_EXTRA = "upload_widget_result_extra";
 
+    public static final String IMAGES_URI_EXTRA = "images_uri_extra";
+
     /**
      * Start the {@link UploadWidgetActivity}. Please make sure that you have declared it your manifest.
      *
      * @param activity    The activity which requested the upload widget.
      * @param requestCode A request code to start the upload widget with.
-     * @param uri         The image uri to be displayed.
+     * @param imageUris   The Uris of all selected images.
      */
-    public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull Uri uri) {
+    public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> imageUris) {
         Intent intent = new Intent(activity, UploadWidgetActivity.class);
-        intent.setData(uri);
+        intent.putParcelableArrayListExtra(IMAGES_URI_EXTRA, imageUris);
         activity.startActivityForResult(intent, requestCode);
     }
 
     /**
      * Create a new {@link UploadRequest} with the upload widget's preprocess results.
      *
-     * @param data Result data from the upload widget.
+     * @param result Result data from the upload widget.
      * @return Newly created {@link UploadRequest}.
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      */
-    public static UploadRequest preprocessResult(@NonNull Intent data) {
-        checkDataNotNull(data);
-        Uri uri = data.getData();
-        Result result = data.getParcelableExtra(RESULT_EXTRA);
-
-        return MediaManager.get().upload(uri)
+    public static UploadRequest preprocessResult(Result result) {
+        return MediaManager.get().upload(result.getImageUri())
                 .preprocess(ImagePreprocessChain.uploadWidgetChain(result));
     }
 
@@ -55,15 +55,12 @@ public class UploadWidget {
      * Preprocess the {@code uploadRequest}'s with the upload widget results.
      *
      * @param uploadRequest Already constructed upload request.
-     * @param data          Result data from the upload widget.
+     * @param result Result data from the upload widget.
      * @return Preprocessed {@link UploadRequest}
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
      */
-    public static UploadRequest preprocessResult(@NonNull UploadRequest uploadRequest, @NonNull Intent data) {
-        checkDataNotNull(data);
-        Result result = data.getParcelableExtra(RESULT_EXTRA);
-
+    public static UploadRequest preprocessResult(@NonNull UploadRequest uploadRequest, Result result) {
         return uploadRequest.preprocess(ImagePreprocessChain.uploadWidgetChain(result));
     }
 
@@ -76,16 +73,16 @@ public class UploadWidget {
     public static void openMediaChooser(Activity activity, int requestCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setType("image/*");
         activity.startActivityForResult(intent, requestCode);
     }
 
     private static void checkDataNotNull(Intent data) {
-        Uri uri = data.getData();
-        Result result = data.getParcelableExtra(RESULT_EXTRA);
+        ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
 
-        if (uri == null || result == null) {
-            throw new IllegalArgumentException("Data must contain an image uri and an upload widget result");
+        if (results == null) {
+            throw new IllegalArgumentException("Data must contain upload widget results");
         }
     }
 
@@ -94,16 +91,19 @@ public class UploadWidget {
      */
     public static final class Result implements Parcelable {
 
+        private Uri imageUri;
         private final CropPoints cropPoints;
         private int rotationAngle;
 
-        private Result(CropPoints cropPoints, int rotationAngle) {
+        private Result(Uri imageUri, CropPoints cropPoints, int rotationAngle) {
+            this.imageUri = imageUri;
             this.cropPoints = cropPoints;
             this.rotationAngle = rotationAngle;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeParcelable(imageUri, flags);
             dest.writeParcelable(cropPoints, flags);
             dest.writeInt(rotationAngle);
         }
@@ -121,6 +121,7 @@ public class UploadWidget {
         };
 
         protected Result(Parcel in) {
+            imageUri = in.readParcelable(Uri.class.getClassLoader());
             cropPoints = in.readParcelable(CropPoints.class.getClassLoader());
             rotationAngle = in.readInt();
         }
@@ -129,6 +130,8 @@ public class UploadWidget {
         public int describeContents() {
             return 0;
         }
+
+        public Uri getImageUri() { return imageUri; }
 
         public CropPoints getCropPoints() {
             return cropPoints;
@@ -143,8 +146,14 @@ public class UploadWidget {
          */
         public static final class Builder {
 
+            private Uri imageUri;
             private CropPoints cropPoints;
             private int rotationAngle;
+
+            public Builder imageUri(Uri imageUri) {
+                this.imageUri = imageUri;
+                return this;
+            }
 
             /**
              * Sets the cropping points to crop the image. If the points make the same diagonal size
@@ -166,7 +175,7 @@ public class UploadWidget {
              * @return Instance of {@link UploadWidget.Result} based on the requested parameters.
              */
             public UploadWidget.Result build() {
-                return new UploadWidget.Result(cropPoints, rotationAngle);
+                return new UploadWidget.Result(imageUri, cropPoints, rotationAngle);
             }
         }
     }

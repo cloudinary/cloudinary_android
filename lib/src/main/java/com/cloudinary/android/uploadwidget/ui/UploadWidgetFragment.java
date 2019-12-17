@@ -7,56 +7,49 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.cloudinary.android.R;
-import com.cloudinary.android.uploadwidget.CropPoints;
 import com.cloudinary.android.uploadwidget.UploadWidget;
-import com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Previews an image and lets the user to optionally edit it.
+ * A simple {@link Fragment} subclass.
  */
-public class UploadWidgetFragment extends Fragment {
+public class UploadWidgetFragment extends Fragment implements CropRotateFragment.Callback {
 
-    private static final String IMAGE_URI_ARG = "image_uri_arg";
 
-    private UploadWidgetImageView uploadWidgetImageView;
+    private static final String IMAGES_URIS_LIST_ARG = "images_uris_list_arg";
     private FloatingActionButton uploadFab;
-    private Button doneButton;
-    private Button cancelButton;
+    private ViewPager imagesViewPager;
+    private ImagePagerAdapter imagesPagerAdapter;
+    private RecyclerView thumbnailsRecyclerView;
+    private ThumbnailsAdapter thumbnailsAdapter;
+    private ArrayList<Uri> imagesUris;
+    private Map<Uri, UploadWidget.Result> uriResults;
 
-    private Uri imageUri;
-    private boolean isEditable = true;
-    private ImageView rotateButton;
+    public UploadWidgetFragment() {
+        // Required empty public constructor
+    }
 
-    public UploadWidgetFragment() { }
-
-    /**
-     * Instantiates a new {@link UploadWidgetFragment} with an image uri argument and an {@link UploadWidgetListener}.
-     * @param imageUri Uri of the image to be displayed.
-     */
-    public static UploadWidgetFragment newInstance(Uri imageUri) {
-        if (imageUri == null) {
-            throw new IllegalArgumentException("Image uri must be provided");
-        }
-
+    public static UploadWidgetFragment newInstance(ArrayList<Uri> imagesUris) {
         UploadWidgetFragment fragment = new UploadWidgetFragment();
         Bundle args = new Bundle();
-        args.putString(IMAGE_URI_ARG, imageUri.toString());
+        args.putParcelableArrayList(IMAGES_URIS_LIST_ARG, imagesUris);
         fragment.setArguments(args);
 
         return fragment;
@@ -65,43 +58,30 @@ public class UploadWidgetFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         Bundle arguments = getArguments();
         if (arguments != null) {
-            imageUri = Uri.parse(arguments.getString(IMAGE_URI_ARG));
+            imagesUris = arguments.getParcelableArrayList(IMAGES_URIS_LIST_ARG);
         }
-        setHasOptionsMenu(true);
+        uriResults = new HashMap<>(imagesUris.size());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_upload_widget, container, false);
-        uploadWidgetImageView = view.findViewById(R.id.imageUriImageView);
-        uploadWidgetImageView.setImageUri(imageUri);
 
-        doneButton = view.findViewById(R.id.doneButton);
-        doneButton.setOnClickListener(new View.OnClickListener() {
+        imagesViewPager = view.findViewById(R.id.imagesViewPager);
+        imagesPagerAdapter = new ImagePagerAdapter(imagesUris);
+        imagesViewPager.setAdapter(imagesPagerAdapter);
+        imagesViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
-            public void onClick(View v) {
-                uploadWidgetImageView.cropImage();
-                setPreviewMode(false);
-            }
-        });
-
-        cancelButton = view.findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadWidgetImageView.stopCropping();
-                setPreviewMode(true);
-            }
-        });
-
-        rotateButton = view.findViewById(R.id.rotateButton);
-        rotateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadWidgetImageView.rotateImage();
+            public void onPageSelected(int position) {
+                thumbnailsAdapter.setSelectedThumbnail(position);
+                thumbnailsRecyclerView.scrollToPosition(position);
+                super.onPageSelected(position);
             }
         });
 
@@ -109,30 +89,25 @@ public class UploadWidgetFragment extends Fragment {
         uploadFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CropPoints cropPoints = uploadWidgetImageView.getCropPoints();
-                UploadWidget.Result result = new UploadWidget.Result.Builder()
-                        .cropPoints(cropPoints)
-                        .rotationAngle(uploadWidgetImageView.getRotationAngle())
-                        .build();
-
                 if (getActivity() instanceof UploadWidgetListener) {
-                    ((UploadWidgetListener) getActivity()).onConfirm(imageUri, result);
+                    ((UploadWidgetListener) getActivity()).onConfirm(getResults());
                 }
             }
         });
 
-        view.setFocusableInTouchMode(true);
-        view.requestFocus();
-        view.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == MotionEvent.ACTION_UP) {
-                    onBackPressed();
-                    return true;
+        thumbnailsRecyclerView = view.findViewById(R.id.thumbnailsRecyclerView);
+        if (imagesUris.size() > 1) {
+            thumbnailsAdapter = new ThumbnailsAdapter(imagesUris, new ThumbnailsAdapter.Callback() {
+                @Override
+                public void onThumbnailClicked(Uri uri) {
+                    imagesViewPager.setCurrentItem(imagesPagerAdapter.getImageIndex(uri), true);
                 }
-                return false;
-            }
-        });
+            });
+            thumbnailsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+            thumbnailsRecyclerView.setAdapter(thumbnailsAdapter);
+        } else {
+            thumbnailsRecyclerView.setVisibility(View.INVISIBLE);
+        }
 
         return view;
     }
@@ -156,83 +131,77 @@ public class UploadWidgetFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.upload_widget_menu, menu);
-        final MenuItem aspectRatioItem = menu.findItem(R.id.aspect_ratio_action);
         final MenuItem cropItem = menu.findItem(R.id.crop_action);
+        final View cropActionView = cropItem.getActionView();
 
-        if (isEditable) {
-            final View cropActionView = cropItem.getActionView();
-            final View aspectRatioActionView = aspectRatioItem.getActionView();
-            cropActionView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    aspectRatioItem.setVisible(true);
-                    uploadFab.hide();
-                    rotateButton.setVisibility(View.VISIBLE);
-                    doneButton.setVisibility(View.VISIBLE);
-                    cancelButton.setVisibility(View.VISIBLE);
-                    cropItem.setVisible(false);
-                    uploadWidgetImageView.startCropping();
+        cropActionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri imageUri = imagesUris.get(imagesViewPager.getCurrentItem());
+                CropRotateFragment cropRotateFragment = CropRotateFragment.newInstance(imageUri, UploadWidgetFragment.this);
+
+                FragmentActivity activity = getActivity();
+                if (activity != null) {
+                    activity.getSupportFragmentManager().beginTransaction()
+                            .replace(android.R.id.content, cropRotateFragment, "image_fragment_tag")
+                            .addToBackStack(null)
+                            .commit();
                 }
-            });
+            }
+        });
 
-            aspectRatioActionView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    TextView aspectRatioTextView = aspectRatioActionView.findViewById(R.id.aspectRatioTextView);
-                    ImageView aspectRatioImageView = aspectRatioActionView.findViewById(R.id.aspectRatioImageView);
-
-                    if (uploadWidgetImageView.isAspectRatioLocked()) {
-                        uploadWidgetImageView.setAspectRatioLocked(false);
-                        aspectRatioTextView.setText(getString(R.string.menu_item_aspect_ratio_unlocked));
-                        aspectRatioImageView.setImageResource(R.drawable.unlock);
-                    } else {
-                        uploadWidgetImageView.setAspectRatioLocked(true);
-                        aspectRatioTextView.setText(getString(R.string.menu_item_aspect_ratio_locked));
-                        aspectRatioImageView.setImageResource(R.drawable.lock);
-                    }
-                }
-            });
-        } else {
-            cropItem.setVisible(false);
-            aspectRatioItem.setVisible(false);
-        }
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onCropRotateFinish(Uri imageUri, final UploadWidget.Result result) {
+        uriResults.put(imageUri, result);
+        BitmapManager.get().saveResult(getContext(), result, new BitmapManager.SaveResultCallback() {
+            @Override
+            public void onSuccess(Uri resultUri) {
+                imagesPagerAdapter.updateResultUri(result.getImageUri(), resultUri);
+            }
+
+            @Override
+            public void onFailure() { }
+        });
+
+    }
+
+    @Override
+    public void onCropRotateCancel(Uri imageUri) {
+        resetUriResult(imageUri);
+        imagesPagerAdapter.resetResultUri(imageUri);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void setPreviewMode(boolean isEditable) {
-        this.isEditable = isEditable;
-        cancelButton.setVisibility(View.INVISIBLE);
-        doneButton.setVisibility(View.INVISIBLE);
-        rotateButton.setVisibility(View.INVISIBLE);
-        uploadFab.show();
-        invalidateOptionsMenu();
-    }
-
-    private void invalidateOptionsMenu() {
-        FragmentActivity activity = getActivity();
-        if (activity != null) {
-            activity.invalidateOptionsMenu();
-        }
-    }
-
-    private void onBackPressed() {
-        if (uploadWidgetImageView.isCropStarted()) {
-            uploadWidgetImageView.stopCropping();
-            setPreviewMode(true);
-        } else {
             FragmentActivity activity = getActivity();
             if (activity != null) {
                 activity.onBackPressed();
             }
         }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private ArrayList<UploadWidget.Result> getResults() {
+        for (Uri uri : imagesUris) {
+            if (!uriResults.containsKey(uri)) {
+                resetUriResult(uri);
+            }
+        }
+
+        ArrayList<UploadWidget.Result> results = new ArrayList<>(uriResults.size());
+        results.addAll(uriResults.values());
+
+        return results;
+    }
+
+    private void resetUriResult(Uri uri) {
+        uriResults.put(uri, new UploadWidget.Result.Builder()
+                .imageUri(uri)
+                .build());
     }
 
     /**
@@ -242,9 +211,9 @@ public class UploadWidgetFragment extends Fragment {
 
         /**
          * Called when the upload widget (optional) edits are confirmed.
-         * @param imageUri Original image uri.
-         * @param result   Confirmed edits' results.
+         * @param results Upload widget's results.
          */
-        void onConfirm(Uri imageUri, UploadWidget.Result result);
+        void onConfirm(ArrayList<UploadWidget.Result> results);
     }
+
 }

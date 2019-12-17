@@ -1,6 +1,7 @@
 package com.cloudinary.android.preprocess;
 
 import android.graphics.Bitmap;
+
 import com.cloudinary.android.uploadwidget.UploadWidget;
 
 /**
@@ -28,13 +29,21 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
     /**
      * Convenience method for building an upload widget preprocessing chain.
      * Use this in {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
+     *
      * @param result The result from the upload widget.
      * @return The prepared chain to pass on to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}
      */
     public static ImagePreprocessChain uploadWidgetChain(UploadWidget.Result result) {
-        return (ImagePreprocessChain) new ImagePreprocessChain()
-                .addStep(new Rotate(result.getRotationAngle()))
-                .addStep(new Crop(result.getCropPoints().getPoint1(), result.getCropPoints().getPoint2()));
+        ImagePreprocessChain imagePreprocessChain = new ImagePreprocessChain();
+
+        if (result.getRotationAngle() != 0) {
+            imagePreprocessChain.addStep(new Rotate(result.getRotationAngle()));
+        }
+        if (result.getCropPoints() != null) {
+            imagePreprocessChain.addStep(new Crop(result.getCropPoints().getPoint1(), result.getCropPoints().getPoint2()));
+        }
+
+        return imagePreprocessChain;
     }
 
     @Override

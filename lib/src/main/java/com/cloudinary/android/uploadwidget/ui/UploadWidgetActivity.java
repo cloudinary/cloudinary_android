@@ -11,12 +11,14 @@ import android.support.v7.app.AppCompatActivity;
 import com.cloudinary.android.R;
 import com.cloudinary.android.uploadwidget.UploadWidget;
 
+import java.util.ArrayList;
+
 /**
  * Provides a solution out of the box for developers who want to use the Upload Widget.
  */
 public class UploadWidgetActivity extends AppCompatActivity implements UploadWidgetFragment.UploadWidgetListener {
 
-    private static final String UPLOAD_WIDGET_FRAGMENT_ID = "upload_widget_fragment_id";
+    private static final String UPLOAD_WIDGET_FRAGMENT_TAG = "upload_widget_fragment_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,22 +30,21 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
             actionBar.hide();
         }
 
-        Uri imageUri = getIntent().getData();
+        ArrayList<Uri> imageUris = getIntent().getParcelableArrayListExtra(UploadWidget.IMAGES_URI_EXTRA);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(UPLOAD_WIDGET_FRAGMENT_ID);
+        Fragment fragment = fragmentManager.findFragmentByTag(UPLOAD_WIDGET_FRAGMENT_TAG);
         if (fragment == null) {
-            fragment = UploadWidgetFragment.newInstance(imageUri);
+            fragment = UploadWidgetFragment.newInstance(imageUris);
         }
         fragmentManager.beginTransaction()
-                .replace(R.id.container, fragment, UPLOAD_WIDGET_FRAGMENT_ID)
+                .replace(R.id.container, fragment, UPLOAD_WIDGET_FRAGMENT_TAG)
                 .commit();
     }
 
     @Override
-    public void onConfirm(Uri imageUri, UploadWidget.Result result) {
+    public void onConfirm(ArrayList<UploadWidget.Result> results) {
         Intent data = new Intent();
-        data.setData(imageUri);
-        data.putExtra(UploadWidget.RESULT_EXTRA, result);
+        data.putParcelableArrayListExtra(UploadWidget.RESULT_EXTRA, results);
 
         setResult(RESULT_OK, data);
         finish();

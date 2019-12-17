@@ -2,7 +2,6 @@ package com.cloudinary.android.uploadwidget.ui.imagepreview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -14,10 +13,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.cloudinary.android.uploadwidget.CropPoints;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import com.cloudinary.android.uploadwidget.ui.BitmapManager;
+import com.cloudinary.android.uploadwidget.ui.Dimensions;
 
 /**
  * Previews the Upload Widget's image with editing capabilities.
@@ -28,6 +25,7 @@ public class UploadWidgetImageView extends FrameLayout {
     private ImageView imageView;
     private Uri imageUri;
     private Bitmap bitmap;
+    private Bitmap croppedBitmap;
     private Rect bitmapBounds = new Rect();
     private int originalWidth;
     private boolean isCropStarted;
@@ -70,15 +68,23 @@ public class UploadWidgetImageView extends FrameLayout {
     }
 
     private void setBitmap(int w, int h) {
-        try {
-            bitmap = decodeSampledBitmapFromUri(imageUri, w, h);
-            if (rotationAngle != 0) {
-                rotateBitmapBy(rotationAngle);
+        BitmapManager.get().load(getContext(), imageUri, w, h, new BitmapManager.LoadBitmapCallback() {
+            @Override
+            public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
+                UploadWidgetImageView.this.bitmap = bitmap;
+                if (rotationAngle != 0) {
+                    rotateBitmapBy(rotationAngle);
+                }
+                updateImageViewBitmap();
+
+                originalWidth = originalDimensions.getWidth();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        updateImageViewBitmap();
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
     }
 
     private void updateImageViewBitmap() {
@@ -125,6 +131,7 @@ public class UploadWidgetImageView extends FrameLayout {
      */
     public void stopCropping() {
         isCropStarted = false;
+        croppedBitmap = null;
         setAspectRatioLocked(false);
         cropOverlayView.setVisibility(INVISIBLE);
 
@@ -176,7 +183,7 @@ public class UploadWidgetImageView extends FrameLayout {
      */
     public void cropImage() {
         CropPoints cropPoints = cropOverlayView.getCropPoints();
-        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap,
+        croppedBitmap = Bitmap.createBitmap(bitmap,
                 cropPoints.getPoint1().x - bitmapBounds.left,
                 cropPoints.getPoint1().y - bitmapBounds.top,
                 cropPoints.getPoint2().x - cropPoints.getPoint1().x,
@@ -231,85 +238,4 @@ public class UploadWidgetImageView extends FrameLayout {
         bitmapBounds.set(left, top, left + bitmap.getWidth(), top + bitmap.getHeight());
         cropOverlayView.set(bitmapBounds);
     }
-
-    private Bitmap getScaledBitmap(Bitmap bitmap, int reqWidth, int reqHeight) {
-        if (reqWidth > 0 && reqHeight > 0) {
-            Bitmap resized;
-            int width = bitmap.getWidth();
-            int height = bitmap.getHeight();
-            float scale = Math.max(width / (float) reqWidth, height / (float) reqHeight);
-
-            resized = Bitmap.createScaledBitmap(bitmap, (int) (width / scale), (int) (height / scale), false);
-            if (resized != null) {
-                if (resized != bitmap) {
-                    bitmap.recycle();
-                }
-                return resized;
-            }
-        }
-
-        return bitmap;
-    }
-
-    private Bitmap decodeSampledBitmapFromUri(Uri uri, int reqWidth, int reqHeight) throws FileNotFoundException {
-        Bitmap bitmap;
-        InputStream justDecodeBoundsStream = null;
-        InputStream sampledBitmapStream = null;
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        try {
-            justDecodeBoundsStream = getUriInputStream(uri);
-            BitmapFactory.decodeStream(justDecodeBoundsStream, null, options);
-            originalWidth = options.outWidth;
-
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-            options.inJustDecodeBounds = false;
-            sampledBitmapStream = getUriInputStream(uri);
-            Bitmap sampledBitmap = BitmapFactory.decodeStream(sampledBitmapStream, null, options);
-
-            bitmap = getScaledBitmap(sampledBitmap, reqWidth, reqHeight);
-        } finally {
-            try {
-                if (justDecodeBoundsStream != null) {
-                    justDecodeBoundsStream.close();
-                }
-            } catch (IOException ignored) {
-            }
-            try {
-                if (sampledBitmapStream != null) {
-                    sampledBitmapStream.close();
-                }
-            } catch (IOException ignored) {
-            }
-        }
-
-        return bitmap;
-    }
-
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
-
-    private InputStream getUriInputStream(Uri uri) throws FileNotFoundException {
-        return getContext().getContentResolver().openInputStream(uri);
-    }
-
 }

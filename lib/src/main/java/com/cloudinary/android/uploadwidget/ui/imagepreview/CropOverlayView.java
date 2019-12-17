@@ -94,10 +94,12 @@ class CropOverlayView extends View implements CropOverlayGestureCallback {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        drawDottedPath(canvas);
-        drawGuidelines(canvas);
-        drawHandles(canvas);
-        dimSurroundingBackground(canvas);
+        if (!overlay.isEmpty()) {
+            drawDottedPath(canvas);
+            drawGuidelines(canvas);
+            drawHandles(canvas);
+            dimSurroundingBackground(canvas);
+        }
     }
 
     private void drawDottedPath(Canvas canvas) {
