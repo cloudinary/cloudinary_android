@@ -25,6 +25,9 @@ public class UploadWidget {
      */
     public static final String RESULT_EXTRA = "upload_widget_result_extra";
 
+    /**
+     * The key used to pass the images' uris to the upload widget.
+     */
     public static final String IMAGES_URI_EXTRA = "images_uri_extra";
 
     /**
@@ -111,8 +114,19 @@ public class UploadWidget {
      */
     public static final class Result implements Parcelable {
 
+        /**
+         * Source image uri.
+         */
         public Uri imageUri;
+
+        /**
+         * Pair of cropping points used to crop the image.
+         */
         public CropPoints cropPoints;
+
+        /**
+         * Angle to rotate the image
+         */
         public int rotationAngle;
 
         public Result(Uri imageUri) {

@@ -41,9 +41,9 @@ public class CropRotateFragment extends Fragment {
     }
 
     /**
-     * Instantiates a new {@link CropRotateFragment}.
+     * Instantiate a new {@link CropRotateFragment}.
      *
-     * @param imageUri Uri of the image to be displayed.
+     * @param imageUri Uri of the image to crop and rotate.
      * @param callback Callback to be called when there is a result for the crop and rotate.
      */
     public static CropRotateFragment newInstance(Uri imageUri, Callback callback) {

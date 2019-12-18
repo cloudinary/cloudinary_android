@@ -26,6 +26,9 @@ public class BitmapManager {
     private Handler mainThreadHandler;
     private static BitmapManager instance;
 
+    /**
+     * Return a bitmap manager instance.
+     */
     public synchronized static BitmapManager get() {
         if (instance == null) {
             instance = new BitmapManager();

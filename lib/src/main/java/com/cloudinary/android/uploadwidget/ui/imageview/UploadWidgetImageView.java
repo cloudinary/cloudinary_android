@@ -149,6 +149,9 @@ public class UploadWidgetImageView extends FrameLayout {
         return cropPoints;
     }
 
+    /**
+     * Return a result bitmap of the editing changes, or the source if none was made.
+     */
     public Bitmap getResultBitmap() {
         CropPoints cropPoints = cropOverlayView.getCropPoints();
         Point p1 = cropPoints.getPoint1();
