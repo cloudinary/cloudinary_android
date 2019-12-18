@@ -180,7 +180,12 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
 
     @Override
     public void onCropRotateCancel(Uri imageUri) {
-        resetUriResult(imageUri);
+        UploadWidget.Result result = uriResults.get(imageUri);
+        if (result != null) {
+            result.rotationAngle = 0;
+            result.cropPoints = null;
+        }
+
         imagesPagerAdapter.resetResultImage(imageUri);
     }
 
@@ -198,7 +203,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     private ArrayList<UploadWidget.Result> getResults() {
         for (Uri uri : imagesUris) {
             if (!uriResults.containsKey(uri)) {
-                resetUriResult(uri);
+                uriResults.put(uri, new UploadWidget.Result(uri));
             }
         }
 
@@ -206,10 +211,6 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         results.addAll(uriResults.values());
 
         return results;
-    }
-
-    private void resetUriResult(Uri uri) {
-        uriResults.put(uri, new UploadWidget.Result(uri));
     }
 
     /**
