@@ -1,4 +1,4 @@
-package com.cloudinary.android.uploadwidget.ui.imagepreview.gestures;
+package com.cloudinary.android.uploadwidget.ui.imageview.gestures;
 
 /**
  * Callback for overlay gestures.

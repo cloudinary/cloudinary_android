@@ -23,30 +23,28 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cloudinary.android.R;
-import com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView;
+import com.cloudinary.android.uploadwidget.model.CropRotateResult;
+import com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView;
 
 /**
- * Previews an image and lets the user to optionally edit it.
+ * Crops and rotates an image.
  */
 public class CropRotateFragment extends Fragment {
 
     private static final String IMAGE_URI_ARG = "image_uri_arg";
-    private Callback callback;
 
     private UploadWidgetImageView uploadWidgetImageView;
-    private Button doneButton;
-    private Button cancelButton;
-
     private Uri imageUri;
-    private ImageView rotateButton;
+    private Callback callback;
 
     public CropRotateFragment() {
     }
 
     /**
-     * Instantiates a new {@link CropRotateFragment} with an image uri argument.
+     * Instantiates a new {@link CropRotateFragment}.
      *
      * @param imageUri Uri of the image to be displayed.
+     * @param callback Callback to be called when there is a result for the crop and rotate.
      */
     public static CropRotateFragment newInstance(Uri imageUri, Callback callback) {
         if (imageUri == null) {
@@ -80,7 +78,7 @@ public class CropRotateFragment extends Fragment {
         uploadWidgetImageView.setImageUri(imageUri);
         uploadWidgetImageView.showCropOverlay();
 
-        doneButton = view.findViewById(R.id.doneButton);
+        Button doneButton = view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,7 +89,7 @@ public class CropRotateFragment extends Fragment {
             }
         });
 
-        cancelButton = view.findViewById(R.id.cancelButton);
+        Button cancelButton = view.findViewById(R.id.cancelButton);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,7 +100,7 @@ public class CropRotateFragment extends Fragment {
             }
         });
 
-        rotateButton = view.findViewById(R.id.rotateButton);
+        ImageView rotateButton = view.findViewById(R.id.rotateButton);
         rotateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -173,14 +171,6 @@ public class CropRotateFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    public void setCallback(Callback callback) {
-        this.callback = callback;
-    }
-
-    public CropRotateResult getResult() {
-        return new CropRotateResult(uploadWidgetImageView.getRotationAngle(), uploadWidgetImageView.getCropPoints());
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -192,6 +182,19 @@ public class CropRotateFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Set a crop and rotate callback.
+     *
+     * @param callback Crop and rotate callback to be called for the result.
+     */
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
+
+    private CropRotateResult getResult() {
+        return new CropRotateResult(uploadWidgetImageView.getRotationAngle(), uploadWidgetImageView.getCropPoints());
+    }
+
     private void onBackPressed() {
         FragmentActivity activity = getActivity();
         if (activity != null) {
@@ -200,12 +203,13 @@ public class CropRotateFragment extends Fragment {
     }
 
     /**
-     * Callback for the result of the crop and rotate fragment.
+     * Callback for the result of the crop and rotate.
      */
     public interface Callback {
 
         /**
-         * Called when finished to edit the image.
+         * Called when finished to crop and rotate the image.
+         *
          * @param imageUri The source image uri.
          * @param result Crop and rotate result.
          * @param resultBitmap Crop and rotate result bitmap.

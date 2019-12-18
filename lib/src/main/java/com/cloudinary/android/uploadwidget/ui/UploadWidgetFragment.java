@@ -23,6 +23,8 @@ import android.view.ViewGroup;
 
 import com.cloudinary.android.R;
 import com.cloudinary.android.uploadwidget.UploadWidget;
+import com.cloudinary.android.uploadwidget.model.BitmapManager;
+import com.cloudinary.android.uploadwidget.model.CropRotateResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +39,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     private static final String IMAGES_URIS_LIST_ARG = "images_uris_list_arg";
     private FloatingActionButton uploadFab;
     private ViewPager imagesViewPager;
-    private ImagePagerAdapter imagesPagerAdapter;
+    private ImagesPagerAdapter imagesPagerAdapter;
     private RecyclerView thumbnailsRecyclerView;
     private ThumbnailsAdapter thumbnailsAdapter;
     private ArrayList<Uri> imagesUris;
@@ -75,7 +77,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         View view = inflater.inflate(R.layout.fragment_upload_widget, container, false);
 
         imagesViewPager = view.findViewById(R.id.imagesViewPager);
-        imagesPagerAdapter = new ImagePagerAdapter(imagesUris);
+        imagesPagerAdapter = new ImagesPagerAdapter(imagesUris);
         imagesViewPager.setAdapter(imagesPagerAdapter);
         imagesViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -101,7 +103,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
             thumbnailsAdapter = new ThumbnailsAdapter(imagesUris, new ThumbnailsAdapter.Callback() {
                 @Override
                 public void onThumbnailClicked(Uri uri) {
-                    imagesViewPager.setCurrentItem(imagesPagerAdapter.getImageIndex(uri), true);
+                    imagesViewPager.setCurrentItem(imagesPagerAdapter.getImagePosition(uri), true);
                 }
             });
             thumbnailsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -144,7 +146,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
                 FragmentActivity activity = getActivity();
                 if (activity != null) {
                     activity.getSupportFragmentManager().beginTransaction()
-                            .replace(android.R.id.content, cropRotateFragment, "image_fragment_tag")
+                            .replace(android.R.id.content, cropRotateFragment, null)
                             .addToBackStack(null)
                             .commit();
                 }
@@ -164,15 +166,14 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         uwResult.cropPoints = result.getCropPoints();
         uriResults.put(imageUri, uwResult);
 
-        BitmapManager.get().save(getContext(), resultBitmap, new BitmapManager.SaveResultCallback() {
+        BitmapManager.get().save(getContext(), resultBitmap, new BitmapManager.SaveCallback() {
             @Override
             public void onSuccess(Uri resultUri) {
-                imagesPagerAdapter.updateResultUri(imageUri, resultUri);
+                imagesPagerAdapter.updateResultImage(imageUri, resultUri);
             }
 
             @Override
-            public void onFailure() {
-            }
+            public void onFailure() { }
         });
 
     }
@@ -180,7 +181,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     @Override
     public void onCropRotateCancel(Uri imageUri) {
         resetUriResult(imageUri);
-        imagesPagerAdapter.resetResultUri(imageUri);
+        imagesPagerAdapter.resetResultImage(imageUri);
     }
 
     @Override
@@ -217,7 +218,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     public interface UploadWidgetListener {
 
         /**
-         * Called when the upload widget (optional) edits are confirmed.
+         * Called when the upload widget results are confirmed.
          *
          * @param results Upload widget's results.
          */

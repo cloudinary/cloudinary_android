@@ -1,4 +1,4 @@
-package com.cloudinary.android.uploadwidget.ui.imagepreview;
+package com.cloudinary.android.uploadwidget.ui.imageview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,9 +15,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.cloudinary.android.uploadwidget.CropPoints;
-import com.cloudinary.android.uploadwidget.ui.imagepreview.gestures.CropOverlayGestureCallback;
-import com.cloudinary.android.uploadwidget.ui.imagepreview.gestures.CropOverlayGestureDetector;
+import com.cloudinary.android.uploadwidget.model.CropPoints;
+import com.cloudinary.android.uploadwidget.ui.imageview.gestures.CropOverlayGestureCallback;
+import com.cloudinary.android.uploadwidget.ui.imageview.gestures.CropOverlayGestureDetector;
 
 /**
  * Represents the crop overlay which covers the image with the cropping rectangle, while dimming the surrounding area.

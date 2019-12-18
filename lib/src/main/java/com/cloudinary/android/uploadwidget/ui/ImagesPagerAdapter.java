@@ -7,15 +7,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView;
+import com.cloudinary.android.uploadwidget.model.Image;
+import com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView;
 
 import java.util.ArrayList;
 
-public class ImagePagerAdapter extends PagerAdapter {
+/**
+ * Displays images or their results.
+ */
+class ImagesPagerAdapter extends PagerAdapter {
 
     private ArrayList<Image> images;
 
-    public ImagePagerAdapter(ArrayList<Uri> imagesUris) {
+    public ImagesPagerAdapter(ArrayList<Uri> imagesUris) {
         images = new ArrayList<>(imagesUris.size());
 
         for (Uri uri : imagesUris) {
@@ -27,13 +31,12 @@ public class ImagePagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         Image image = images.get(position);
-        Uri uri = image.resultUri;
+        Uri uri = image.getResultUri();
         if (uri == null) {
-            uri = image.sourceUri;
+            uri = image.getSourceUri();
         }
 
         final UploadWidgetImageView imageView = new UploadWidgetImageView(container.getContext());
-        imageView.setTag(image.sourceUri);
         imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         imageView.setImageUri(uri);
 
@@ -62,26 +65,41 @@ public class ImagePagerAdapter extends PagerAdapter {
         return images.size();
     }
 
-    public void updateResultUri(Uri sourceUri, Uri resultUri) {
-        for (int i = 0; i < images.size(); i++) {
-            Image image = images.get(i);
-
-            if (image.sourceUri.toString().equals(sourceUri.toString())) {
-                image.resultUri = resultUri;
+    /**
+     * Update the result image
+     *
+     * @param sourceUri The Uri of the source image that's being updated.
+     * @param resultUri The Uri of the result image.
+     */
+    public void updateResultImage(Uri sourceUri, Uri resultUri) {
+        for (Image image : images) {
+            if (image.getSourceUri().toString().equals(sourceUri.toString())) {
+                image.setResultUri(resultUri);
                 notifyDataSetChanged();
                 break;
             }
         }
     }
 
-    public void resetResultUri(Uri sourceUri) {
-        updateResultUri(sourceUri, null);
+    /**
+     * Reset the result image
+     *
+     * @param sourceUri The Uri of the image to reset.
+     */
+    public void resetResultImage(Uri sourceUri) {
+        updateResultImage(sourceUri, null);
     }
 
-    public int getImageIndex(Uri uri) {
+    /**
+     * Get the image uri's position within the adapter.
+     *
+     * @param uri Uri of the image.
+     * @return Position of the image within the adapter, or -1 of it doesn't exist.
+     */
+    public int getImagePosition(Uri uri) {
         for (int i = 0; i < images.size(); i++) {
             Image image = images.get(i);
-            if (image.sourceUri.toString().equals(uri.toString())) {
+            if (image.getSourceUri().toString().equals(uri.toString())) {
                 return i;
             }
         }

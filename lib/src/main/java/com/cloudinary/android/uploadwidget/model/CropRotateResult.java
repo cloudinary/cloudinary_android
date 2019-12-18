@@ -1,8 +1,7 @@
-package com.cloudinary.android.uploadwidget.ui;
-
-import com.cloudinary.android.uploadwidget.CropPoints;
+package com.cloudinary.android.uploadwidget.model;
 
 public class CropRotateResult {
+
     private int rotationAngle;
     private CropPoints cropPoints;
 

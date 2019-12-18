@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
+import com.cloudinary.android.uploadwidget.model.CropPoints;
 import com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity;
 
 import java.util.ArrayList;
@@ -37,6 +38,25 @@ public class UploadWidget {
         Intent intent = new Intent(activity, UploadWidgetActivity.class);
         intent.putParcelableArrayListExtra(IMAGES_URI_EXTRA, imageUris);
         activity.startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * Create a preprocessed list of {@link UploadRequest}s from the UploadWidget's results data.
+     *
+     * @param data Results data from the upload widget.
+     * @return Preprocessed {@link UploadRequest}s.
+     */
+    public static ArrayList<UploadRequest> preprocessResults(Intent data) {
+        checkDataNotNull(data);
+        ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
+        ArrayList<UploadRequest> uploadRequests = new ArrayList<>(results.size());
+
+        for (Result result : results) {
+            uploadRequests.add(MediaManager.get().upload(result.imageUri)
+                    .preprocess(ImagePreprocessChain.uploadWidgetChain(result)));
+        }
+
+        return uploadRequests;
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.cloudinary.android.uploadwidget.ui;
+package com.cloudinary.android.uploadwidget.model;
 
 public class Dimensions {
 

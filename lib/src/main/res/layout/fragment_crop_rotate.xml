@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:background="@android:color/transparent" />
 
-    <com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView
+    <com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView
         android:id="@+id/imageUriImageView"
         android:layout_below="@id/cropRotateToolbar"
         android:layout_above="@id/buttonsContainer"

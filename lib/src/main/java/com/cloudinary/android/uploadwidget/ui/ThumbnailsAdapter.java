@@ -11,10 +11,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.cloudinary.android.R;
+import com.cloudinary.android.uploadwidget.model.BitmapManager;
+import com.cloudinary.android.uploadwidget.model.Dimensions;
 
 import java.util.ArrayList;
 
-public class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.ThumbnailViewHolder> {
+/**
+ * Displays the images' thumbnails.
+ */
+class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.ThumbnailViewHolder> {
 
     private int selectedThumbnailPosition;
     private ArrayList<Uri> imagesUris;
@@ -55,16 +60,14 @@ public class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Th
 
         Context context = holder.itemView.getContext();
         float thumbnailSize = context.getResources().getDimension(R.dimen.thumbnail_size);
-        BitmapManager.get().load(context, uri, (int) thumbnailSize, (int) thumbnailSize, new BitmapManager.LoadBitmapCallback() {
+        BitmapManager.get().load(context, uri, (int) thumbnailSize, (int) thumbnailSize, new BitmapManager.LoadCallback() {
             @Override
             public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
                 holder.imageView.setImageBitmap(bitmap);
             }
 
             @Override
-            public void onFailure() {
-
-            }
+            public void onFailure() { }
         });
     }
 
@@ -73,6 +76,11 @@ public class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Th
         return imagesUris.size();
     }
 
+    /**
+     * Set the selected thumbnail.
+     *
+     * @param position Position of the new selected thumbnail.
+     */
     public void setSelectedThumbnail(int position) {
         notifyItemChanged(selectedThumbnailPosition);
         notifyItemChanged(position);
@@ -98,7 +106,7 @@ public class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Th
         /**
          * Called when a thumbnail is clicked.
          *
-         * @param uri Uri of the thumbnail's image.
+         * @param uri Uri of the clicked thumbnail.
          */
         void onThumbnailClicked(Uri uri);
     }

@@ -1,4 +1,4 @@
-package com.cloudinary.android.uploadwidget;
+package com.cloudinary.android.uploadwidget.model;
 
 import android.graphics.Point;
 import android.os.Parcel;

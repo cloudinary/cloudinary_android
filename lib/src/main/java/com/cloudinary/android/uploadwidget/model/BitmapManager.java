@@ -1,4 +1,4 @@
-package com.cloudinary.android.uploadwidget.ui;
+package com.cloudinary.android.uploadwidget.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,6 +9,7 @@ import android.support.v4.util.LruCache;
 
 import com.cloudinary.android.preprocess.BitmapEncoder;
 import com.cloudinary.android.preprocess.ResourceCreationException;
+import com.cloudinary.android.uploadwidget.utils.BitmapUtils;
 
 import java.security.MessageDigest;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +50,7 @@ public class BitmapManager {
      * @param height   Height for the output bitmap to be adjusted to (not necessarily exact fit).
      * @param callback The callback to be called when loading the bitmap.
      */
-    public void load(final Context context, final Uri uri, final int width, final int height, final LoadBitmapCallback callback) {
+    public void load(final Context context, final Uri uri, final int width, final int height, final LoadCallback callback) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -76,7 +77,7 @@ public class BitmapManager {
      * @param bitmap Bitmap to save.
      * @param callback the callback to be called when saving the bitmap.
      */
-    public void save(final Context context, final Bitmap bitmap, final SaveResultCallback callback) {
+    public void save(final Context context, final Bitmap bitmap, final SaveCallback callback) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -107,7 +108,7 @@ public class BitmapManager {
         };
     }
 
-    private void onLoadSuccess(final Bitmap bitmap, final Dimensions dimensions, final LoadBitmapCallback callback) {
+    private void onLoadSuccess(final Bitmap bitmap, final Dimensions dimensions, final LoadCallback callback) {
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -118,7 +119,7 @@ public class BitmapManager {
         });
     }
 
-    private void onLoadFailed(final LoadBitmapCallback callback) {
+    private void onLoadFailed(final LoadCallback callback) {
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -129,7 +130,7 @@ public class BitmapManager {
         });
     }
 
-    private void onSaveSuccess(final Uri resultUri, final SaveResultCallback callback) {
+    private void onSaveSuccess(final Uri resultUri, final SaveCallback callback) {
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -140,7 +141,7 @@ public class BitmapManager {
         });
     }
 
-    private void onSaveFailed(final SaveResultCallback callback) {
+    private void onSaveFailed(final SaveCallback callback) {
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -158,9 +159,11 @@ public class BitmapManager {
             byte[] hash = digest.digest(plaintext.getBytes("UTF-8"));
             StringBuilder hexString = new StringBuilder();
 
-            for (int i = 0; i < hash.length; i++) {
-                String hex = Integer.toHexString(0xff & hash[i]);
-                if (hex.length() == 1) hexString.append('0');
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
                 hexString.append(hex);
             }
 
@@ -174,7 +177,7 @@ public class BitmapManager {
     /**
      * Callback for loading a bitmap.
      */
-    public interface LoadBitmapCallback {
+    public interface LoadCallback {
 
         /**
          * Called when the bitmap is loaded successfully.
@@ -193,7 +196,7 @@ public class BitmapManager {
     /**
      * Callback for saving a bitmap into a file.
      */
-    public interface SaveResultCallback {
+    public interface SaveCallback {
 
         /**
          * Called when the bitmap was saved successfully.

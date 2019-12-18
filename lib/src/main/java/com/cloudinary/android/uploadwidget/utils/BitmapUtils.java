@@ -1,9 +1,11 @@
-package com.cloudinary.android.uploadwidget.ui;
+package com.cloudinary.android.uploadwidget.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+
+import com.cloudinary.android.uploadwidget.model.Dimensions;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +13,16 @@ import java.io.InputStream;
 
 public class BitmapUtils {
 
+    /**
+     * Decode a sampled bitmap to the required width and height.
+     *
+     * @param context Android context.
+     * @param uri Bitmap's source uri.
+     * @param reqWidth Required width for the bitmap to be adjusted to.
+     * @param reqHeight Required height for the bitmap to be adjusted to.
+     * @return The decoded bitmap.
+     * @throws FileNotFoundException If cannot locate the bitmap's source uri.
+     */
     public static Bitmap decodeSampledBitmapFromUri(Context context, Uri uri, int reqWidth, int reqHeight) throws FileNotFoundException {
         Bitmap bitmap;
         InputStream justDecodeBoundsStream = null;
@@ -45,6 +57,14 @@ public class BitmapUtils {
         return bitmap;
     }
 
+    /**
+     * Get bitmap's dimensions.
+     *
+     * @param context Android context.
+     * @param uri Bitmap's source uri.
+     * @return Dimensions of the bitmap.
+     * @throws FileNotFoundException If cannot locate the bitmap's source uri.
+     */
     public static Dimensions getBitmapDimensions(Context context, Uri uri) throws FileNotFoundException {
         InputStream justDecodeBoundsStream = null;
         final BitmapFactory.Options options = new BitmapFactory.Options();

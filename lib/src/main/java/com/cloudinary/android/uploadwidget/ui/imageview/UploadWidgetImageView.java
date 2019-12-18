@@ -1,4 +1,4 @@
-package com.cloudinary.android.uploadwidget.ui.imagepreview;
+package com.cloudinary.android.uploadwidget.ui.imageview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,9 +12,9 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.cloudinary.android.uploadwidget.CropPoints;
-import com.cloudinary.android.uploadwidget.ui.BitmapManager;
-import com.cloudinary.android.uploadwidget.ui.Dimensions;
+import com.cloudinary.android.uploadwidget.model.CropPoints;
+import com.cloudinary.android.uploadwidget.model.BitmapManager;
+import com.cloudinary.android.uploadwidget.model.Dimensions;
 
 /**
  * Previews the Upload Widget's image with editing capabilities.
@@ -28,7 +28,6 @@ public class UploadWidgetImageView extends FrameLayout {
     private Rect bitmapBounds = new Rect();
     private int originalWidth;
     private int rotationAngle;
-    private boolean sizeChanged;
 
     public UploadWidgetImageView(@NonNull Context context) {
         super(context);
@@ -66,7 +65,7 @@ public class UploadWidgetImageView extends FrameLayout {
     }
 
     private void setBitmap(int w, int h) {
-        BitmapManager.get().load(getContext(), imageUri, w, h, new BitmapManager.LoadBitmapCallback() {
+        BitmapManager.get().load(getContext(), imageUri, w, h, new BitmapManager.LoadCallback() {
             @Override
             public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
                 UploadWidgetImageView.this.bitmap = bitmap;
@@ -79,9 +78,7 @@ public class UploadWidgetImageView extends FrameLayout {
             }
 
             @Override
-            public void onFailure() {
-
-            }
+            public void onFailure() { }
         });
     }
 
