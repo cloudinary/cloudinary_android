@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
                     UploadRequest uploadRequest = UploadWidget.preprocessResult(result);
                     String requestId = uploadRequest.dispatch(MainApplication.get());
 
-                    Resource resource = createResourceFromUri(result.getImageUri(), data.getFlags());
+                    Resource resource = createResourceFromUri(result.imageUri, data.getFlags());
                     resource.setRequestId(requestId);
                     ResourceRepo.getInstance().resourceQueued(resource);
                 }

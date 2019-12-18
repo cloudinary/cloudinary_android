@@ -47,7 +47,7 @@ public class UploadWidget {
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      */
     public static UploadRequest preprocessResult(Result result) {
-        return MediaManager.get().upload(result.getImageUri())
+        return MediaManager.get().upload(result.imageUri)
                 .preprocess(ImagePreprocessChain.uploadWidgetChain(result));
     }
 
@@ -91,14 +91,12 @@ public class UploadWidget {
      */
     public static final class Result implements Parcelable {
 
-        private Uri imageUri;
-        private final CropPoints cropPoints;
-        private int rotationAngle;
+        public Uri imageUri;
+        public CropPoints cropPoints;
+        public int rotationAngle;
 
-        private Result(Uri imageUri, CropPoints cropPoints, int rotationAngle) {
+        public Result(Uri imageUri) {
             this.imageUri = imageUri;
-            this.cropPoints = cropPoints;
-            this.rotationAngle = rotationAngle;
         }
 
         @Override
@@ -129,54 +127,6 @@ public class UploadWidget {
         @Override
         public int describeContents() {
             return 0;
-        }
-
-        public Uri getImageUri() { return imageUri; }
-
-        public CropPoints getCropPoints() {
-            return cropPoints;
-        }
-
-        public int getRotationAngle() {
-            return rotationAngle;
-        }
-
-        /**
-         * Construct an {@link UploadWidget.Result} instance
-         */
-        public static final class Builder {
-
-            private Uri imageUri;
-            private CropPoints cropPoints;
-            private int rotationAngle;
-
-            public Builder imageUri(Uri imageUri) {
-                this.imageUri = imageUri;
-                return this;
-            }
-
-            /**
-             * Sets the cropping points to crop the image. If the points make the same diagonal size
-             * as the original image, it will be returned unchanged.
-             * @param cropPoints Pair of points that make a diagonal to crop the image.
-             * @return Itself for chaining operation.
-             */
-            public Builder cropPoints(CropPoints cropPoints) {
-                this.cropPoints = cropPoints;
-                return this;
-            }
-
-            public Builder rotationAngle(int rotationAngle) {
-                this.rotationAngle = rotationAngle;
-                return this;
-            }
-
-            /**
-             * @return Instance of {@link UploadWidget.Result} based on the requested parameters.
-             */
-            public UploadWidget.Result build() {
-                return new UploadWidget.Result(imageUri, cropPoints, rotationAngle);
-            }
         }
     }
 

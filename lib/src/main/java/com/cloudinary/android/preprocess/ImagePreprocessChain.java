@@ -36,11 +36,11 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
     public static ImagePreprocessChain uploadWidgetChain(UploadWidget.Result result) {
         ImagePreprocessChain imagePreprocessChain = new ImagePreprocessChain();
 
-        if (result.getRotationAngle() != 0) {
-            imagePreprocessChain.addStep(new Rotate(result.getRotationAngle()));
+        if (result.rotationAngle != 0) {
+            imagePreprocessChain.addStep(new Rotate(result.rotationAngle));
         }
-        if (result.getCropPoints() != null) {
-            imagePreprocessChain.addStep(new Crop(result.getCropPoints().getPoint1(), result.getCropPoints().getPoint2()));
+        if (result.cropPoints != null) {
+            imagePreprocessChain.addStep(new Crop(result.cropPoints.getPoint1(), result.cropPoints.getPoint2()));
         }
 
         return imagePreprocessChain;

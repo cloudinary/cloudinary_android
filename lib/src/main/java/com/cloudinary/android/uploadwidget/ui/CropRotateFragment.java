@@ -1,6 +1,7 @@
 package com.cloudinary.android.uploadwidget.ui;
 
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cloudinary.android.R;
-import com.cloudinary.android.uploadwidget.UploadWidget;
 import com.cloudinary.android.uploadwidget.ui.imagepreview.UploadWidgetImageView;
 
 /**
@@ -78,14 +78,14 @@ public class CropRotateFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_crop_rotate, container, false);
         uploadWidgetImageView = view.findViewById(R.id.imageUriImageView);
         uploadWidgetImageView.setImageUri(imageUri);
-        uploadWidgetImageView.startCropping();
+        uploadWidgetImageView.showCropOverlay();
 
         doneButton = view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (callback != null) {
-                    callback.onCropRotateFinish(imageUri, getResult());
+                    callback.onCropRotateFinish(imageUri, getResult(), uploadWidgetImageView.getResultBitmap());
                     onBackPressed();
                 }
             }
@@ -177,12 +177,8 @@ public class CropRotateFragment extends Fragment {
         this.callback = callback;
     }
 
-    public UploadWidget.Result getResult() {
-        return new UploadWidget.Result.Builder()
-                .imageUri(imageUri)
-                .cropPoints(uploadWidgetImageView.getCropPoints())
-                .rotationAngle(uploadWidgetImageView.getRotationAngle())
-                .build();
+    public CropRotateResult getResult() {
+        return new CropRotateResult(uploadWidgetImageView.getRotationAngle(), uploadWidgetImageView.getCropPoints());
     }
 
     @Override
@@ -210,18 +206,19 @@ public class CropRotateFragment extends Fragment {
 
         /**
          * Called when finished to edit the image.
-         *
          * @param imageUri The source image uri.
-         * @param result   Result of the image editing.
+         * @param result Crop and rotate result.
+         * @param resultBitmap Crop and rotate result bitmap.
          */
-        void onCropRotateFinish(Uri imageUri, UploadWidget.Result result);
+        void onCropRotateFinish(Uri imageUri, CropRotateResult result, Bitmap resultBitmap);
 
         /**
-         * Called when canceled to edit the image.
+         * Called when canceled to crop and rotate the image.
          *
          * @param imageUri The source image uri.
          */
         void onCropRotateCancel(Uri imageUri);
 
     }
+
 }

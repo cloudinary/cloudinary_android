@@ -7,16 +7,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.util.LruCache;
 
-import com.cloudinary.android.payload.LocalUriPayload;
-import com.cloudinary.android.preprocess.ImagePreprocessChain;
-import com.cloudinary.android.uploadwidget.UploadWidget;
-import com.cloudinary.utils.StringUtils;
+import com.cloudinary.android.preprocess.BitmapEncoder;
+import com.cloudinary.android.preprocess.ResourceCreationException;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.MessageDigest;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -69,7 +63,7 @@ public class BitmapManager {
                     Dimensions dimensions = BitmapUtils.getBitmapDimensions(context, uri);
 
                     onLoadSuccess(bitmap, dimensions, callback);
-                } catch (FileNotFoundException e) {
+                } catch (Exception e) {
                     onLoadFailed(callback);
                 }
             }
@@ -82,49 +76,17 @@ public class BitmapManager {
      * @param bitmap Bitmap to save.
      * @param callback the callback to be called when saving the bitmap.
      */
-    public void saveToFile(final Context context, final Bitmap bitmap, final SaveResultCallback callback) {
+    public void save(final Context context, final Bitmap bitmap, final SaveResultCallback callback) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                FileOutputStream fos = null;
-                final String fileName = UUID.randomUUID().toString();
                 try {
-                    fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-
+                    BitmapEncoder encoder = new BitmapEncoder(BitmapEncoder.Format.PNG, 100);
+                    String fileName = encoder.encode(context, bitmap);
                     final Uri bitmapUri = Uri.fromFile(context.getFileStreamPath(fileName));
-                    String hash = getHash(bitmapUri.toString() + bitmap.getWidth() + bitmap.getHeight());
-                    memoryCache.put(hash, bitmap);
 
                     onSaveSuccess(bitmapUri, callback);
-                } catch (IOException e) {
-                    onSaveFailed(callback);
-                } finally {
-                    if (fos != null) {
-                        try {
-                            fos.close();
-                            if (StringUtils.isBlank(fileName)) {
-                                // failed, delete the file just in case it's there:
-                                context.deleteFile(fileName);
-                            }
-                        } catch (IOException ignored) {
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    public void saveResult(final Context context, final UploadWidget.Result result, final SaveResultCallback callback) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String fileName = ImagePreprocessChain.uploadWidgetChain(result).execute(context, new LocalUriPayload(result.getImageUri()));
-                    Uri resultUri = Uri.fromFile(context.getFileStreamPath(fileName));
-
-                    onSaveSuccess(resultUri, callback);
-                } catch (Exception e) {
+                } catch (ResourceCreationException e) {
                     onSaveFailed(callback);
                 }
             }
@@ -234,14 +196,14 @@ public class BitmapManager {
     public interface SaveResultCallback {
 
         /**
-         * Called when the result was saved successfully.
+         * Called when the bitmap was saved successfully.
          *
          * @param resultUri Result's file uri.
          */
         void onSuccess(Uri resultUri);
 
         /**
-         * Called when failed to save the result.
+         * Called when failed to save the bitmap.
          */
         void onFailure();
     }

@@ -25,12 +25,10 @@ public class UploadWidgetImageView extends FrameLayout {
     private ImageView imageView;
     private Uri imageUri;
     private Bitmap bitmap;
-    private Bitmap croppedBitmap;
     private Rect bitmapBounds = new Rect();
     private int originalWidth;
-    private boolean isCropStarted;
-    private boolean isCroppedBitmapDisplayed;
     private int rotationAngle;
+    private boolean sizeChanged;
 
     public UploadWidgetImageView(@NonNull Context context) {
         super(context);
@@ -62,7 +60,7 @@ public class UploadWidgetImageView extends FrameLayout {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        if (imageUri != null && !isCroppedBitmapDisplayed) {
+        if (imageUri != null) {
             setBitmap(w, h);
         }
     }
@@ -119,41 +117,17 @@ public class UploadWidgetImageView extends FrameLayout {
     }
 
     /**
-     * Start the cropping, showing the crop overlay fitted to the image bounds.
+     * Show the crop overlay
      */
-    public void startCropping() {
+    public void showCropOverlay() {
         cropOverlayView.setVisibility(VISIBLE);
-        isCropStarted = true;
     }
 
     /**
-     * Stop the cropping, hiding the crop overlay and setting the original bitmap.
+     * Hide the crop overlay
      */
-    public void stopCropping() {
-        isCropStarted = false;
-        croppedBitmap = null;
-        setAspectRatioLocked(false);
+    public void hideCropOverlay() {
         cropOverlayView.setVisibility(INVISIBLE);
-
-        if (isCroppedBitmapDisplayed) {
-            setBitmap(getWidth(), getHeight());
-            isCroppedBitmapDisplayed = false;
-        }
-        if (rotationAngle != 0) {
-            rotateBitmapBy(-rotationAngle);
-        }
-        rotationAngle = 0;
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
-        updateImageViewBitmap();
-    }
-
-    /**
-     * Whether it is during cropping or not.
-     *
-     * @return true if {@link UploadWidgetImageView#startCropping()} was called, and false if cropping was never started or {@link UploadWidgetImageView#stopCropping()} was called.
-     */
-    public boolean isCropStarted() {
-        return isCropStarted;
     }
 
     /**
@@ -178,21 +152,23 @@ public class UploadWidgetImageView extends FrameLayout {
         return cropPoints;
     }
 
-    /**
-     * Crop the image, hiding the crop overlay.
-     */
-    public void cropImage() {
+    public Bitmap getResultBitmap() {
         CropPoints cropPoints = cropOverlayView.getCropPoints();
-        croppedBitmap = Bitmap.createBitmap(bitmap,
-                cropPoints.getPoint1().x - bitmapBounds.left,
-                cropPoints.getPoint1().y - bitmapBounds.top,
-                cropPoints.getPoint2().x - cropPoints.getPoint1().x,
-                cropPoints.getPoint2().y - cropPoints.getPoint1().y);
+        Point p1 = cropPoints.getPoint1();
+        Point p2 = cropPoints.getPoint2();
 
-        imageView.setImageBitmap(croppedBitmap);
-        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        cropOverlayView.setVisibility(INVISIBLE);
-        isCroppedBitmapDisplayed = true;
+        Bitmap resultBitmap;
+        if (p2.x - p1.x != bitmap.getWidth() || p2.y - p1.y != bitmap.getHeight()) {
+            resultBitmap = Bitmap.createBitmap(bitmap,
+                    p1.x - bitmapBounds.left,
+                    p1.y - bitmapBounds.top,
+                    p2.x - p1.x,
+                    p2.y - p1.y);
+        } else {
+            resultBitmap = bitmap;
+        }
+
+        return resultBitmap;
     }
 
     /**

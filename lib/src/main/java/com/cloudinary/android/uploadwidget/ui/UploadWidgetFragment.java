@@ -1,6 +1,7 @@
 package com.cloudinary.android.uploadwidget.ui;
 
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -154,16 +155,24 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     }
 
     @Override
-    public void onCropRotateFinish(Uri imageUri, final UploadWidget.Result result) {
-        uriResults.put(imageUri, result);
-        BitmapManager.get().saveResult(getContext(), result, new BitmapManager.SaveResultCallback() {
+    public void onCropRotateFinish(final Uri imageUri, final CropRotateResult result, Bitmap resultBitmap) {
+        UploadWidget.Result uwResult = uriResults.get(imageUri);
+        if (uwResult == null) {
+            uwResult = new UploadWidget.Result(imageUri);
+        }
+        uwResult.rotationAngle = result.getRotationAngle();
+        uwResult.cropPoints = result.getCropPoints();
+        uriResults.put(imageUri, uwResult);
+
+        BitmapManager.get().save(getContext(), resultBitmap, new BitmapManager.SaveResultCallback() {
             @Override
             public void onSuccess(Uri resultUri) {
-                imagesPagerAdapter.updateResultUri(result.getImageUri(), resultUri);
+                imagesPagerAdapter.updateResultUri(imageUri, resultUri);
             }
 
             @Override
-            public void onFailure() { }
+            public void onFailure() {
+            }
         });
 
     }
@@ -199,9 +208,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     }
 
     private void resetUriResult(Uri uri) {
-        uriResults.put(uri, new UploadWidget.Result.Builder()
-                .imageUri(uri)
-                .build());
+        uriResults.put(uri, new UploadWidget.Result(uri));
     }
 
     /**
@@ -211,6 +218,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
 
         /**
          * Called when the upload widget (optional) edits are confirmed.
+         *
          * @param results Upload widget's results.
          */
         void onConfirm(ArrayList<UploadWidget.Result> results);
