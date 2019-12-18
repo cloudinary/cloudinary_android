@@ -7,11 +7,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.util.LruCache;
 
-import com.cloudinary.android.preprocess.BitmapEncoder;
-import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.android.uploadwidget.utils.BitmapUtils;
+import com.cloudinary.utils.StringUtils;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -84,14 +86,27 @@ public class BitmapManager {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                FileOutputStream fos = null;
+                String fileName = UUID.randomUUID().toString();
                 try {
-                    BitmapEncoder encoder = new BitmapEncoder(BitmapEncoder.Format.PNG, 100);
-                    String fileName = encoder.encode(context, bitmap);
-                    final Uri bitmapUri = Uri.fromFile(context.getFileStreamPath(fileName));
+                    fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    Uri bitmapUri = Uri.fromFile(context.getFileStreamPath(fileName));
 
                     onSaveSuccess(bitmapUri, callback);
-                } catch (ResourceCreationException e) {
+                } catch (Exception e) {
                     onSaveFailed(callback);
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                            if (StringUtils.isBlank(fileName)) {
+                                // failed, delete the file just in case it's there:
+                                context.deleteFile(fileName);
+                            }
+                        } catch (IOException ignored) {
+                        }
+                    }
                 }
             }
         });
