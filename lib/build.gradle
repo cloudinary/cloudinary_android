@@ -14,6 +14,7 @@ android {
         // files - to make sure the credentials are not checked into source control.
         // The url is taken from a property or environment variable:
         manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: ""]
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
