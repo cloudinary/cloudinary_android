@@ -3,6 +3,7 @@ package com.cloudinary.android;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 
@@ -11,8 +12,11 @@ import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.preprocess.DimensionsValidator;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.preprocess.Limit;
+import com.cloudinary.android.preprocess.Parameters;
 import com.cloudinary.android.preprocess.PreprocessException;
+import com.cloudinary.android.preprocess.Transcode;
 import com.cloudinary.android.preprocess.ValidationException;
+import com.cloudinary.android.preprocess.VideoPreprocessChain;
 
 import junit.framework.Assert;
 
@@ -24,6 +28,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 
@@ -174,6 +179,51 @@ public class PreprocessTest extends AbstractTest {
         bitmap = Bitmap.createScaledBitmap(bitmap, 1500, 1500, false);
         errors += getError(context, validator, bitmap);
         Assert.assertEquals(6, errors);
+    }
+
+    @Test
+    public void testTranscode() throws IOException, PreprocessException {
+        Context context = InstrumentationRegistry.getTargetContext();
+        File file = assetToFile("videos/test_video.mp4");
+        Uri videoUri = Uri.fromFile(file);
+
+        Parameters parameters = new Parameters();
+        parameters.requestId = "test_request_id";
+        parameters.targetFilePath = context.getFilesDir() + File.separator + UUID.randomUUID().toString();
+        parameters.frameRate = 30;
+        parameters.width = 1280;
+        parameters.height = 720;
+        parameters.keyFramesInterval = 3;
+        parameters.targetAudioBitrateKbps = 128;
+        parameters.targetVideoBitrateKbps = (int) (3.3 * 1024 * 1024);
+
+        Uri outputVideoUri = new Transcode(parameters).execute(context, videoUri);
+        File targetVideoFile = new File(outputVideoUri.getPath());
+
+        Assert.assertTrue(targetVideoFile.length() > 0);
+    }
+
+    @Test
+    public void testVideoChain() throws IOException, PreprocessException, PayloadNotFoundException {
+        Context context = InstrumentationRegistry.getTargetContext();
+        File file = assetToFile("videos/test_video.mp4");
+        FilePayload payload = new FilePayload(file.getAbsolutePath());
+
+        Parameters parameters = new Parameters();
+        parameters.requestId = "test_request_id";
+        parameters.targetFilePath = context.getFilesDir() + File.separator + UUID.randomUUID().toString();
+        parameters.frameRate = 30;
+        parameters.width = 1280;
+        parameters.height = 720;
+        parameters.keyFramesInterval = 3;
+        parameters.targetAudioBitrateKbps = 128;
+        parameters.targetVideoBitrateKbps = (int) (3.3 * 1024 * 1024);
+
+        VideoPreprocessChain chain = VideoPreprocessChain.videoTranscodingChain(context, parameters);
+        String outputVideoPath = chain.execute(context, payload);
+        File targetVideoFile = new File(outputVideoPath);
+
+        Assert.assertTrue(targetVideoFile.length() > 0);
     }
 
     private int getError(Context context, DimensionsValidator validator, Bitmap bitmap) {

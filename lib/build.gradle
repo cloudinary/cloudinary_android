@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 18
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -45,6 +45,7 @@ dependencies {
     implementation('com.evernote:android-job:1.2.6', {
         exclude group: 'com.android.support', module: 'support-compat'
     })
+    implementation 'com.linkedin.android.litr:litr:1.1.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation "com.cloudinary:cloudinary-test-common:${cloudinaryLibsVersion}"
