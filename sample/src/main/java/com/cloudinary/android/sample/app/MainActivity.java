@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             String action = intent.getAction();
             if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                 pager.setCurrentItem(IN_PROGRESS_PAGE_POSITION);
-                uploadImageFromIntentUri(intent);
+                uploadFromIntentUri(intent);
             } else if (CloudinaryService.ACTION_STATE_ERROR.equals(action)) {
                 pager.setCurrentItem(FAILED_PAGE_POSITION);
             } else if (CloudinaryService.ACTION_STATE_IN_PROGRESS.equals(action)) {
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
                 // if the user chose to upload right now we want to schedule an immediate upload:
                 uploadImage((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
-                uploadImageFromIntentUri(data);
+                uploadFromIntentUri(data);
             }
         }
     }
@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
     }
 
-    private void uploadImageFromIntentUri(Intent data) {
+    private void uploadFromIntentUri(Intent data) {
         final int takeFlags = data.getFlags()
                 & (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);

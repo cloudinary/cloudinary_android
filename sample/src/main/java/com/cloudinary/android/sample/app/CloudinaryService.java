@@ -216,10 +216,11 @@ public class CloudinaryService extends ListenerService {
 
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
+        String resourceType = (String) resultData.get("resource_type");
         notificationManager.notify(id,
                 getBuilder(requestId, Resource.UploadStatus.UPLOADED)
                         .setContentTitle("Cloudinary Upload")
-                        .setContentText("The image was uploaded successfully!")
+                        .setContentText(String.format("The %s was uploaded successfully!", resourceType))
                         .build());
 
         cleanupBitmap(requestId);
