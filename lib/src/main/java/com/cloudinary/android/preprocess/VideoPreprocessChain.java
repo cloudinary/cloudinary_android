@@ -1,10 +1,6 @@
 package com.cloudinary.android.preprocess;
 
-import android.content.Context;
 import android.net.Uri;
-
-import java.io.File;
-import java.util.UUID;
 
 /**
  * A preprocess chain to run on videos before uploading. Pass an instance of a populated chain to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
@@ -13,28 +9,21 @@ import java.util.UUID;
  */
 public class VideoPreprocessChain extends PreprocessChain<Uri> {
 
-    private static String targetfilePath;
-
     /**
-     * Convenience method for building an efficient video transcoding chain using {@link VideoEncoder} and {@link Transcode}.
+     * Convenience method for building an efficient video transcoding chain using {@link Transcode}.
      * Use this in {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
      *
-     * @param context Android context.
      * @param parameters Transcoding parameters.
      * @return The prepared chain to pass on to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}
      */
-    public static VideoPreprocessChain videoTranscodingChain(Context context, Parameters parameters) {
-        targetfilePath = context.getFilesDir() + File.separator + UUID.randomUUID().toString();
-        parameters.targetFilePath = targetfilePath;
-
+    public static VideoPreprocessChain videoTranscodingChain(Parameters parameters) {
         return (VideoPreprocessChain) new VideoPreprocessChain()
-                .saveWith(new VideoEncoder(targetfilePath))
                 .addStep(new Transcode(parameters));
     }
 
     @Override
     protected ResourceEncoder<Uri> getDefaultEncoder() {
-        return new VideoEncoder(targetfilePath);
+        return new VideoEncoder();
     }
 
     @Override

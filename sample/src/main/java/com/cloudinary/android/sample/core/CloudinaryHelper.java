@@ -41,15 +41,15 @@ public class CloudinaryHelper {
                 .option("resource_type", "auto");
 
         Parameters parameters = new Parameters();
-        parameters.requestId = request.getRequestId();
-        parameters.frameRate = 30;
-        parameters.width = 1280;
-        parameters.height = 720;
-        parameters.keyFramesInterval = 3;
-        parameters.targetAudioBitrateKbps = 128;
-        parameters.targetVideoBitrateKbps = (int) (3.3 * 1024 * 1024);
+        parameters.setRequestId(request.getRequestId());
+        parameters.setFrameRate(30);
+        parameters.setWidth(1280);
+        parameters.setHeight(720);
+        parameters.setKeyFramesInterval(3);
+        parameters.setTargetAudioBitrateKbps(128);
+        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
 
-        request.preprocess(VideoPreprocessChain.videoTranscodingChain(MainApplication.get(), parameters));
+        request.preprocess(VideoPreprocessChain.videoTranscodingChain(parameters));
 
         return request.dispatch(MainApplication.get());
     }

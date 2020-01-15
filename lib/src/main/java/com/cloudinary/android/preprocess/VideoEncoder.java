@@ -8,14 +8,8 @@ import android.net.Uri;
  */
 public class VideoEncoder implements ResourceEncoder<Uri> {
 
-    private final String targetFilePath;
-
-    public VideoEncoder(String targetFilePath) {
-        this.targetFilePath = targetFilePath;
-    }
-
     @Override
     public String encode(Context context, Uri resource) {
-        return targetFilePath;
+        return resource.toString();
     }
 }

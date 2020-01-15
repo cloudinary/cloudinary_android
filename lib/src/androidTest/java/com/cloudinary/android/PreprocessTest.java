@@ -188,14 +188,13 @@ public class PreprocessTest extends AbstractTest {
         Uri videoUri = Uri.fromFile(file);
 
         Parameters parameters = new Parameters();
-        parameters.requestId = "test_request_id";
-        parameters.targetFilePath = context.getFilesDir() + File.separator + UUID.randomUUID().toString();
-        parameters.frameRate = 30;
-        parameters.width = 1280;
-        parameters.height = 720;
-        parameters.keyFramesInterval = 3;
-        parameters.targetAudioBitrateKbps = 128;
-        parameters.targetVideoBitrateKbps = (int) (3.3 * 1024 * 1024);
+        parameters.setRequestId("test_request_id");
+        parameters.setFrameRate(30);
+        parameters.setWidth(1280);
+        parameters.setHeight(720);
+        parameters.setKeyFramesInterval(3);
+        parameters.setTargetAudioBitrateKbps(128);
+        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
 
         Uri outputVideoUri = new Transcode(parameters).execute(context, videoUri);
         File targetVideoFile = new File(outputVideoUri.getPath());
@@ -210,16 +209,15 @@ public class PreprocessTest extends AbstractTest {
         FilePayload payload = new FilePayload(file.getAbsolutePath());
 
         Parameters parameters = new Parameters();
-        parameters.requestId = "test_request_id";
-        parameters.targetFilePath = context.getFilesDir() + File.separator + UUID.randomUUID().toString();
-        parameters.frameRate = 30;
-        parameters.width = 1280;
-        parameters.height = 720;
-        parameters.keyFramesInterval = 3;
-        parameters.targetAudioBitrateKbps = 128;
-        parameters.targetVideoBitrateKbps = (int) (3.3 * 1024 * 1024);
+        parameters.setRequestId("test_request_id");
+        parameters.setFrameRate(30);
+        parameters.setWidth(1280);
+        parameters.setHeight(720);
+        parameters.setKeyFramesInterval(3);
+        parameters.setTargetAudioBitrateKbps(128);
+        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
 
-        VideoPreprocessChain chain = VideoPreprocessChain.videoTranscodingChain(context, parameters);
+        VideoPreprocessChain chain = VideoPreprocessChain.videoTranscodingChain(parameters);
         String outputVideoPath = chain.execute(context, payload);
         File targetVideoFile = new File(outputVideoPath);
 

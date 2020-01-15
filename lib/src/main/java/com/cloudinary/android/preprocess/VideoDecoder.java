@@ -9,10 +9,6 @@ import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Returns the decoded video uri from a given payload. Payloads must be either {@link LocalUriPayload} or {@link FilePayload}.
@@ -30,42 +26,17 @@ public class VideoDecoder implements ResourceDecoder<Uri> {
      */
     @Override
     public Uri decode(Context context, Payload payload) throws PayloadDecodeException, PayloadNotFoundException {
-        File file;
+        Uri uri;
         if (payload instanceof LocalUriPayload) {
-            file = new File(context.getFilesDir() + "/tempFile_" + System.currentTimeMillis());
-            InputStream resource = (InputStream) payload.prepare(context);
-            OutputStream output = null;
-            try {
-                output = context.openFileOutput(file.getName(), Context.MODE_PRIVATE);
-                byte[] buffer = new byte[4 * 1024]; // or other buffer size
-                int read;
-
-                while ((read = resource.read(buffer)) != -1) {
-                    output.write(buffer, 0, read);
-                }
-
-                output.flush();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            finally {
-                try {
-                    resource.close();
-                    if (output != null) {
-                        output.close();
-                    }
-                } catch (IOException ignored) {
-                }
-            }
+            uri = ((LocalUriPayload) payload).getData();
         } else if (payload instanceof FilePayload) {
-            file = (File) payload.prepare(context);
+            File file = (File) payload.prepare(context);
+            uri = Uri.fromFile(file);
         } else {
             throw new PayloadDecodeException();
         }
 
-        return Uri.fromFile(file);
+        return uri;
     }
 
 }

@@ -58,4 +58,8 @@ public abstract class Payload<T> {
     public int hashCode() {
         return data != null ? data.hashCode() : 0;
     }
+
+    public T getData() {
+        return data;
+    }
 }
