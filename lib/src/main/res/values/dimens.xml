@@ -12,4 +12,8 @@
     <dimen name="thumbnail_horizontal_margin">1dp</dimen>
     <dimen name="thumbnails_list_vertical_margin">5dp</dimen>
     <dimen name="images_pager_margin_top">5dp</dimen>
+    <dimen name="thumbnail_media_type_icon_size">24dp</dimen>
+    <dimen name="thumbnail_media_type_icon_left_margin">3dp</dimen>
+    <dimen name="thumbnail_media_type_icon_bottom_margin">3dp</dimen>
+    <dimen name="video_play_button_overlay_size">100dp</dimen>
 </resources>

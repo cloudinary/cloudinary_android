@@ -25,6 +25,8 @@ import com.cloudinary.android.R;
 import com.cloudinary.android.uploadwidget.UploadWidget;
 import com.cloudinary.android.uploadwidget.model.BitmapManager;
 import com.cloudinary.android.uploadwidget.model.CropRotateResult;
+import com.cloudinary.android.uploadwidget.utils.MediaType;
+import com.cloudinary.android.uploadwidget.utils.UriUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,6 +89,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
                 super.onPageSelected(position);
             }
         });
+        imagesViewPager.addOnPageChangeListener(imagesPagerAdapter);
 
         uploadFab = view.findViewById(R.id.uploadFab);
         uploadFab.setOnClickListener(new View.OnClickListener() {
@@ -166,16 +169,18 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         uwResult.cropPoints = result.getCropPoints();
         uriResults.put(imageUri, uwResult);
 
-        BitmapManager.get().save(getContext(), resultBitmap, new BitmapManager.SaveCallback() {
-            @Override
-            public void onSuccess(Uri resultUri) {
-                imagesPagerAdapter.updateResultImage(imageUri, resultUri);
-            }
+        MediaType mediaType = UriUtils.getMediaType(getContext(), imageUri);
+        if (mediaType == MediaType.IMAGE) {
+            BitmapManager.get().save(getContext(), resultBitmap, new BitmapManager.SaveCallback() {
+                @Override
+                public void onSuccess(Uri resultUri) {
+                    imagesPagerAdapter.updateResultImage(imageUri, resultUri);
+                }
 
-            @Override
-            public void onFailure() { }
-        });
-
+                @Override
+                public void onFailure() { }
+            });
+        }
     }
 
     @Override

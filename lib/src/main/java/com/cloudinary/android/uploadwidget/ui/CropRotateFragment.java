@@ -23,8 +23,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cloudinary.android.R;
+import com.cloudinary.android.uploadwidget.model.BitmapManager;
 import com.cloudinary.android.uploadwidget.model.CropRotateResult;
 import com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView;
+import com.cloudinary.android.uploadwidget.utils.MediaType;
+import com.cloudinary.android.uploadwidget.utils.UriUtils;
 
 /**
  * Crops and rotates an image.
@@ -75,8 +78,25 @@ public class CropRotateFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crop_rotate, container, false);
         uploadWidgetImageView = view.findViewById(R.id.imageUriImageView);
-        uploadWidgetImageView.setImageUri(imageUri);
-        uploadWidgetImageView.showCropOverlay();
+
+        MediaType mediaType = UriUtils.getMediaType(getContext(), imageUri);
+        if (mediaType == MediaType.VIDEO) {
+            Bitmap videoThumbnail = UriUtils.getVideoThumbnail(getContext(), imageUri);
+            BitmapManager.get().save(getContext(), videoThumbnail, new BitmapManager.SaveCallback() {
+                @Override
+                public void onSuccess(Uri resultUri) {
+                    uploadWidgetImageView.setImageUri(resultUri);
+                    uploadWidgetImageView.showCropOverlay();
+                }
+
+                @Override
+                public void onFailure() { }
+            });
+        } else {
+            uploadWidgetImageView.setImageUri(imageUri);
+            uploadWidgetImageView.showCropOverlay();
+        }
+
 
         Button doneButton = view.findViewById(R.id.doneButton);
         doneButton.setOnClickListener(new View.OnClickListener() {

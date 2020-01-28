@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.support.v4.util.LruCache;
 
 import com.cloudinary.android.uploadwidget.utils.BitmapUtils;
+import com.cloudinary.android.uploadwidget.utils.MediaType;
+import com.cloudinary.android.uploadwidget.utils.UriUtils;
 import com.cloudinary.utils.StringUtils;
 
 import java.io.FileOutputStream;
@@ -69,6 +71,39 @@ public class BitmapManager {
                     Dimensions dimensions = BitmapUtils.getBitmapDimensions(context, uri);
 
                     onLoadSuccess(bitmap, dimensions, callback);
+                } catch (Exception e) {
+                    onLoadFailed(callback);
+                }
+            }
+        });
+    }
+
+    /**
+     * Get a video file's thumbnail.
+     * @param context Android context.
+     * @param uri Uri of the video file.
+     * @param width Thumbnail's width.
+     * @param height Thumbnail's height.
+     * @param callback The callback to be called when loading the thumbnail.
+     */
+    public void thumbnail(final Context context, final Uri uri, final int width, final int height, final LoadCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (UriUtils.getMediaType(context, uri) == MediaType.VIDEO) {
+                        String hash = getHash(uri.toString() + width + height);
+                        Bitmap bitmap = memoryCache.get(hash);
+                        if (bitmap == null) {
+                            bitmap = UriUtils.getVideoThumbnail(context, uri);
+                            memoryCache.put(hash, bitmap);
+                        }
+                        Dimensions dimensions = BitmapUtils.getBitmapDimensions(context, uri);
+
+                        onLoadSuccess(bitmap, dimensions, callback);
+                    } else {
+                        onLoadFailed(callback);
+                    }
                 } catch (Exception e) {
                     onLoadFailed(callback);
                 }

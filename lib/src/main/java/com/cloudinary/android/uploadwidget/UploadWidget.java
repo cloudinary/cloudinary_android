@@ -1,15 +1,15 @@
 package com.cloudinary.android.uploadwidget;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
-import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.UploadRequest;
-import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.uploadwidget.model.CropPoints;
 import com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity;
 
@@ -49,14 +49,14 @@ public class UploadWidget {
      * @param data Results data from the upload widget.
      * @return Preprocessed {@link UploadRequest}s.
      */
-    public static ArrayList<UploadRequest> preprocessResults(Intent data) {
+    public static ArrayList<UploadRequest> preprocessResults(Context context, Intent data) {
         checkDataNotNull(data);
         ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
         ArrayList<UploadRequest> uploadRequests = new ArrayList<>(results.size());
 
         for (Result result : results) {
-            uploadRequests.add(MediaManager.get().upload(result.imageUri)
-                    .preprocess(ImagePreprocessChain.uploadWidgetChain(result)));
+            UploadRequest uploadRequest = UploadWidgetResultProcessor.process(context, result);
+            uploadRequests.add(uploadRequest);
         }
 
         return uploadRequests;
@@ -69,9 +69,8 @@ public class UploadWidget {
      * @return Newly created {@link UploadRequest}.
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      */
-    public static UploadRequest preprocessResult(Result result) {
-        return MediaManager.get().upload(result.imageUri)
-                .preprocess(ImagePreprocessChain.uploadWidgetChain(result));
+    public static UploadRequest preprocessResult(Context context, Result result) {
+        return UploadWidgetResultProcessor.process(context, result);
     }
 
     /**
@@ -83,8 +82,8 @@ public class UploadWidget {
      * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
      */
-    public static UploadRequest preprocessResult(@NonNull UploadRequest uploadRequest, Result result) {
-        return uploadRequest.preprocess(ImagePreprocessChain.uploadWidgetChain(result));
+    public static UploadRequest preprocessResult(Context context, @NonNull UploadRequest uploadRequest, Result result) {
+        return UploadWidgetResultProcessor.process(context, uploadRequest, result);
     }
 
     /**
@@ -97,7 +96,14 @@ public class UploadWidget {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setType("image/*");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/jpg", "image/png", "video/*"});
+            intent.setType("(*/*");
+        } else {
+            intent.setType("image/*|video/*");
+        }
+
         activity.startActivityForResult(intent, requestCode);
     }
 

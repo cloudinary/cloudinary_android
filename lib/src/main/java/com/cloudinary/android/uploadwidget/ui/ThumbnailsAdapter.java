@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import com.cloudinary.android.R;
 import com.cloudinary.android.uploadwidget.model.BitmapManager;
 import com.cloudinary.android.uploadwidget.model.Dimensions;
+import com.cloudinary.android.uploadwidget.utils.MediaType;
+import com.cloudinary.android.uploadwidget.utils.UriUtils;
 
 import java.util.ArrayList;
 
@@ -59,16 +61,35 @@ class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Thumbnail
         });
 
         Context context = holder.itemView.getContext();
-        float thumbnailSize = context.getResources().getDimension(R.dimen.thumbnail_size);
-        BitmapManager.get().load(context, uri, (int) thumbnailSize, (int) thumbnailSize, new BitmapManager.LoadCallback() {
-            @Override
-            public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
-                holder.imageView.setImageBitmap(bitmap);
-            }
+        int thumbnailSize = (int) context.getResources().getDimension(R.dimen.thumbnail_size);
 
-            @Override
-            public void onFailure() { }
-        });
+        MediaType mediaType = UriUtils.getMediaType(context, uri);
+        if (mediaType == MediaType.IMAGE) {
+            holder.mediaTypeIcon.setVisibility(View.GONE);
+
+            BitmapManager.get().load(context, uri, thumbnailSize, thumbnailSize, new BitmapManager.LoadCallback() {
+                @Override
+                public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
+                    holder.imageView.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onFailure() { }
+            });
+        } else if (mediaType == MediaType.VIDEO) {
+            holder.mediaTypeIcon.setVisibility(View.VISIBLE);
+            holder.mediaTypeIcon.setImageResource(R.drawable.video);
+
+            BitmapManager.get().thumbnail(context, uri, thumbnailSize, thumbnailSize, new BitmapManager.LoadCallback() {
+                @Override
+                public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
+                    holder.imageView.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onFailure() { }
+            });
+        }
     }
 
     @Override
@@ -91,10 +112,12 @@ class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Thumbnail
     static class ThumbnailViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageView;
+        private ImageView mediaTypeIcon;
 
         ThumbnailViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
+            mediaTypeIcon = itemView.findViewById(R.id.mediaTypeIcon);
         }
     }
 

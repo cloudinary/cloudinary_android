@@ -28,6 +28,7 @@ public class UploadWidgetImageView extends FrameLayout {
     private Rect bitmapBounds = new Rect();
     private int originalWidth;
     private int rotationAngle;
+    private boolean sizeChanged;
 
     public UploadWidgetImageView(@NonNull Context context) {
         super(context);
@@ -62,6 +63,8 @@ public class UploadWidgetImageView extends FrameLayout {
         if (imageUri != null) {
             setBitmap(w, h);
         }
+
+        sizeChanged = true;
     }
 
     private void setBitmap(int w, int h) {
@@ -111,6 +114,10 @@ public class UploadWidgetImageView extends FrameLayout {
      */
     public void setImageUri(Uri imageUri) {
         this.imageUri = imageUri;
+
+        if (imageUri != null && sizeChanged) {
+            setBitmap(getWidth(), getHeight());
+        }
     }
 
     /**

@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             public void run() {
                 ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
                 for (UploadWidget.Result result : results) {
-                    UploadRequest uploadRequest = UploadWidget.preprocessResult(result);
+                    UploadRequest uploadRequest = UploadWidget.preprocessResult(MainActivity.this, result);
                     String requestId = uploadRequest.dispatch(MainApplication.get());
 
                     Resource resource = createResourceFromUri(result.imageUri, data.getFlags());
