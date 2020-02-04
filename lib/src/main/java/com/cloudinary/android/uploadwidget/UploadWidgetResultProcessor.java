@@ -15,13 +15,13 @@ import com.cloudinary.android.uploadwidget.utils.UriUtils;
 class UploadWidgetResultProcessor {
 
     static UploadRequest process(Context context, UploadWidget.Result result) {
-        UploadRequest uploadRequest = MediaManager.get().upload(result.imageUri);
+        UploadRequest uploadRequest = MediaManager.get().upload(result.uri);
 
         return process(context, uploadRequest, result);
     }
 
     static UploadRequest process(Context context, UploadRequest uploadRequest, UploadWidget.Result result) {
-        MediaType mediaType = UriUtils.getMediaType(context, result.imageUri);
+        MediaType mediaType = UriUtils.getMediaType(context, result.uri);
 
         if (mediaType == MediaType.IMAGE) {
             ImagePreprocessChain imagePreprocessChain = new ImagePreprocessChain();

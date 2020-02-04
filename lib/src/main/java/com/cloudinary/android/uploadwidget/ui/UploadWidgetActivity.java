@@ -30,11 +30,11 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
             actionBar.hide();
         }
 
-        ArrayList<Uri> imageUris = getIntent().getParcelableArrayListExtra(UploadWidget.IMAGES_URI_EXTRA);
+        ArrayList<Uri> uris = getIntent().getParcelableArrayListExtra(UploadWidget.URIS_EXTRA);
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag(UPLOAD_WIDGET_FRAGMENT_TAG);
         if (fragment == null) {
-            fragment = UploadWidgetFragment.newInstance(imageUris);
+            fragment = UploadWidgetFragment.newInstance(uris);
         }
         fragmentManager.beginTransaction()
                 .replace(R.id.container, fragment, UPLOAD_WIDGET_FRAGMENT_TAG)

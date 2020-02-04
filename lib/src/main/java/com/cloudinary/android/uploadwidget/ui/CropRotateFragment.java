@@ -30,14 +30,14 @@ import com.cloudinary.android.uploadwidget.utils.MediaType;
 import com.cloudinary.android.uploadwidget.utils.UriUtils;
 
 /**
- * Crops and rotates an image.
+ * Crops and rotates a media file
  */
 public class CropRotateFragment extends Fragment {
 
-    private static final String IMAGE_URI_ARG = "image_uri_arg";
+    private static final String URI_ARG = "uri_arg";
 
     private UploadWidgetImageView uploadWidgetImageView;
-    private Uri imageUri;
+    private Uri uri;
     private Callback callback;
 
     public CropRotateFragment() {
@@ -46,17 +46,17 @@ public class CropRotateFragment extends Fragment {
     /**
      * Instantiate a new {@link CropRotateFragment}.
      *
-     * @param imageUri Uri of the image to crop and rotate.
+     * @param uri Uri of the media file to crop and rotate.
      * @param callback Callback to be called when there is a result for the crop and rotate.
      */
-    public static CropRotateFragment newInstance(Uri imageUri, Callback callback) {
-        if (imageUri == null) {
-            throw new IllegalArgumentException("Image uri must be provided");
+    public static CropRotateFragment newInstance(Uri uri, Callback callback) {
+        if (uri == null) {
+            throw new IllegalArgumentException("Uri must be provided");
         }
 
         CropRotateFragment fragment = new CropRotateFragment();
         Bundle args = new Bundle();
-        args.putString(IMAGE_URI_ARG, imageUri.toString());
+        args.putString(URI_ARG, uri.toString());
         fragment.setArguments(args);
         fragment.setCallback(callback);
 
@@ -68,7 +68,7 @@ public class CropRotateFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if (arguments != null) {
-            imageUri = Uri.parse(arguments.getString(IMAGE_URI_ARG));
+            uri = Uri.parse(arguments.getString(URI_ARG));
         }
         setHasOptionsMenu(true);
     }
@@ -77,11 +77,11 @@ public class CropRotateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crop_rotate, container, false);
-        uploadWidgetImageView = view.findViewById(R.id.imageUriImageView);
+        uploadWidgetImageView = view.findViewById(R.id.imageView);
 
-        MediaType mediaType = UriUtils.getMediaType(getContext(), imageUri);
+        MediaType mediaType = UriUtils.getMediaType(getContext(), uri);
         if (mediaType == MediaType.VIDEO) {
-            Bitmap videoThumbnail = UriUtils.getVideoThumbnail(getContext(), imageUri);
+            Bitmap videoThumbnail = UriUtils.getVideoThumbnail(getContext(), uri);
             BitmapManager.get().save(getContext(), videoThumbnail, new BitmapManager.SaveCallback() {
                 @Override
                 public void onSuccess(Uri resultUri) {
@@ -93,7 +93,7 @@ public class CropRotateFragment extends Fragment {
                 public void onFailure() { }
             });
         } else {
-            uploadWidgetImageView.setImageUri(imageUri);
+            uploadWidgetImageView.setImageUri(uri);
             uploadWidgetImageView.showCropOverlay();
         }
 
@@ -103,7 +103,7 @@ public class CropRotateFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (callback != null) {
-                    callback.onCropRotateFinish(imageUri, getResult(), uploadWidgetImageView.getResultBitmap());
+                    callback.onCropRotateFinish(uri, getResult(), uploadWidgetImageView.getResultBitmap());
                     onBackPressed();
                 }
             }
@@ -114,7 +114,7 @@ public class CropRotateFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (callback != null) {
-                    callback.onCropRotateCancel(imageUri);
+                    callback.onCropRotateCancel(uri);
                 }
                 onBackPressed();
             }
@@ -135,7 +135,7 @@ public class CropRotateFragment extends Fragment {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == MotionEvent.ACTION_UP) {
                     if (callback != null) {
-                        callback.onCropRotateCancel(imageUri);
+                        callback.onCropRotateCancel(uri);
                     }
                     onBackPressed();
                     return true;
@@ -195,7 +195,7 @@ public class CropRotateFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             if (callback != null) {
-                callback.onCropRotateCancel(imageUri);
+                callback.onCropRotateCancel(uri);
             }
             onBackPressed();
         }
@@ -228,20 +228,20 @@ public class CropRotateFragment extends Fragment {
     public interface Callback {
 
         /**
-         * Called when finished to crop and rotate the image.
+         * Called when finished to crop and rotate.
          *
-         * @param imageUri The source image uri.
+         * @param uri The source uri.
          * @param result Crop and rotate result.
          * @param resultBitmap Crop and rotate result bitmap.
          */
-        void onCropRotateFinish(Uri imageUri, CropRotateResult result, Bitmap resultBitmap);
+        void onCropRotateFinish(Uri uri, CropRotateResult result, Bitmap resultBitmap);
 
         /**
-         * Called when canceled to crop and rotate the image.
+         * Called when canceled to crop and rotate.
          *
-         * @param imageUri The source image uri.
+         * @param uri The source uri.
          */
-        void onCropRotateCancel(Uri imageUri);
+        void onCropRotateCancel(Uri uri);
 
     }
 

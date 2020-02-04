@@ -2,8 +2,6 @@ package com.cloudinary.android.preprocess;
 
 import android.graphics.Bitmap;
 
-import com.cloudinary.android.uploadwidget.UploadWidget;
-
 /**
  * A preprocess chain to run on images before uploading. Pass an instance of a populated chain to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
  * The processing steps will run by the order in which they were added to the chain. This chain uses the default Bitmap encoder/decoder, however custom implementations
@@ -24,26 +22,6 @@ public class ImagePreprocessChain extends PreprocessChain<Bitmap> {
         return (ImagePreprocessChain) new ImagePreprocessChain()
                 .loadWith(new BitmapDecoder(maxWidth, maxHeight))
                 .addStep(new Limit(maxWidth, maxHeight));
-    }
-
-    /**
-     * Convenience method for building an upload widget preprocessing chain.
-     * Use this in {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
-     *
-     * @param result The result from the upload widget.
-     * @return The prepared chain to pass on to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}
-     */
-    public static ImagePreprocessChain uploadWidgetChain(UploadWidget.Result result) {
-        ImagePreprocessChain imagePreprocessChain = new ImagePreprocessChain();
-
-        if (result.rotationAngle != 0) {
-            imagePreprocessChain.addStep(new Rotate(result.rotationAngle));
-        }
-        if (result.cropPoints != null) {
-            imagePreprocessChain.addStep(new Crop(result.cropPoints.getPoint1(), result.cropPoints.getPoint2()));
-        }
-
-        return imagePreprocessChain;
     }
 
     @Override

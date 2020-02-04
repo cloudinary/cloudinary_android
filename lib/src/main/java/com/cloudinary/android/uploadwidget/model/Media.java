@@ -2,12 +2,12 @@ package com.cloudinary.android.uploadwidget.model;
 
 import android.net.Uri;
 
-public class Image {
+public class Media {
 
     private Uri sourceUri;
     private Uri resultUri;
 
-    public Image(Uri sourceUri) {
+    public Media(Uri sourceUri) {
         this.sourceUri = sourceUri;
     }
 

@@ -15,7 +15,7 @@
         android:background="@android:color/transparent" />
 
     <com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView
-        android:id="@+id/imageUriImageView"
+        android:id="@+id/imageView"
         android:layout_below="@id/cropRotateToolbar"
         android:layout_above="@id/buttonsContainer"
         android:layout_centerVertical="true"

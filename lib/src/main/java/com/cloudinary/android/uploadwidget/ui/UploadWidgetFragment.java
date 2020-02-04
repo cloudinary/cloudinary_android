@@ -33,18 +33,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Previews media files, and optionally edits them, before uploading.
  */
 public class UploadWidgetFragment extends Fragment implements CropRotateFragment.Callback {
 
 
     private static final String IMAGES_URIS_LIST_ARG = "images_uris_list_arg";
     private FloatingActionButton uploadFab;
-    private ViewPager imagesViewPager;
-    private ImagesPagerAdapter imagesPagerAdapter;
+    private ViewPager mediaViewPager;
+    private MediaPagerAdapter mediaPagerAdapter;
     private RecyclerView thumbnailsRecyclerView;
     private ThumbnailsAdapter thumbnailsAdapter;
-    private ArrayList<Uri> imagesUris;
+    private ArrayList<Uri> uris;
     private Map<Uri, UploadWidget.Result> uriResults;
 
     public UploadWidgetFragment() {
@@ -67,9 +67,9 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            imagesUris = arguments.getParcelableArrayList(IMAGES_URIS_LIST_ARG);
+            uris = arguments.getParcelableArrayList(IMAGES_URIS_LIST_ARG);
         }
-        uriResults = new HashMap<>(imagesUris.size());
+        uriResults = new HashMap<>(uris.size());
     }
 
     @Override
@@ -78,10 +78,10 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_upload_widget, container, false);
 
-        imagesViewPager = view.findViewById(R.id.imagesViewPager);
-        imagesPagerAdapter = new ImagesPagerAdapter(imagesUris);
-        imagesViewPager.setAdapter(imagesPagerAdapter);
-        imagesViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        mediaViewPager = view.findViewById(R.id.imagesViewPager);
+        mediaPagerAdapter = new MediaPagerAdapter(uris, mediaViewPager);
+        mediaViewPager.setAdapter(mediaPagerAdapter);
+        mediaViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 thumbnailsAdapter.setSelectedThumbnail(position);
@@ -89,7 +89,6 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
                 super.onPageSelected(position);
             }
         });
-        imagesViewPager.addOnPageChangeListener(imagesPagerAdapter);
 
         uploadFab = view.findViewById(R.id.uploadFab);
         uploadFab.setOnClickListener(new View.OnClickListener() {
@@ -102,11 +101,11 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         });
 
         thumbnailsRecyclerView = view.findViewById(R.id.thumbnailsRecyclerView);
-        if (imagesUris.size() > 1) {
-            thumbnailsAdapter = new ThumbnailsAdapter(imagesUris, new ThumbnailsAdapter.Callback() {
+        if (uris.size() > 1) {
+            thumbnailsAdapter = new ThumbnailsAdapter(uris, new ThumbnailsAdapter.Callback() {
                 @Override
                 public void onThumbnailClicked(Uri uri) {
-                    imagesViewPager.setCurrentItem(imagesPagerAdapter.getImagePosition(uri), true);
+                    mediaViewPager.setCurrentItem(mediaPagerAdapter.getMediaPosition(uri), true);
                 }
             });
             thumbnailsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -143,8 +142,8 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
         cropActionView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri imageUri = imagesUris.get(imagesViewPager.getCurrentItem());
-                CropRotateFragment cropRotateFragment = CropRotateFragment.newInstance(imageUri, UploadWidgetFragment.this);
+                Uri uri = uris.get(mediaViewPager.getCurrentItem());
+                CropRotateFragment cropRotateFragment = CropRotateFragment.newInstance(uri, UploadWidgetFragment.this);
 
                 FragmentActivity activity = getActivity();
                 if (activity != null) {
@@ -160,21 +159,21 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     }
 
     @Override
-    public void onCropRotateFinish(final Uri imageUri, final CropRotateResult result, Bitmap resultBitmap) {
-        UploadWidget.Result uwResult = uriResults.get(imageUri);
+    public void onCropRotateFinish(final Uri uri, final CropRotateResult result, Bitmap resultBitmap) {
+        UploadWidget.Result uwResult = uriResults.get(uri);
         if (uwResult == null) {
-            uwResult = new UploadWidget.Result(imageUri);
+            uwResult = new UploadWidget.Result(uri);
         }
         uwResult.rotationAngle = result.getRotationAngle();
         uwResult.cropPoints = result.getCropPoints();
-        uriResults.put(imageUri, uwResult);
+        uriResults.put(uri, uwResult);
 
-        MediaType mediaType = UriUtils.getMediaType(getContext(), imageUri);
+        MediaType mediaType = UriUtils.getMediaType(getContext(), uri);
         if (mediaType == MediaType.IMAGE) {
             BitmapManager.get().save(getContext(), resultBitmap, new BitmapManager.SaveCallback() {
                 @Override
                 public void onSuccess(Uri resultUri) {
-                    imagesPagerAdapter.updateResultImage(imageUri, resultUri);
+                    mediaPagerAdapter.updateMediaResult(uri, resultUri);
                 }
 
                 @Override
@@ -184,14 +183,14 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     }
 
     @Override
-    public void onCropRotateCancel(Uri imageUri) {
-        UploadWidget.Result result = uriResults.get(imageUri);
+    public void onCropRotateCancel(Uri uri) {
+        UploadWidget.Result result = uriResults.get(uri);
         if (result != null) {
             result.rotationAngle = 0;
             result.cropPoints = null;
         }
 
-        imagesPagerAdapter.resetResultImage(imageUri);
+        mediaPagerAdapter.resetMediaResult(uri);
     }
 
     @Override
@@ -206,7 +205,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
     }
 
     private ArrayList<UploadWidget.Result> getResults() {
-        for (Uri uri : imagesUris) {
+        for (Uri uri : uris) {
             if (!uriResults.containsKey(uri)) {
                 uriResults.put(uri, new UploadWidget.Result(uri));
             }

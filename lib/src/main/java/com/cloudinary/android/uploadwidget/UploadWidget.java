@@ -26,20 +26,20 @@ public class UploadWidget {
     public static final String RESULT_EXTRA = "upload_widget_result_extra";
 
     /**
-     * The key used to pass the images' uris to the upload widget.
+     * The key used to pass the uris to the upload widget.
      */
-    public static final String IMAGES_URI_EXTRA = "images_uri_extra";
+    public static final String URIS_EXTRA = "uris_extra";
 
     /**
      * Start the {@link UploadWidgetActivity}. Please make sure that you have declared it your manifest.
      *
      * @param activity    The activity which requested the upload widget.
      * @param requestCode A request code to start the upload widget with.
-     * @param imageUris   The Uris of all selected images.
+     * @param uris   Uris of the selected media files.
      */
-    public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> imageUris) {
+    public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> uris) {
         Intent intent = new Intent(activity, UploadWidgetActivity.class);
-        intent.putParcelableArrayListExtra(IMAGES_URI_EXTRA, imageUris);
+        intent.putParcelableArrayListExtra(URIS_EXTRA, uris);
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -67,7 +67,6 @@ public class UploadWidget {
      *
      * @param result Result data from the upload widget.
      * @return Newly created {@link UploadRequest}.
-     * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      */
     public static UploadRequest preprocessResult(Context context, Result result) {
         return UploadWidgetResultProcessor.process(context, result);
@@ -79,7 +78,6 @@ public class UploadWidget {
      * @param uploadRequest Already constructed upload request.
      * @param result Result data from the upload widget.
      * @return Preprocessed {@link UploadRequest}
-     * @throws IllegalArgumentException if data does not contain an image uri or an {@link Result}.
      * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
      */
     public static UploadRequest preprocessResult(Context context, @NonNull UploadRequest uploadRequest, Result result) {
@@ -87,7 +85,7 @@ public class UploadWidget {
     }
 
     /**
-     * Open the native android picker to choose an image.
+     * Open the native android picker to choose a media file.
      *
      * @param activity    The activity that the native android picker was initiated from.
      * @param requestCode A request code to start the native android picker with.
@@ -121,27 +119,27 @@ public class UploadWidget {
     public static final class Result implements Parcelable {
 
         /**
-         * Source image uri.
+         * Source uri.
          */
-        public Uri imageUri;
+        public Uri uri;
 
         /**
-         * Pair of cropping points used to crop the image.
+         * Pair of cropping points.
          */
         public CropPoints cropPoints;
 
         /**
-         * Angle to rotate the image
+         * Angle to rotate.
          */
         public int rotationAngle;
 
-        public Result(Uri imageUri) {
-            this.imageUri = imageUri;
+        public Result(Uri uri) {
+            this.uri = uri;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeParcelable(imageUri, flags);
+            dest.writeParcelable(uri, flags);
             dest.writeParcelable(cropPoints, flags);
             dest.writeInt(rotationAngle);
         }
@@ -159,7 +157,7 @@ public class UploadWidget {
         };
 
         protected Result(Parcel in) {
-            imageUri = in.readParcelable(Uri.class.getClassLoader());
+            uri = in.readParcelable(Uri.class.getClassLoader());
             cropPoints = in.readParcelable(CropPoints.class.getClassLoader());
             rotationAngle = in.readInt();
         }

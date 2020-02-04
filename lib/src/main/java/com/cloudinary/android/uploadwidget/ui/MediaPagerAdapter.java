@@ -14,7 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.cloudinary.android.R;
-import com.cloudinary.android.uploadwidget.model.Image;
+import com.cloudinary.android.uploadwidget.model.Media;
 import com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView;
 import com.cloudinary.android.uploadwidget.utils.MediaType;
 import com.cloudinary.android.uploadwidget.utils.UriUtils;
@@ -22,20 +22,25 @@ import com.cloudinary.android.uploadwidget.utils.UriUtils;
 import java.util.ArrayList;
 
 /**
- * TODO: Displays media files or their upload widget results.
+ * Displays media files or their results.
  */
-class ImagesPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeListener {
+class MediaPagerAdapter extends PagerAdapter {
 
     private SparseArray<View> views;
-    private ArrayList<Image> images;
+    private ArrayList<Media> mediaList;
     private int currentPagePosition;
 
-    public ImagesPagerAdapter(ArrayList<Uri> imagesUris) {
-        images = new ArrayList<>(imagesUris.size());
-        views = new SparseArray<>(imagesUris.size());
+    public MediaPagerAdapter(ArrayList<Uri> uris, ViewPager mediaViewPager) {
+        mediaList = new ArrayList<>(uris.size());
+        views = new SparseArray<>(uris.size());
 
-        for (Uri uri : imagesUris) {
-            images.add(new Image(uri));
+        for (Uri sourceUri : uris) {
+            mediaList.add(new Media(sourceUri));
+        }
+
+        MediaPageChangedListener pageChangeListener = new MediaPageChangedListener();
+        if (mediaViewPager != null) {
+            mediaViewPager.addOnPageChangeListener(pageChangeListener);
         }
     }
 
@@ -43,12 +48,12 @@ class ImagesPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeL
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         Context context = container.getContext();
-        Image image = images.get(position);
+        Media media = mediaList.get(position);
 
         MediaType mediaType = MediaType.IMAGE;
-        Uri uri = image.getResultUri();
+        Uri uri = media.getResultUri();
         if (uri == null) {
-            uri = image.getSourceUri();
+            uri = media.getSourceUri();
             mediaType = UriUtils.getMediaType(context, uri);
         }
 
@@ -124,19 +129,19 @@ class ImagesPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeL
 
     @Override
     public int getCount() {
-        return images.size();
+        return mediaList.size();
     }
 
     /**
-     * Update the result image
+     * Update the result media
      *
-     * @param sourceUri The Uri of the source image that's being updated.
-     * @param resultUri The Uri of the result image.
+     * @param sourceUri The Uri of the source media that's being updated.
+     * @param resultUri The Uri of the result media.
      */
-    public void updateResultImage(Uri sourceUri, Uri resultUri) {
-        for (Image image : images) {
-            if (image.getSourceUri().toString().equals(sourceUri.toString())) {
-                image.setResultUri(resultUri);
+    public void updateMediaResult(Uri sourceUri, Uri resultUri) {
+        for (Media media : mediaList) {
+            if (media.getSourceUri().toString().equals(sourceUri.toString())) {
+                media.setResultUri(resultUri);
                 notifyDataSetChanged();
                 break;
             }
@@ -144,24 +149,24 @@ class ImagesPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeL
     }
 
     /**
-     * Reset the result image
+     * Reset the result media
      *
-     * @param sourceUri The Uri of the image to reset.
+     * @param sourceUri The Uri of the source media to reset.
      */
-    public void resetResultImage(Uri sourceUri) {
-        updateResultImage(sourceUri, null);
+    public void resetMediaResult(Uri sourceUri) {
+        updateMediaResult(sourceUri, null);
     }
 
     /**
-     * Get the image uri's position within the adapter.
+     * Get the media uri's position within the adapter.
      *
-     * @param uri Uri of the image.
-     * @return Position of the image within the adapter, or -1 of it doesn't exist.
+     * @param uri Uri of the media.
+     * @return Position of the media within the adapter, or -1 of it doesn't exist.
      */
-    public int getImagePosition(Uri uri) {
-        for (int i = 0; i < images.size(); i++) {
-            Image image = images.get(i);
-            if (image.getSourceUri().toString().equals(uri.toString())) {
+    public int getMediaPosition(Uri uri) {
+        for (int i = 0; i < mediaList.size(); i++) {
+            Media media = mediaList.get(i);
+            if (media.getSourceUri().toString().equals(uri.toString())) {
                 return i;
             }
         }
@@ -169,7 +174,7 @@ class ImagesPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeL
         return -1;
     }
 
-    public class PageChangedListener extends ViewPager.SimpleOnPageChangeListener {
+    public class MediaPageChangedListener extends ViewPager.SimpleOnPageChangeListener {
 
         @Override
         public void onPageSelected(int position) {
@@ -181,27 +186,5 @@ class ImagesPagerAdapter extends PagerAdapter implements ViewPager.OnPageChangeL
 
             currentPagePosition = position;
         }
-
-    }
-
-    @Override
-    public void onPageScrolled(int i, float v, int i1) {
-
-    }
-
-    @Override
-    public void onPageSelected(int i) {
-        View currentView = views.get(currentPagePosition);
-        if (currentView instanceof UploadWidgetVideoView) {
-            UploadWidgetVideoView videoView = (UploadWidgetVideoView) currentView;
-            videoView.pause();
-        }
-
-        currentPagePosition = i;
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int i) {
-
     }
 }
