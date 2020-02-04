@@ -1,10 +1,10 @@
-package com.cloudinary.android.preprocess;
+package com.cloudinary.android;
 
 import android.content.Context;
 
 /**
  * Preprocess to run on a resource before uploading to Cloudinary. Pass an implementation of this interface to {@link PreprocessChain#addStep(Preprocess)}
- * to run preprocessing and validation steps on a resource (see {@link Limit}, {@link DimensionsValidator} for examples).
+ * to run preprocessing and validation steps on a resource.
  *
  * @param <T> The class representing the resource - This is the type on which the preprocessing will run (e.g. {@link android.graphics.Bitmap})
  */

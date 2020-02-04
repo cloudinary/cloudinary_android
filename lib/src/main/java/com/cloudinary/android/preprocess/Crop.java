@@ -4,6 +4,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 
+import com.cloudinary.android.Preprocess;
+import com.cloudinary.android.PreprocessChain;
+import com.cloudinary.android.PreprocessException;
+
 /**
  * Preprocess for cropping. Send an instance to {@link PreprocessChain#addStep(Preprocess)} to crop an image.
  * Points must form a diagonal within the bounds of the image.

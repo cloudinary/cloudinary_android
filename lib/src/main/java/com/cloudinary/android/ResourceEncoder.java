@@ -1,10 +1,9 @@
-package com.cloudinary.android.preprocess;
+package com.cloudinary.android;
 
 import android.content.Context;
 
 /**
  * Implement this interface to pass to {@link PreprocessChain#saveWith(ResourceEncoder)} for custom resource encoding behavior.
- * (See {@link BitmapEncoder} for an example)
  *
  * @param <T> The concrete type this encoder needs to encode
  */

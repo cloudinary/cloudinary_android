@@ -3,6 +3,9 @@ package com.cloudinary.android.preprocess;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.cloudinary.android.Preprocess;
+import com.cloudinary.android.PreprocessChain;
+
 /**
  * Preprocess implementation for resizing. Send an instance to {@link PreprocessChain#addStep(Preprocess)}
  * to scale down any image larger then {@link #height}/{@link #width}. The scaling retains aspect ratio while

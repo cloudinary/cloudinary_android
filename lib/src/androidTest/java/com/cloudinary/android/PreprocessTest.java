@@ -13,9 +13,7 @@ import com.cloudinary.android.preprocess.Crop;
 import com.cloudinary.android.preprocess.DimensionsValidator;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
 import com.cloudinary.android.preprocess.Limit;
-import com.cloudinary.android.preprocess.PreprocessException;
 import com.cloudinary.android.preprocess.Rotate;
-import com.cloudinary.android.preprocess.ValidationException;
 
 import junit.framework.Assert;
 

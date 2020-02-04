@@ -3,6 +3,8 @@ package com.cloudinary.android.preprocess;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.cloudinary.android.ResourceCreationException;
+import com.cloudinary.android.ResourceEncoder;
 import com.cloudinary.utils.StringUtils;
 
 import java.io.FileOutputStream;

@@ -3,6 +3,9 @@ package com.cloudinary.android.preprocess;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.cloudinary.android.Preprocess;
+import com.cloudinary.android.ValidationException;
+
 /**
  * A preprocess step for validating the dimensions of a given bitmap.
  */

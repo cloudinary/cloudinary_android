@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.cloudinary.android.PayloadDecodeException;
+import com.cloudinary.android.ResourceDecoder;
 import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 

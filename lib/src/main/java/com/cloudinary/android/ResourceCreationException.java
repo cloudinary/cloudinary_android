@@ -1,4 +1,4 @@
-package com.cloudinary.android.preprocess;
+package com.cloudinary.android;
 
 /**
  * Thrown if a resource cannot be created (saved) after running the preprocessing steps.

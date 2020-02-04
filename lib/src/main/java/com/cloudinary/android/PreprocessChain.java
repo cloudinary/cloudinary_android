@@ -1,4 +1,4 @@
-package com.cloudinary.android.preprocess;
+package com.cloudinary.android;
 
 import android.content.Context;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * A preprocess chain to run on resource before uploading. Pass an instance of a populated chain to {@link com.cloudinary.android.UploadRequest#preprocess(PreprocessChain)}.
- * The processing steps will run by the order in which they were added to the chain. Note: The best practice is to use a concrete subclass (e.g. {@link ImagePreprocessChain})
+ * The processing steps will run by the order in which they were added to the chain. Note: The best practice is to use a concrete subclass
  * rather than extend this class. A chain can be used for manipulating and/or validating resources before starting the upload.
  *
  * @param <T> The type of the resource to execute the processing on (e.g. {@link android.graphics.Bitmap})

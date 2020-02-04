@@ -1,4 +1,4 @@
-package com.cloudinary.android.preprocess;
+package com.cloudinary.android;
 
 /**
  * Base exception for exceptions thrown during the preprocessing phase.
