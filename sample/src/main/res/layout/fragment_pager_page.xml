@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/mainGallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -24,7 +24,7 @@
             android:gravity="center"
             android:textSize="24sp" />
 
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="match_parent"
             android:layout_height="16dp" />
 

@@ -1,6 +1,6 @@
 package com.cloudinary.android;
 
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;

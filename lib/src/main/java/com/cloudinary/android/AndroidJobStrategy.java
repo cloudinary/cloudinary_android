@@ -2,7 +2,7 @@ package com.cloudinary.android;
 
 import android.content.Context;
 import android.os.PowerManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.cloudinary.android.callback.UploadStatus;
 import com.cloudinary.android.policy.UploadPolicy;

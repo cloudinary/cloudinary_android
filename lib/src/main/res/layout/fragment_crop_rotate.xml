@@ -7,7 +7,7 @@
     android:background="@android:color/black"
     tools:context=".uploadwidget.ui.CropRotateFragment">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/cropRotateToolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"

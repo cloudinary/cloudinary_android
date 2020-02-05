@@ -7,7 +7,7 @@
     <uses-sdk android:minSdkVersion="9" />
 
     <instrumentation
-        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.cloudinary.android" />
 
     <uses-permission android:name="android.permission.INTERNET" />

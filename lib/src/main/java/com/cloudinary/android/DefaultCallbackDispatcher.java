@@ -7,7 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.util.Pools;
+import androidx.core.util.Pools;
 
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.ListenerService;

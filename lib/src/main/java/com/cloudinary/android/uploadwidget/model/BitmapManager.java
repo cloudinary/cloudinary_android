@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 
 import com.cloudinary.android.uploadwidget.utils.BitmapUtils;
 import com.cloudinary.android.uploadwidget.utils.MediaType;

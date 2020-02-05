@@ -1,6 +1,6 @@
 package com.cloudinary.android;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 import android.widget.ImageView;
 
 import com.cloudinary.Cloudinary;
