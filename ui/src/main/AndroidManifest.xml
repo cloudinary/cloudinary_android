@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.cloudinary.android.ui">
+
+    <application>
+
+        <activity android:name="com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity"
+            android:configChanges="orientation"
+            android:theme="@style/UploadWidgetTheme"/>
+
+    </application>
+
+</manifest>
