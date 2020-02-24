@@ -65,7 +65,7 @@ public class PayloadTest extends AbstractTest {
 
     @Test
     public void testResourcePayload() throws PayloadNotFoundException {
-        ResourcePayload payload = new ResourcePayload(com.cloudinary.android.test.R.raw.old_logo);
+        ResourcePayload payload = new ResourcePayload(com.cloudinary.android.core.test.R.raw.old_logo);
         verifyLengthAndRecreation(payload, 3381);
     }
 
