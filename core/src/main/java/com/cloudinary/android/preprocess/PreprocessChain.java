@@ -1,7 +1,8 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 
+import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 

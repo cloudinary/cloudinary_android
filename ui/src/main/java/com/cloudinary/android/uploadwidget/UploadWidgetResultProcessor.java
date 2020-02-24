@@ -6,9 +6,9 @@ import android.graphics.Point;
 import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.UploadRequest;
-import com.cloudinary.android.Crop;
-import com.cloudinary.android.ImagePreprocessChain;
-import com.cloudinary.android.Rotate;
+import com.cloudinary.android.preprocess.Crop;
+import com.cloudinary.android.preprocess.ImagePreprocessChain;
+import com.cloudinary.android.preprocess.Rotate;
 import com.cloudinary.android.uploadwidget.utils.MediaType;
 import com.cloudinary.android.uploadwidget.utils.UriUtils;
 

@@ -1,8 +1,12 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+
+import com.cloudinary.android.preprocess.Preprocess;
+import com.cloudinary.android.preprocess.PreprocessChain;
+import com.cloudinary.android.preprocess.PreprocessException;
 
 /**
  * Preprocess for cropping. Send an instance to {@link PreprocessChain#addStep(Preprocess)} to crop an image.

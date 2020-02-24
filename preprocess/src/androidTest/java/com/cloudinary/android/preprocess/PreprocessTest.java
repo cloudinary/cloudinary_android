@@ -1,4 +1,4 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,6 +9,10 @@ import androidx.annotation.NonNull;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.RequestDispatcher;
+import com.cloudinary.android.UploadContext;
+import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 

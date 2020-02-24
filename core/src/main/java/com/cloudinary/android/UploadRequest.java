@@ -11,6 +11,10 @@ import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.PayloadNotFoundException;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
+import com.cloudinary.android.preprocess.PayloadDecodeException;
+import com.cloudinary.android.preprocess.PreprocessChain;
+import com.cloudinary.android.preprocess.PreprocessException;
+import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.utils.ObjectUtils;
 
 import java.io.IOException;

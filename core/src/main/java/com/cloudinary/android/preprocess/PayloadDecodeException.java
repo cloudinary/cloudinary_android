@@ -1,4 +1,4 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 /**
  * Thrown if a given payload could not be properly decoded

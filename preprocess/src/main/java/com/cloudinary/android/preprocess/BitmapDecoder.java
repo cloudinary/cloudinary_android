@@ -1,4 +1,4 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 import android.graphics.Bitmap;

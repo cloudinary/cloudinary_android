@@ -1,6 +1,8 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.graphics.Bitmap;
+
+import com.cloudinary.android.UploadRequest;
 
 /**
  * A preprocess chain to run on images before uploading. Pass an instance of a populated chain to {@link UploadRequest#preprocess(PreprocessChain)}.

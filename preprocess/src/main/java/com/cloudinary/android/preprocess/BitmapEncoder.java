@@ -1,8 +1,10 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.cloudinary.android.preprocess.ResourceCreationException;
+import com.cloudinary.android.preprocess.ResourceEncoder;
 import com.cloudinary.utils.StringUtils;
 
 import java.io.FileOutputStream;

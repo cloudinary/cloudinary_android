@@ -1,10 +1,12 @@
-package com.cloudinary.android;
+package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.policy.UploadPolicy;
