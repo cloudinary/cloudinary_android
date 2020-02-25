@@ -121,12 +121,16 @@ public class CropRotateFragment extends Fragment {
         });
 
         ImageView rotateButton = view.findViewById(R.id.rotateButton);
-        rotateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadWidgetImageView.rotateImage();
-            }
-        });
+        if (mediaType == MediaType.VIDEO) {
+            rotateButton.setVisibility(View.GONE);
+        } else {
+            rotateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    uploadWidgetImageView.rotateImage();
+                }
+            });
+        }
 
         view.setFocusableInTouchMode(true);
         view.requestFocus();
