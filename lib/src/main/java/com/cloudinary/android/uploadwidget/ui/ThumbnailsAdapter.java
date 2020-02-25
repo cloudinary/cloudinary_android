@@ -34,7 +34,7 @@ class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Thumbnail
 
     @NonNull
     @Override
-    public ThumbnailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int position) {
+    public ThumbnailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_list_item, parent, false);
         return new ThumbnailViewHolder(view);
     }
@@ -49,6 +49,7 @@ class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Thumbnail
             holder.imageView.setBackgroundResource(0);
         }
         holder.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        holder.imageView.setImageBitmap(null);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +71,9 @@ class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Thumbnail
             BitmapManager.get().load(context, uri, thumbnailSize, thumbnailSize, new BitmapManager.LoadCallback() {
                 @Override
                 public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
-                    holder.imageView.setImageBitmap(bitmap);
+                    if (holder.getAdapterPosition() == position) {
+                        holder.imageView.setImageBitmap(bitmap);
+                    }
                 }
 
                 @Override
@@ -83,7 +86,9 @@ class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.Thumbnail
             BitmapManager.get().thumbnail(context, uri, thumbnailSize, thumbnailSize, new BitmapManager.LoadCallback() {
                 @Override
                 public void onSuccess(Bitmap bitmap, Dimensions originalDimensions) {
-                    holder.imageView.setImageBitmap(bitmap);
+                    if (holder.getAdapterPosition() == position) {
+                        holder.imageView.setImageBitmap(bitmap);
+                    }
                 }
 
                 @Override
