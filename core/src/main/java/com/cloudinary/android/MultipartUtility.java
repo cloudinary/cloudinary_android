@@ -174,7 +174,7 @@ public class MultipartUtility {
     /**
      * For internal use only - callback to monitor multipart upload progress
      */
-    public interface MultipartCallback {
+    interface MultipartCallback {
         void totalBytesLoaded(long bytes);
     }
 

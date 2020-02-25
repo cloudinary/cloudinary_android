@@ -49,7 +49,7 @@ public class UploadRequest<T extends Payload> {
         this.uploadContext = uploadContext;
     }
 
-    public UploadRequest(UploadContext<T> uploadContext, @Nullable Map<String, Object> options) {
+    UploadRequest(UploadContext<T> uploadContext, @Nullable Map<String, Object> options) {
         this.uploadContext = uploadContext;
         this.options = options;
     }
