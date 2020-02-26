@@ -1,1 +1,5 @@
-<manifest package="com.cloudinary.android.preprocess" />
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="com.cloudinary.android.preprocess">
+
+    <uses-sdk tools:overrideLibrary="com.linkedin.android.litr" />
+</manifest>

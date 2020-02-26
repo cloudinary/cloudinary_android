@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
@@ -34,7 +35,7 @@ public class PreprocessTest extends AbstractTest {
 
     @BeforeClass
     public static void setup() throws IOException {
-        assetFile = AbstractTest.assetToFile(AbstractTest.TEST_IMAGE);
+        assetFile = assetToFile(TEST_IMAGE);
     }
 
     /**
@@ -254,6 +255,49 @@ public class PreprocessTest extends AbstractTest {
         Assert.assertNotNull(statefulCallback.lastSuccess);
         Assert.assertEquals(16, statefulCallback.lastSuccess.get("width"));
         MediaManager.get().unregisterCallback(statefulCallback);
+    }
+
+    @Test
+    public void testTranscode() throws IOException, PreprocessException {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File file = assetToFile("videos/test_video.mp4");
+        Uri videoUri = Uri.fromFile(file);
+
+        Parameters parameters = new Parameters();
+        parameters.setRequestId("test_request_id");
+        parameters.setFrameRate(30);
+        parameters.setWidth(1280);
+        parameters.setHeight(720);
+        parameters.setKeyFramesInterval(3);
+        parameters.setTargetAudioBitrateKbps(128);
+        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
+
+        Uri outputVideoUri = new Transcode(parameters).execute(context, videoUri);
+        File targetVideoFile = new File(outputVideoUri.getPath());
+
+        Assert.assertTrue(targetVideoFile.length() > 0);
+    }
+
+    @Test
+    public void testVideoChain() throws IOException, PreprocessException, PayloadNotFoundException {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File file = assetToFile("videos/test_video.mp4");
+        FilePayload payload = new FilePayload(file.getAbsolutePath());
+
+        Parameters parameters = new Parameters();
+        parameters.setRequestId("test_request_id");
+        parameters.setFrameRate(30);
+        parameters.setWidth(1280);
+        parameters.setHeight(720);
+        parameters.setKeyFramesInterval(3);
+        parameters.setTargetAudioBitrateKbps(128);
+        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
+
+        VideoPreprocessChain chain = VideoPreprocessChain.videoTranscodingChain(parameters);
+        String outputVideoPath = chain.execute(context, payload);
+        File targetVideoFile = new File(outputVideoPath);
+
+        Assert.assertTrue(targetVideoFile.length() > 0);
     }
 
     private int getError(Context context, DimensionsValidator validator, Bitmap bitmap) {

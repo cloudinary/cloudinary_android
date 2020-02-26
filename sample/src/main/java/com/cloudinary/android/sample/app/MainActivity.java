@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             String action = intent.getAction();
             if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                 pager.setCurrentItem(IN_PROGRESS_PAGE_POSITION);
-                uploadImageFromIntentUri(intent);
+                uploadFromIntentUri(intent);
             } else if (CloudinaryService.ACTION_STATE_ERROR.equals(action)) {
                 pager.setCurrentItem(FAILED_PAGE_POSITION);
             } else if (CloudinaryService.ACTION_STATE_IN_PROGRESS.equals(action)) {
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         if (resultCode == RESULT_OK) {
             if (requestCode == ImageActivity.UPLOAD_IMAGE_REQUEST_CODE) {
                 // if the user chose to upload right now we want to schedule an immediate upload:
-                uploadImage((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
+                upload((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
             } else if (requestCode == UPLOAD_WIDGET_REQUEST_CODE) {
                 handleUploadWidgetResult(data);
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         List<Resource> resources = ResourceRepo.getInstance().listAll();
         for (Resource resource : resources) {
             if (StringUtils.isBlank(resource.getCloudinaryPublicId())) {
-                uploadImage(resource);
+                upload(resource);
             }
         }
     }
@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
     }
 
-    private void uploadImageFromIntentUri(Intent data) {
+    private void uploadFromIntentUri(Intent data) {
         Uri uri = data.getData();
         if (uri != null) {
             handleUri(uri, data.getFlags());
@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         backgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                uploadImage(createResourceFromUri(uri, flags));
+                upload(createResourceFromUri(uri, flags));
             }
         });
     }
@@ -335,8 +335,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         return new Resource(uri.toString(), pair.first, pair.second);
     }
 
-
-    private void uploadImage(Resource resource) {
+    private void upload(Resource resource) {
         resourceUpdated(ResourceRepo.getInstance().uploadResource(resource));
     }
 
@@ -351,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
 
     @Override
     public void onRetryClicked(Resource resource) {
-        uploadImage(resource);
+        upload(resource);
     }
 
     @Override

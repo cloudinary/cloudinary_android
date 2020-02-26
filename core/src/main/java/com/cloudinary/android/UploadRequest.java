@@ -288,7 +288,7 @@ public class UploadRequest<T extends Payload> {
         }
     }
 
-    String getRequestId() {
+    public String getRequestId() {
         return requestId;
     }
 
