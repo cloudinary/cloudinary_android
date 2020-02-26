@@ -5,8 +5,8 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.espresso.intent.rule.IntentsTestRule;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.espresso.intent.rule.IntentsTestRule;
 
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainActivity;
@@ -20,11 +20,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.intent.Intents.intending;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.intent.Intents.intending;
+import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 public class UploadWidgetTest {
 

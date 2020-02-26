@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".ui.uploadwidget.ui.CropRotateFragment">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/cropRotateToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/transparent" />
+
+    <com.cloudinary.android.uploadwidget.ui.imageview.UploadWidgetImageView
+        android:id="@+id/imageView"
+        android:layout_below="@id/cropRotateToolbar"
+        android:layout_above="@id/buttonsContainer"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="@dimen/imageview_top_margin"
+        android:layout_marginBottom="@dimen/imageview_bottom_margin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/buttonsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/cancel_button_left_margin"
+            android:layout_marginStart="@dimen/cancel_button_left_margin"
+            android:padding="@dimen/button_padding"
+            android:background="@android:color/transparent"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/cancel" />
+
+        <ImageView
+            android:id="@+id/rotateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:padding="@dimen/button_padding"
+            android:focusable="true"
+            android:clickable="true"
+            app:srcCompat="@drawable/rotate_90" />
+
+        <Button
+            android:id="@+id/doneButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/done_button_right_margin"
+            android:layout_marginEnd="@dimen/done_button_right_margin"
+            android:padding="@dimen/button_padding"
+            android:background="@android:color/transparent"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/done" />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
