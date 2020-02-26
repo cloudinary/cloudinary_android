@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="imageview_top_margin">10dp</dimen>
+    <dimen name="imageview_bottom_margin">10dp</dimen>
+    <dimen name="done_button_right_margin">10dp</dimen>
+    <dimen name="cancel_button_left_margin">10dp</dimen>
+    <dimen name="button_padding">10dp</dimen>
+    <dimen name="upload_fab_margin">16dp</dimen>
+    <dimen name="menu_item_icon_padding">12dp</dimen>
+    <dimen name="thumbnail_size">80dp</dimen>
+    <dimen name="thumbnail_border_width">2dp</dimen>
+    <dimen name="thumbnail_horizontal_margin">1dp</dimen>
+    <dimen name="thumbnails_list_vertical_margin">5dp</dimen>
+    <dimen name="images_pager_margin_top">5dp</dimen>
+    <dimen name="thumbnail_media_type_icon_size">24dp</dimen>
+    <dimen name="thumbnail_media_type_icon_left_margin">3dp</dimen>
+    <dimen name="thumbnail_media_type_icon_bottom_margin">3dp</dimen>
+    <dimen name="video_play_button_overlay_size">100dp</dimen>
+</resources>

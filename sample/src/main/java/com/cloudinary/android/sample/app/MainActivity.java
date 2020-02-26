@@ -11,19 +11,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.DocumentsContract;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.util.Pair;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -250,10 +250,10 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             public void run() {
                 ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
                 for (UploadWidget.Result result : results) {
-                    UploadRequest uploadRequest = UploadWidget.preprocessResult(result);
+                    UploadRequest uploadRequest = UploadWidget.preprocessResult(MainActivity.this, result);
                     String requestId = uploadRequest.dispatch(MainApplication.get());
 
-                    Resource resource = createResourceFromUri(result.imageUri, data.getFlags());
+                    Resource resource = createResourceFromUri(result.uri, data.getFlags());
                     resource.setRequestId(requestId);
                     ResourceRepo.getInstance().resourceQueued(resource);
                 }
