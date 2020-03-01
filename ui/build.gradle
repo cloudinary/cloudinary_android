@@ -41,6 +41,7 @@ dependencies {
 ext {
     publishArtifactId = 'cloudinary-android-ui'
     publishArtifactName = 'Cloudinary Android UI Library'
+    jarFileName = "ui"
 }
 
 apply from: '../publish.gradle'

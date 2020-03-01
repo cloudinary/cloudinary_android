@@ -44,9 +44,12 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
     implementation ('com.squareup.picasso:picasso:2.71828', {
-        exclude group: "com.android.support", module: "exifinterface"
+        exclude group: "com.android.support"
     })
-    implementation 'com.google.android.exoplayer:exoplayer:2.9.5'
+
+    implementation ('com.google.android.exoplayer:exoplayer:2.9.5', {
+        exclude group: "com.android.support"
+    })
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {

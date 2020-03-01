@@ -39,6 +39,7 @@ dependencies {
 ext {
     publishArtifactId = 'cloudinary-android'
     publishArtifactName = 'Cloudinary Android Library'
+    jarFileName = "all"
 }
 
 apply from: '../publish.gradle'
