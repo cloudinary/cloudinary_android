@@ -74,6 +74,6 @@ public class UploadWidgetTest {
     }
 
     private static InputStream getAssetStream(String filename) throws IOException {
-        return InstrumentationRegistry.getContext().getAssets().open(filename);
+        return InstrumentationRegistry.getInstrumentation().getContext().getAssets().open(filename);
     }
 }

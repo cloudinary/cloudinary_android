@@ -54,7 +54,10 @@ class MediaPagerAdapter extends PagerAdapter {
         Uri uri = media.getResultUri();
         if (uri == null) {
             uri = media.getSourceUri();
-            mediaType = UriUtils.getMediaType(context, uri);
+            MediaType fromUri = UriUtils.getMediaType(context, uri);
+            if (fromUri != null) {
+                mediaType = fromUri;
+            }
         }
 
         View view = null;

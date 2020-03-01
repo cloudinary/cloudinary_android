@@ -13,6 +13,11 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+
+        // filter in the api credentials before building but without changing original source
+        // files - to make sure the credentials are not checked into source control.
+        // The url is taken from a property or environment variable:
+        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: ""]
     }
 
     buildTypes {
@@ -40,6 +45,8 @@ dependencies {
 ext {
     publishArtifactId = 'cloudinary-android-preprocess'
     publishArtifactName = 'Cloudinary Android Preprocess Library'
+    jarFileName = "preprocess"
+
 }
 
 apply from: '../publish.gradle'
