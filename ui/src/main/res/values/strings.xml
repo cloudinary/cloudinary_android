@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
+    <string name="menu_item_crop">Crop \u0026 Rotate</string>
+    <string name="menu_item_aspect_ratio_unlocked">Aspect ratio unlocked</string>
+    <string name="menu_item_aspect_ratio_locked">Aspect ratio locked</string>
+</resources>

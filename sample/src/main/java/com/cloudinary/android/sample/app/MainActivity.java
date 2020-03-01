@@ -11,29 +11,31 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.DocumentsContract;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.util.Pair;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.android.sample.persist.ResourceRepo;
+import com.cloudinary.android.uploadwidget.UploadWidget;
 import com.cloudinary.utils.StringUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.PicassoTools;
@@ -48,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     public static final int IN_PROGRESS_PAGE_POSITION = 2;
     public static final int FAILED_PAGE_POSITION = 3;
 
-    private static final int CHOOSE_IMAGE_REQUEST_CODE = 1000;
+    public static final int CHOOSE_IMAGE_REQUEST_CODE = 1000;
+    private static final int UPLOAD_WIDGET_REQUEST_CODE = 1002;
     private FloatingActionButton fab;
     private BroadcastReceiver receiver;
     private ViewPager pager;
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Utils.openMediaChooser(MainActivity.this, CHOOSE_IMAGE_REQUEST_CODE);
+                UploadWidget.openMediaChooser(MainActivity.this, CHOOSE_IMAGE_REQUEST_CODE);
             }
         });
 
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
             String action = intent.getAction();
             if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                 pager.setCurrentItem(IN_PROGRESS_PAGE_POSITION);
-                uploadImageFromIntentUri(intent);
+                uploadFromIntentUri(intent);
             } else if (CloudinaryService.ACTION_STATE_ERROR.equals(action)) {
                 pager.setCurrentItem(FAILED_PAGE_POSITION);
             } else if (CloudinaryService.ACTION_STATE_IN_PROGRESS.equals(action)) {
@@ -217,18 +220,52 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         if (resultCode == RESULT_OK) {
             if (requestCode == ImageActivity.UPLOAD_IMAGE_REQUEST_CODE) {
                 // if the user chose to upload right now we want to schedule an immediate upload:
-                uploadImage((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
+                upload((Resource) data.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA));
+            } else if (requestCode == UPLOAD_WIDGET_REQUEST_CODE) {
+                handleUploadWidgetResult(data);
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
-                uploadImageFromIntentUri(data);
+                UploadWidget.startActivity(this, UPLOAD_WIDGET_REQUEST_CODE, extractImageUris(data));
             }
         }
+    }
+
+    private ArrayList<Uri> extractImageUris(Intent data) {
+        ArrayList<Uri> imageUris = new ArrayList<>();
+
+        ClipData clipData = data.getClipData();
+        if (clipData != null) {
+            for (int i = 0; i < clipData.getItemCount(); i++) {
+                imageUris.add(clipData.getItemAt(i).getUri());
+            }
+        } else if (data.getData() != null) {
+            imageUris.add(data.getData());
+        }
+
+        return imageUris;
+    }
+
+    private void handleUploadWidgetResult(final Intent data) {
+        backgroundHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<UploadWidget.Result> results = data.getParcelableArrayListExtra(UploadWidget.RESULT_EXTRA);
+                for (UploadWidget.Result result : results) {
+                    UploadRequest uploadRequest = UploadWidget.preprocessResult(MainActivity.this, result);
+                    String requestId = uploadRequest.dispatch(MainApplication.get());
+
+                    Resource resource = createResourceFromUri(result.uri, data.getFlags());
+                    resource.setRequestId(requestId);
+                    ResourceRepo.getInstance().resourceQueued(resource);
+                }
+            }
+        });
     }
 
     private void syncCloudinary() {
         List<Resource> resources = ResourceRepo.getInstance().listAll();
         for (Resource resource : resources) {
             if (StringUtils.isBlank(resource.getCloudinaryPublicId())) {
-                uploadImage(resource);
+                upload(resource);
             }
         }
     }
@@ -265,18 +302,14 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
     }
 
-    private void uploadImageFromIntentUri(Intent data) {
-        final int takeFlags = data.getFlags()
-                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
+    private void uploadFromIntentUri(Intent data) {
         Uri uri = data.getData();
         if (uri != null) {
-            handleUri(uri, takeFlags);
+            handleUri(uri, data.getFlags());
         } else if (data.getClipData() != null) {
             ClipData clip = data.getClipData();
             for (int i = 0; i < clip.getItemCount(); i++) {
-                handleUri(clip.getItemAt(i).getUri(), takeFlags);
+                handleUri(clip.getItemAt(i).getUri(), data.getFlags());
             }
         }
     }
@@ -285,18 +318,24 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         backgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (DocumentsContract.isDocumentUri(MainActivity.this, uri)) {
-                    getContentResolver().takePersistableUriPermission(uri, flags);
-                }
-
-                Pair<String, String> pair = Utils.getResourceNameAndType(MainActivity.this, uri);
-                Resource resource = new Resource(uri.toString(), pair.first, pair.second);
-                uploadImage(resource);
+                upload(createResourceFromUri(uri, flags));
             }
         });
     }
 
-    private void uploadImage(Resource resource) {
+    private Resource createResourceFromUri(final Uri uri, final int flags) {
+        final int takeFlags = flags & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        if (DocumentsContract.isDocumentUri(MainActivity.this, uri)) {
+            getContentResolver().takePersistableUriPermission(uri, takeFlags);
+        }
+
+        Pair<String, String> pair = Utils.getResourceNameAndType(MainActivity.this, uri);
+
+        return new Resource(uri.toString(), pair.first, pair.second);
+    }
+
+    private void upload(Resource resource) {
         resourceUpdated(ResourceRepo.getInstance().uploadResource(resource));
     }
 
@@ -311,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
 
     @Override
     public void onRetryClicked(Resource resource) {
-        uploadImage(resource);
+        upload(resource);
     }
 
     @Override
