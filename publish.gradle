@@ -1,0 +1,119 @@
+apply plugin: 'signing'
+apply plugin: "de.marcphilipp.nexus-publish"
+apply plugin: "io.codearte.nexus-staging"
+apply plugin: 'digital.wup.android-maven-publish'
+
+if (hasProperty("ossrhPassword")) {
+    signing {
+        sign configurations.archives
+    }
+
+    nexusStaging {
+        packageGroup = group
+        username = project.hasProperty("ossrhUsername") ? project.ext["ossrhUsername"] : ""
+        password = project.hasProperty("ossrhPassword") ? project.ext["ossrhPassword"] : ""
+    }
+
+    publishing {
+        publications {
+            mavenAar(MavenPublication) {
+                from components.android
+
+//                artifact(file("$buildDir/outputs/aar/lib-release.aar.asc")) {
+                artifact(file("$buildDir/outputs/aar/$jarFileName-release.aar.asc")) {
+                    classifier = null
+                    extension = 'aar.asc'
+                }
+
+                pom {
+                    name = publishArtifactName
+                    packaging = 'aar'
+                    groupId = publishGroupId
+                    artifactId = publishArtifactId
+                    description = publishDescription
+                    url = githubUrl
+                    licenses {
+                        license {
+                            name = licenseName
+                            url = licenseUrl
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = developerId
+                            name = developerName
+                            email = developerEmail
+                        }
+                    }
+                    scm {
+                        connection = scmConnection
+                        developerConnection = scmDeveloperConnection
+                        url = scmUrl
+                    }
+                }
+
+                pom.withXml {
+                    def pomFile = file("${project.buildDir}/generated-pom.xml")
+                    writeTo(pomFile)
+                    def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                    artifact(pomAscFile) {
+                        classifier = null
+                        extension = 'pom.asc'
+                    }
+                }
+
+                project.tasks.signArchives.signatureFiles.each {
+                    artifact(it) {
+                        def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                        if (matcher.find()) {
+                            classifier = matcher.group(1)
+                        } else {
+                            classifier = null
+                        }
+                        extension = 'jar.asc'
+                    }
+                }
+            }
+        }
+
+        nexusPublishing {
+            repositories {
+                sonatype {
+                    username = project.hasProperty("ossrhUsername") ? project.ext["ossrhUsername"] : ""
+                    password = project.hasProperty("ossrhPassword") ? project.ext["ossrhPassword"] : ""
+                }
+            }
+        }
+
+        model {
+            tasks.generatePomFileForMavenAarPublication {
+                destination = file("$buildDir/generated-pom.xml")
+            }
+            tasks.publishMavenAarPublicationToMavenLocal {
+                dependsOn project.tasks.signArchives
+            }
+            tasks.publishMavenAarPublicationToSonatypeRepository {
+                dependsOn project.tasks.signArchives
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { var -> classpath += var.javaCompileProvider.get().classpath }
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}

@@ -46,7 +46,7 @@ public class ResourceRepo {
         return helper.findByRequestId(requestId);
     }
 
-    private Resource resourceQueued(Resource resource) {
+    public Resource resourceQueued(Resource resource) {
         String localUri = resource.getLocalUri();
         String requestId = resource.getRequestId();
         helper.insertOrUpdateQueuedResource(localUri, resource.getName(), requestId, resource.getResourceType(), Resource.UploadStatus.QUEUED);
@@ -97,7 +97,13 @@ public class ResourceRepo {
             MediaManager.get().cancelRequest(resource.getRequestId());
         }
 
-        String requestId = CloudinaryHelper.uploadResource(resource, resource.getResourceType().equals("image"));
+        String type = resource.getResourceType();
+        String requestId;
+        if (type.startsWith("video")) {
+            requestId = CloudinaryHelper.uploadVideoResource(resource);
+        } else {
+            requestId = CloudinaryHelper.uploadImageResource(resource);
+        }
         resource.setRequestId(requestId);
 
         return resourceQueued(resource);

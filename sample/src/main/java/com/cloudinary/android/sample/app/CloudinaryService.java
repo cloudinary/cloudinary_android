@@ -10,8 +10,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.TypedValue;
 
 import com.cloudinary.android.callback.ErrorInfo;
@@ -216,10 +216,11 @@ public class CloudinaryService extends ListenerService {
 
         int id = idsProvider.incrementAndGet();
         requestIdsToNotificationIds.put(requestId, id);
+        String resourceType = (String) resultData.get("resource_type");
         notificationManager.notify(id,
                 getBuilder(requestId, Resource.UploadStatus.UPLOADED)
                         .setContentTitle("Cloudinary Upload")
-                        .setContentText("The image was uploaded successfully!")
+                        .setContentText(String.format("The %s was uploaded successfully!", resourceType))
                         .build());
 
         cleanupBitmap(requestId);

@@ -9,6 +9,8 @@ import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.policy.TimeWindow;
 import com.cloudinary.android.preprocess.BitmapEncoder;
 import com.cloudinary.android.preprocess.ImagePreprocessChain;
+import com.cloudinary.android.preprocess.Parameters;
+import com.cloudinary.android.preprocess.VideoPreprocessChain;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainApplication;
 import com.cloudinary.android.sample.app.Utils;
@@ -20,19 +22,34 @@ import java.util.List;
 import java.util.Map;
 
 public class CloudinaryHelper {
-    public static String uploadResource(Resource resource, boolean preprocess) {
+    public static String uploadImageResource(Resource resource) {
         UploadRequest request = MediaManager.get().upload(Uri.parse(resource.getLocalUri()))
                 .unsigned("android_sample")
                 .constrain(TimeWindow.getDefault())
                 .option("resource_type", "auto")
                 .maxFileSize(100 * 1024 * 1024) // max 100mb
                 .policy(MediaManager.get().getGlobalUploadPolicy().newBuilder().maxRetries(2).build());
-        if (preprocess) {
-            // scale down images above 2000 width/height, and re-encode as webp with 80 quality to save bandwidth
-            request.preprocess(ImagePreprocessChain.limitDimensionsChain(2000, 2000)
-                    .saveWith(new BitmapEncoder(BitmapEncoder.Format.WEBP, 80)));
+        // scale down images above 2000 width/height, and re-encode as webp with 80 quality to save bandwidth
+        request.preprocess(ImagePreprocessChain.limitDimensionsChain(2000, 2000)
+                .saveWith(new BitmapEncoder(BitmapEncoder.Format.WEBP, 80)));
 
-        }
+        return request.dispatch(MainApplication.get());
+    }
+
+    public static String uploadVideoResource(Resource resource) {
+        UploadRequest request = MediaManager.get().upload(Uri.parse(resource.getLocalUri()))
+                .option("resource_type", "auto");
+
+        Parameters parameters = new Parameters();
+        parameters.setRequestId(request.getRequestId());
+        parameters.setFrameRate(30);
+        parameters.setWidth(1280);
+        parameters.setHeight(720);
+        parameters.setKeyFramesInterval(3);
+        parameters.setTargetAudioBitrateKbps(128);
+        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
+
+        request.preprocess(VideoPreprocessChain.videoTranscodingChain(parameters));
 
         return request.dispatch(MainApplication.get());
     }

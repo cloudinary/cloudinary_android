@@ -16,7 +16,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.DocumentsContract;
-import android.support.v4.util.Pair;
+import androidx.core.util.Pair;
 import android.view.WindowManager;
 
 import com.cloudinary.utils.StringUtils;
