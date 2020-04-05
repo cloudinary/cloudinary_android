@@ -29,6 +29,7 @@ public class UploadWidget {
      * The key used to pass the uris to the upload widget.
      */
     public static final String URIS_EXTRA = "uris_extra";
+    public static final String START_NOW_EXTRA = "start_now_extra";
 
     /**
      * Start the {@link UploadWidgetActivity}. Please make sure that you have declared it your manifest.
@@ -40,6 +41,18 @@ public class UploadWidget {
     public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> uris) {
         Intent intent = new Intent(activity, UploadWidgetActivity.class);
         intent.putParcelableArrayListExtra(URIS_EXTRA, uris);
+        activity.startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * Start the upload widget in full workflow mode.
+     * @param activity
+     */
+    public static void startActivity(@NonNull Activity activity, int requestCode, boolean startImmediately){
+        Intent intent = new Intent(activity, UploadWidgetActivity.class);
+        if (startImmediately){
+            intent.putExtra(UploadWidget.START_NOW_EXTRA, true);
+        }
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -93,7 +106,9 @@ public class UploadWidget {
     public static void openMediaChooser(Activity activity, int requestCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/jpg", "image/png", "video/*"});
@@ -133,6 +148,13 @@ public class UploadWidget {
          */
         public int rotationAngle;
 
+        /**
+         * The request id, in case the full flow was requested and an upload request was already
+         * started or dispatched.
+         */
+        public String requestId;
+
+
         public Result(Uri uri) {
             this.uri = uri;
         }
@@ -142,6 +164,7 @@ public class UploadWidget {
             dest.writeParcelable(uri, flags);
             dest.writeParcelable(cropPoints, flags);
             dest.writeInt(rotationAngle);
+            dest.writeString(requestId);
         }
 
         public static final Creator<Result> CREATOR = new Creator<Result>() {
@@ -160,6 +183,7 @@ public class UploadWidget {
             uri = in.readParcelable(Uri.class.getClassLoader());
             cropPoints = in.readParcelable(CropPoints.class.getClassLoader());
             rotationAngle = in.readInt();
+            requestId = in.readString();
         }
 
         @Override
