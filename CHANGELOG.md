@@ -1,20 +1,3 @@
-1.27.0/ 2020-04-05
-==================
-
-New functionality
------------------
-
-  * Add support for Upload widget, video preprocessing and separate modules.
-  
-Other changes
--------------
-
-  * Automate publishing script, bump gradle version to 6.0.1 (#105)
-  * Change `compile` to `implementation` in README.MD
-  * Bump cloudinary-core version (#108)
-  * Bump gradle and exoplayer versions (#101)
-  * Bump sample project libraries (#97)
-
 1.26.0 / 2019-02-13
 ===================
 
