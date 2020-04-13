@@ -2,9 +2,14 @@ package com.cloudinary.android.sample.app;
 
 import android.content.ClipData;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.cloudinary.android.CloudinaryRequest;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -50,8 +55,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -205,32 +208,34 @@ public class ImageActivity extends AppCompatActivity {
         exoPlayer.removeListener(listener);
         exoPlayerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
-        final Picasso picasso = new Picasso.Builder(this).listener(new Picasso.Listener() {
-            @Override
-            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                showSnackBar("Error loading resource: " + exception.getMessage());
-            }
-        }).build();
 
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(imageView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override
             public void onUrlReady(Url url) {
-                String uriString = url.generate();
-                currentUrl = uriString;
-                picasso.load(Uri.parse(uriString)).into(imageView, new Callback() {
+                currentUrl = url.generate();
+            }
+        });
+
+        GlideApp.with(imageView)
+                .load(new CloudinaryRequest.Builder(data.getPublicId())
+                        .transformation(data.getTransformation())
+                        .responsive(FIT)
+                        .build())
+                .addListener(new RequestListener<Drawable>() {
                     @Override
-                    public void onSuccess() {
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        showSnackBar("Error loading resource: " + e.getMessage());
                         progressBar.setVisibility(View.GONE);
+                        return false;
                     }
 
                     @Override
-                    public void onError(Exception e) {
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
                         progressBar.setVisibility(View.GONE);
+                        return false;
                     }
-                });
-            }
-        });
+                }).into(imageView);
     }
 
     @Override
