@@ -7,13 +7,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.uploadwidget.model.CropPoints;
 import com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Helper class to start the UploadWidget and preprocess its results.
@@ -29,30 +32,48 @@ public class UploadWidget {
      * The key used to pass the uris to the upload widget.
      */
     public static final String URIS_EXTRA = "uris_extra";
-    public static final String START_NOW_EXTRA = "start_now_extra";
+
+    public static final String REQUIRED_ACTION_EXTRA = "required_action_extra";
 
     /**
-     * Start the {@link UploadWidgetActivity}. Please make sure that you have declared it your manifest.
+     * Start the {@link UploadWidgetActivity} with a pre-populated list of files to upload, and return
+     * a list of upload request to dispatch. This is equivalent to RequiredAction.NONE.
+     * Deprecated - please use {@link #startActivity(Activity, int, LaunchOptions)} directly.
      *
      * @param activity    The activity which requested the upload widget.
      * @param requestCode A request code to start the upload widget with.
-     * @param uris   Uris of the selected media files.
+     * @param uris        Uris of the selected media files.
      */
+    @Deprecated
     public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> uris) {
-        Intent intent = new Intent(activity, UploadWidgetActivity.class);
-        intent.putParcelableArrayListExtra(URIS_EXTRA, uris);
-        activity.startActivityForResult(intent, requestCode);
+        startActivity(activity, requestCode, new LaunchOptions(RequiredAction.NONE, uris));
     }
 
     /**
-     * Start the upload widget in full workflow mode.
-     * @param activity
+     * Start the {@link UploadWidgetActivity} configured for full process - Launch file selection UI
+     * as well as dispatching the created upload request automatically.
+     *
+     * @param activity    The activity which requested the upload widget.
+     * @param requestCode A request code to start the upload widget with.
      */
-    public static void startActivity(@NonNull Activity activity, int requestCode, boolean startImmediately){
-        Intent intent = new Intent(activity, UploadWidgetActivity.class);
-        if (startImmediately){
-            intent.putExtra(UploadWidget.START_NOW_EXTRA, true);
+    public static void startActivity(@NonNull Activity activity, int requestCode) {
+        startActivity(activity, requestCode, new LaunchOptions(RequiredAction.DISPATCH, null));
+    }
+
+    /**
+     * Start the {@link UploadWidgetActivity} configured according to the supplied launch options.
+     *
+     * @param activity      The activity which requested the upload widget.
+     * @param requestCode   A request code to start the upload widget with.
+     * @param launchOptions The launch option to define the required upload widget behaviour
+     */
+    public static void startActivity(@NonNull Activity activity, int requestCode, LaunchOptions launchOptions) {
+        Intent intent = new Intent(activity, UploadWidgetActivity.class).putExtra(REQUIRED_ACTION_EXTRA, launchOptions.requiredAction);
+
+        if (launchOptions.uris != null && !launchOptions.uris.isEmpty()) {
+            intent.putParcelableArrayListExtra(URIS_EXTRA, new ArrayList<Parcelable>(launchOptions.uris));
         }
+
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -89,9 +110,9 @@ public class UploadWidget {
      * Preprocess the {@code uploadRequest}'s with the upload widget results.
      *
      * @param uploadRequest Already constructed upload request.
-     * @param result Result data from the upload widget.
+     * @param result        Result data from the upload widget.
      * @return Preprocessed {@link UploadRequest}
-     * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
+     * @throws IllegalStateException if {@code uploadRequest} was already dispatched.
      */
     public static UploadRequest preprocessResult(Context context, @NonNull UploadRequest uploadRequest, Result result) {
         return UploadWidgetResultProcessor.process(context, uploadRequest, result);
@@ -190,6 +211,49 @@ public class UploadWidget {
         public int describeContents() {
             return 0;
         }
+    }
+
+    /**
+     * This class is used to define the required launch behaviour of the upload widget.
+     */
+    public static class LaunchOptions {
+        final RequiredAction requiredAction;
+        final Collection<Uri> uris;
+
+        /**
+         * Construct a new instance to use when launching the upload widget activity.
+         *
+         * @param requiredAction Indicates the widget how to handle the selected files. This also
+         *                       affects the result received later in onActivityResult. When the action
+         *                       used is DISPATCH or START_NOW the widget returns a list of request IDs.
+         *                       When the action is NONE, the widget returns results that needs to be
+         *                       processed into UploadRequest, allowing customization before dispatching/starting.
+         * @param uris           A list of Uris of files to display and upload.
+         */
+        public LaunchOptions(@NonNull RequiredAction requiredAction, @Nullable Collection<Uri> uris) {
+            this.requiredAction = requiredAction;
+            this.uris = uris;
+        }
+    }
+
+    /**
+     * Define how the upload widget handles the selected files to upload
+     */
+    public enum RequiredAction {
+        /**
+         * Dispatch the selected files within the upload widget, and return request IDs.
+         */
+        DISPATCH,
+
+        /**
+         * Immediately start the selected files within the upload widget, and return request IDs.
+         */
+        START_NOW,
+
+        /**
+         * Create the request data and preprocess configuration without starting any request.
+         */
+        NONE,
     }
 
 }

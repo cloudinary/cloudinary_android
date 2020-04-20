@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UploadWidget.startActivity(MainActivity.this, UPLOAD_WIDGET_REQUEST_CODE, true);
+                UploadWidget.startActivity(MainActivity.this, UPLOAD_WIDGET_REQUEST_CODE);
             }
         });
 

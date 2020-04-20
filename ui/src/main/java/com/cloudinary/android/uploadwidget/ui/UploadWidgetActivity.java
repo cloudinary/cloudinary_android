@@ -28,8 +28,8 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
 
     private static final String UPLOAD_WIDGET_FRAGMENT_TAG = "upload_widget_fragment_tag";
     private static final int MEDIA_CHOOSER_REQUEST_CODE = 5050;
-    private boolean isFullFlow;
-    private boolean startNow = false;
+    private UploadWidget.RequiredAction requiredAction;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +41,13 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
             actionBar.hide();
         }
 
-        isFullFlow = !getIntent().hasExtra(UploadWidget.URIS_EXTRA);
+        requiredAction = (UploadWidget.RequiredAction) getIntent().getSerializableExtra(RESULT_EXTRA);
 
-        if (isFullFlow) {
-            startNow = getIntent().getBooleanExtra(UploadWidget.START_NOW_EXTRA, false);
-            UploadWidget.openMediaChooser(this, MEDIA_CHOOSER_REQUEST_CODE);
-        } else {
-            ArrayList<Uri> uris = getIntent().getParcelableArrayListExtra(UploadWidget.URIS_EXTRA);
+        final ArrayList<Uri> uris = getIntent().getParcelableArrayListExtra(UploadWidget.URIS_EXTRA);
+        if (uris != null && !uris.isEmpty()) {
             showImages(uris);
+        } else {
+            UploadWidget.openMediaChooser(this, MEDIA_CHOOSER_REQUEST_CODE);
         }
     }
 
@@ -107,26 +106,20 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
         return imageUris;
     }
 
-    private ArrayList<UploadWidget.Result> handleUploadWidgetResult(final ArrayList<UploadWidget.Result> results) {
-        for (UploadWidget.Result result : results) {
-            UploadRequest uploadRequest = UploadWidget.preprocessResult(this, result);
-            String requestId = startNow ? uploadRequest.startNow(this) : uploadRequest.dispatch(this);
-            result.requestId = requestId;
-        }
-
-        return results;
-    }
-
     @Override
     public void onConfirm(ArrayList<UploadWidget.Result> results) {
         Intent data = new Intent();
-        if (isFullFlow) {
-            ArrayList<UploadWidget.Result> populatedResults = handleUploadWidgetResult(results);
-            data.putParcelableArrayListExtra(RESULT_EXTRA, populatedResults);
-        } else {
-            data.putParcelableArrayListExtra(UploadWidget.RESULT_EXTRA, results);
+
+        if (requiredAction != UploadWidget.RequiredAction.NONE) {
+            // create the requests and start/dispatch them, then return the results + request IDs.
+            for (UploadWidget.Result result : results) {
+                UploadRequest uploadRequest = UploadWidget.preprocessResult(this, result);
+                result.requestId  = requiredAction == UploadWidget.RequiredAction.START_NOW ?
+                        uploadRequest.startNow(this) : uploadRequest.dispatch(this);
+            }
         }
 
+        data.putParcelableArrayListExtra(RESULT_EXTRA, results);
         setResult(RESULT_OK, data);
         finish();
     }
