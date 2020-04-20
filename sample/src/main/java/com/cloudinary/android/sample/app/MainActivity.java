@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.DocumentsContract;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     public static final int IN_PROGRESS_PAGE_POSITION = 2;
     public static final int FAILED_PAGE_POSITION = 3;
 
-    private static final int UPLOAD_WIDGET_REQUEST_CODE = 1002;
+    public static final int UPLOAD_WIDGET_REQUEST_CODE = 1002;
     private FloatingActionButton fab;
     private BroadcastReceiver receiver;
     private ViewPager pager;

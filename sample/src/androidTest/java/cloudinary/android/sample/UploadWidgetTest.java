@@ -1,18 +1,16 @@
 package cloudinary.android.sample;
 
-import android.app.Activity;
-import android.app.Instrumentation;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
-import androidx.test.platform.app.InstrumentationRegistry;
+
 import androidx.test.espresso.intent.rule.IntentsTestRule;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.app.MainActivity;
+import com.cloudinary.android.uploadwidget.UploadWidget;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -20,11 +18,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.intent.Intents.intending;
-import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 public class UploadWidgetTest {
@@ -41,16 +38,13 @@ public class UploadWidgetTest {
     public IntentsTestRule<MainActivity> intentsTestRule = new IntentsTestRule<>(MainActivity.class);
 
     // TODO: Fix UI tests for travis
-    @Ignore
+//    @Ignore
     @Test
     public void testUploadWidget() {
-        Intent intent = new Intent();
-        intent.setData(Uri.fromFile(assetFile));
-        Instrumentation.ActivityResult result = new Instrumentation.ActivityResult(Activity.RESULT_OK, intent);
-
-        intending(hasComponent(MockNativePickerActivity.class.getName())).respondWith(result);
-        intentsTestRule.getActivity().startActivityForResult(new Intent(intentsTestRule.getActivity(), MockNativePickerActivity.class), MainActivity.CHOOSE_IMAGE_REQUEST_CODE);
-
+        UploadWidget.startActivity(intentsTestRule.getActivity(),
+                MainActivity.UPLOAD_WIDGET_REQUEST_CODE,
+                new UploadWidget.LaunchOptions(UploadWidget.RequiredAction.START_NOW,
+                        Collections.singletonList(Uri.fromFile(assetFile))));
         onView(withId(R.id.crop_action)).perform(click());
         onView(withId(R.id.doneButton)).perform(click());
         onView(withId(R.id.uploadFab)).perform(click());
