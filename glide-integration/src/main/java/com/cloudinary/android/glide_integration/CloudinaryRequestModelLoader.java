@@ -24,7 +24,7 @@ public class CloudinaryRequestModelLoader implements ModelLoader<CloudinaryReque
 
     static final Option<Transformation> TRANSFORMATION =
             Option.memory("com.cloudinary.android.glide_cloudinary.CloudinaryRequestModelLoader.Transformation");
-    static final Option<ResponsiveUrl.Preset> RESPONSIVE =
+    static final Option<ResponsiveUrl> RESPONSIVE =
             Option.memory("com.cloudinary.android.glide_cloudinary.CloudinaryRequestModelLoader.Responsive");;
 
     private ModelLoader<GlideUrl, InputStream> urlLoader;
@@ -46,12 +46,12 @@ public class CloudinaryRequestModelLoader implements ModelLoader<CloudinaryReque
             url.transformation(transformation);
         }
 
-        ResponsiveUrl.Preset responsive = model.getResponsive();
+        ResponsiveUrl responsive = model.getResponsive();
         if (responsive == null) {
             responsive = options.get(RESPONSIVE);
         }
         if (responsive != null) {
-            url = MediaManager.get().responsiveUrl(responsive).buildUrl(url, width, height);
+            url = responsive.buildUrl(url, width, height);
         }
 
         return urlLoader.buildLoadData(new GlideUrl(url.generate()), width, height, options);

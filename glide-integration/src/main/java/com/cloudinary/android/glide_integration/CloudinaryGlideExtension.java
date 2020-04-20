@@ -26,7 +26,7 @@ public class CloudinaryGlideExtension {
 
     @NonNull
     @GlideOption
-    public static BaseRequestOptions<?> responsive(BaseRequestOptions<?> requestOptions, ResponsiveUrl.Preset responsive) {
+    public static BaseRequestOptions<?> responsive(BaseRequestOptions<?> requestOptions, ResponsiveUrl responsive) {
         RequestOptions options = new RequestOptions().set(CloudinaryRequestModelLoader.RESPONSIVE, responsive);
         return requestOptions.apply(options);
     }

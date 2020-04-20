@@ -9,9 +9,9 @@ public class CloudinaryRequest {
 
     private String publicId;
     private Transformation transformation;
-    private ResponsiveUrl.Preset responsive;
+    private ResponsiveUrl responsive;
 
-    private CloudinaryRequest(String publicId, Transformation transformation, ResponsiveUrl.Preset responsive) {
+    private CloudinaryRequest(String publicId, Transformation transformation, ResponsiveUrl responsive) {
         this.publicId = publicId;
         this.transformation = transformation;
         this.responsive = responsive;
@@ -34,7 +34,7 @@ public class CloudinaryRequest {
     /**
      * Get the responsive preset set for this resource.
      */
-    public ResponsiveUrl.Preset getResponsive() {
+    public ResponsiveUrl getResponsive() {
         return responsive;
     }
 
@@ -45,7 +45,7 @@ public class CloudinaryRequest {
 
         private final String publicId;
         private Transformation transformation;
-        private ResponsiveUrl.Preset responsive;
+        private ResponsiveUrl responsive;
 
         public Builder(String publicId) {
             this.publicId = publicId;
@@ -60,10 +60,18 @@ public class CloudinaryRequest {
         }
 
         /**
+         * Set a responsive url to be used when generating the resource.
+         */
+        public Builder responsive(ResponsiveUrl responsiveUrl) {
+            this.responsive = responsiveUrl;
+            return this;
+        }
+
+        /**
          * Set a responsive preset to be used when generating the resource.
          */
-        public Builder responsive(ResponsiveUrl.Preset responsive) {
-            this.responsive = responsive;
+        public Builder responsive(ResponsiveUrl.Preset responsivePreset) {
+            this.responsive = MediaManager.get().responsiveUrl(responsivePreset);
             return this;
         }
 
