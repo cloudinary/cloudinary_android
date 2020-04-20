@@ -19,6 +19,7 @@ import com.cloudinary.android.uploadwidget.UploadWidget;
 
 import java.util.ArrayList;
 
+import static com.cloudinary.android.uploadwidget.UploadWidget.REQUIRED_ACTION_EXTRA;
 import static com.cloudinary.android.uploadwidget.UploadWidget.RESULT_EXTRA;
 
 /**
@@ -41,7 +42,7 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
             actionBar.hide();
         }
 
-        requiredAction = (UploadWidget.RequiredAction) getIntent().getSerializableExtra(RESULT_EXTRA);
+        requiredAction = (UploadWidget.RequiredAction) getIntent().getSerializableExtra(REQUIRED_ACTION_EXTRA);
 
         final ArrayList<Uri> uris = getIntent().getParcelableArrayListExtra(UploadWidget.URIS_EXTRA);
         if (uris != null && !uris.isEmpty()) {
