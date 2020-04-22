@@ -29,7 +29,7 @@ public class CloudinaryRequestModelLoader implements ModelLoader<CloudinaryReque
 
     private ModelLoader<GlideUrl, InputStream> urlLoader;
 
-    private CloudinaryRequestModelLoader(ModelLoader<GlideUrl, InputStream> urlLoader) {
+    public CloudinaryRequestModelLoader(ModelLoader<GlideUrl, InputStream> urlLoader) {
         this.urlLoader = urlLoader;
     }
 

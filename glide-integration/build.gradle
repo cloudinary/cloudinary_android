@@ -27,6 +27,10 @@ dependencies {
     implementation project(':core')
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'org.mockito:mockito-android:2.24.0'
 }
 
 ext {
