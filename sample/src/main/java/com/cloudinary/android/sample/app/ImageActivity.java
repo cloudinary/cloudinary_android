@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -50,8 +51,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -204,33 +203,20 @@ public class ImageActivity extends AppCompatActivity {
     private void loadImage(final EffectData data) {
         exoPlayer.removeListener(listener);
         exoPlayerView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
-        final Picasso picasso = new Picasso.Builder(this).listener(new Picasso.Listener() {
-            @Override
-            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
-                showSnackBar("Error loading resource: " + exception.getMessage());
-            }
-        }).build();
 
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(imageView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override
             public void onUrlReady(Url url) {
-                String uriString = url.generate();
-                currentUrl = uriString;
-                picasso.load(Uri.parse(uriString)).into(imageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        progressBar.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                });
+                currentUrl = url.generate();
             }
         });
+
+        MediaManager.get().download(this)
+                .load(data.getPublicId())
+                .transformation(data.getTransformation())
+                .responsive(FIT)
+                .into(imageView);
     }
 
     @Override
