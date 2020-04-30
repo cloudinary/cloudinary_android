@@ -204,6 +204,8 @@ public class ImageActivity extends AppCompatActivity {
         exoPlayer.removeListener(listener);
         exoPlayerView.setVisibility(View.GONE);
 
+        // TODO: Add progress bar using download strategy callback
+
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(imageView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override

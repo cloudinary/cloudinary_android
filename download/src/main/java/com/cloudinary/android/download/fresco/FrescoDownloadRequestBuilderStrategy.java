@@ -43,6 +43,10 @@ class FrescoDownloadRequestBuilderStrategy implements DownloadRequestBuilderStra
 
     @Override
     public DownloadRequestStrategy into(ImageView imageView) {
+        if (!(imageView instanceof DraweeView)) {
+            throw new IllegalArgumentException("ImageView must be an instance of DraweeView.");
+        }
+
         ImageRequest imageRequest = imageRequestBuilder.build();
         GenericDraweeHierarchy genericDraweeHierarchy = genericDraweeHierarchyBuilder.build();
 

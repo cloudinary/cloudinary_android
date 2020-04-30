@@ -72,6 +72,9 @@ public class DownloadRequestBuilderImpl implements DownloadRequestBuilder {
     public DownloadRequest into(ImageView imageView) {
         final DownloadRequestImpl downloadRequestImpl = new DownloadRequestImpl(downloadRequestBuilderStrategy, imageView);
 
+        if (source == null) {
+            throw new IllegalStateException("Source is null.");
+        }
         if (source instanceof String) {
             if (isCloudinaryPublicIdSource) {
                 Url url = MediaManager.get().url().publicId(source).transformation(transformation);
@@ -80,19 +83,19 @@ public class DownloadRequestBuilderImpl implements DownloadRequestBuilder {
                     responsive.generate(url, imageView, new ResponsiveUrl.Callback() {
                         @Override
                         public void onUrlReady(Url url) {
-                            setUrl(downloadRequestImpl, url.generate());
+                            downloadRequestImpl.setSource(url.generate());
                         }
                     });
                 } else {
-                    setUrl(downloadRequestImpl, url.generate());
+                    downloadRequestImpl.setSource(url.generate());
                 }
             } else {
-                setUrl(downloadRequestImpl, (String) source);
+                downloadRequestImpl.setSource(source);
             }
         } else if (source instanceof Integer) {
-            downloadRequestBuilderStrategy.load((Integer) source);
+            downloadRequestImpl.setSource(source);
         } else {
-            throw new IllegalStateException("load must be called before calling into!");
+            throw new IllegalArgumentException("Load source is not an instance of a correct type.");
         }
 
         if (placeholder != 0) {
@@ -100,10 +103,5 @@ public class DownloadRequestBuilderImpl implements DownloadRequestBuilder {
         }
 
         return downloadRequestImpl.start();
-    }
-
-    private void setUrl(DownloadRequestImpl downloadRequestImpl, String url) {
-        downloadRequestBuilderStrategy.load(url);
-        downloadRequestImpl.setUrl(url);
     }
 }

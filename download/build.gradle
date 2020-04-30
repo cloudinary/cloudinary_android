@@ -13,6 +13,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
         multiDexEnabled true
+
+        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: ""]
     }
 
     buildTypes {
@@ -30,7 +32,6 @@ dependencies {
     compileOnly 'com.squareup.picasso:picasso:2.71828'
     compileOnly 'com.facebook.fresco:fresco:2.2.0'
     compileOnly 'com.github.bumptech.glide:glide:4.11.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

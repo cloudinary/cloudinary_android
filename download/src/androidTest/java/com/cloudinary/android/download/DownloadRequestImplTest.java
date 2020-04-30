@@ -28,7 +28,7 @@ public class DownloadRequestImplTest {
 
     @Test
     public void testDownloadStartWithUrl() {
-        sut.setUrl(url);
+        sut.setSource(url);
         sut.start();
 
         Mockito.verify(downloadRequestBuilderStrategy, Mockito.times(1)).into(imageView);
@@ -37,7 +37,7 @@ public class DownloadRequestImplTest {
     @Test
     public void testDownloadStartRightAfterUrlIsSet() {
         sut.start();
-        sut.setUrl(url);
+        sut.setSource(url);
 
         Mockito.verify(downloadRequestBuilderStrategy, Mockito.times(1)).into(imageView);
     }
@@ -51,7 +51,7 @@ public class DownloadRequestImplTest {
 
     @Test
     public void testDownloadDoesNotStartIfCancelled() {
-        sut.setUrl(url);
+        sut.setSource(url);
         sut.cancel();
         sut.start();
 
@@ -64,8 +64,8 @@ public class DownloadRequestImplTest {
         Mockito.when(downloadRequestBuilderStrategy.into(imageView)).thenReturn(downloadRequestStrategy);
 
         sut.start();
-        sut.setUrl(url);
-        sut.setUrl(url);
+        sut.setSource(url);
+        sut.setSource(url);
         sut.start();
 
         Mockito.verify(downloadRequestBuilderStrategy, Mockito.times(1)).into(imageView);
