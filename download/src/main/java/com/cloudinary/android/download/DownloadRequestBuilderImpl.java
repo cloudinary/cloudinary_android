@@ -25,6 +25,7 @@ public class DownloadRequestBuilderImpl implements DownloadRequestBuilder {
     private ResponsiveUrl responsive;
     private int placeholder;
     private boolean isCloudinaryPublicIdSource;
+    private DownloadRequestCallback callback;
 
     public DownloadRequestBuilderImpl(Context context, DownloadRequestBuilderStrategy downloadRequestBuilderStrategy) {
         this.context = context;
@@ -69,6 +70,12 @@ public class DownloadRequestBuilderImpl implements DownloadRequestBuilder {
     }
 
     @Override
+    public DownloadRequestBuilder callback(DownloadRequestCallback callback) {
+        this.callback = callback;
+        return this;
+    }
+
+    @Override
     public DownloadRequest into(ImageView imageView) {
         final DownloadRequestImpl downloadRequestImpl = new DownloadRequestImpl(downloadRequestBuilderStrategy, imageView);
 
@@ -100,6 +107,9 @@ public class DownloadRequestBuilderImpl implements DownloadRequestBuilder {
 
         if (placeholder != 0) {
             downloadRequestBuilderStrategy.placeholder(placeholder);
+        }
+        if (callback != null) {
+            downloadRequestBuilderStrategy.callback(callback);
         }
 
         return downloadRequestImpl.start();

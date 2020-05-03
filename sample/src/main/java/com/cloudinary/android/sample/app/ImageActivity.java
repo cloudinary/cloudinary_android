@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
+import com.cloudinary.android.download.DownloadRequestCallback;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -203,8 +204,7 @@ public class ImageActivity extends AppCompatActivity {
     private void loadImage(final EffectData data) {
         exoPlayer.removeListener(listener);
         exoPlayerView.setVisibility(View.GONE);
-
-        // TODO: Add progress bar using download strategy callback
+        progressBar.setVisibility(View.VISIBLE);
 
         Url baseUrl = MediaManager.get().url().publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(imageView, baseUrl, FIT, new ResponsiveUrl.Callback() {
@@ -218,6 +218,17 @@ public class ImageActivity extends AppCompatActivity {
                 .load(data.getPublicId())
                 .transformation(data.getTransformation())
                 .responsive(FIT)
+                .callback(new DownloadRequestCallback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                })
                 .into(imageView);
     }
 

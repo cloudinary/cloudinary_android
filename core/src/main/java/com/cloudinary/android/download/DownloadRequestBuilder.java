@@ -57,6 +57,13 @@ public interface DownloadRequestBuilder {
     DownloadRequestBuilder placeholder(@DrawableRes int resourceId);
 
     /**
+     * Set a callback to be called for the result of the download request.
+     * @param callback The callback to be called for the result of the download request.
+     * @return Itself for chaining.
+     */
+    DownloadRequestBuilder callback(DownloadRequestCallback callback);
+
+    /**
      * Set the target {@link ImageView} to load the resource into and start the operation.
      * @param imageView The {@link ImageView} the resource will be loaded into.
      * @return The dispatched request.

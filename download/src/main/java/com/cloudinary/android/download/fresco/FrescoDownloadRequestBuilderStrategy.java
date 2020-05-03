@@ -5,12 +5,14 @@ import android.net.Uri;
 import android.widget.ImageView;
 
 import com.cloudinary.android.download.DownloadRequestBuilderStrategy;
+import com.cloudinary.android.download.DownloadRequestCallback;
 import com.cloudinary.android.download.DownloadRequestStrategy;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.DraweeView;
+import com.facebook.imagepipeline.listener.BaseRequestListener;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
@@ -38,6 +40,24 @@ class FrescoDownloadRequestBuilderStrategy implements DownloadRequestBuilderStra
     @Override
     public DownloadRequestBuilderStrategy placeholder(int resourceId) {
         genericDraweeHierarchyBuilder.setPlaceholderImage(resourceId);
+        return this;
+    }
+
+    @Override
+    public DownloadRequestBuilderStrategy callback(final DownloadRequestCallback callback) {
+        imageRequestBuilder.setRequestListener(new BaseRequestListener() {
+            @Override
+            public void onRequestSuccess(ImageRequest request, String requestId, boolean isPrefetch) {
+                callback.onSuccess();
+                super.onRequestSuccess(request, requestId, isPrefetch);
+            }
+
+            @Override
+            public void onRequestFailure(ImageRequest request, String requestId, Throwable throwable, boolean isPrefetch) {
+                callback.onFailure(throwable);
+                super.onRequestFailure(request, requestId, throwable, isPrefetch);
+            }
+        });
         return this;
     }
 
