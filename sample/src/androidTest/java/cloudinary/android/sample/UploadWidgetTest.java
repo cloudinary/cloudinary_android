@@ -11,6 +11,7 @@ import com.cloudinary.android.sample.app.MainActivity;
 import com.cloudinary.android.uploadwidget.UploadWidget;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -38,12 +39,12 @@ public class UploadWidgetTest {
     public IntentsTestRule<MainActivity> intentsTestRule = new IntentsTestRule<>(MainActivity.class);
 
     // TODO: Fix UI tests for travis
-//    @Ignore
+    @Ignore
     @Test
     public void testUploadWidget() {
         UploadWidget.startActivity(intentsTestRule.getActivity(),
                 MainActivity.UPLOAD_WIDGET_REQUEST_CODE,
-                new UploadWidget.LaunchOptions(UploadWidget.RequiredAction.START_NOW,
+                new UploadWidget.Options(UploadWidget.Action.START_NOW,
                         Collections.singletonList(Uri.fromFile(assetFile))));
         onView(withId(R.id.crop_action)).perform(click());
         onView(withId(R.id.doneButton)).perform(click());

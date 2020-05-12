@@ -19,7 +19,7 @@ import com.cloudinary.android.uploadwidget.UploadWidget;
 
 import java.util.ArrayList;
 
-import static com.cloudinary.android.uploadwidget.UploadWidget.REQUIRED_ACTION_EXTRA;
+import static com.cloudinary.android.uploadwidget.UploadWidget.ACTION_EXTRA;
 import static com.cloudinary.android.uploadwidget.UploadWidget.RESULT_EXTRA;
 
 /**
@@ -29,7 +29,7 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
 
     private static final String UPLOAD_WIDGET_FRAGMENT_TAG = "upload_widget_fragment_tag";
     private static final int MEDIA_CHOOSER_REQUEST_CODE = 5050;
-    private UploadWidget.RequiredAction requiredAction;
+    private UploadWidget.Action action;
 
 
     @Override
@@ -42,7 +42,7 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
             actionBar.hide();
         }
 
-        requiredAction = (UploadWidget.RequiredAction) getIntent().getSerializableExtra(REQUIRED_ACTION_EXTRA);
+        action = (UploadWidget.Action) getIntent().getSerializableExtra(ACTION_EXTRA);
 
         final ArrayList<Uri> uris = getIntent().getParcelableArrayListExtra(UploadWidget.URIS_EXTRA);
         if (uris != null && !uris.isEmpty()) {
@@ -111,11 +111,11 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
     public void onConfirm(ArrayList<UploadWidget.Result> results) {
         Intent data = new Intent();
 
-        if (requiredAction != UploadWidget.RequiredAction.NONE) {
+        if (action != UploadWidget.Action.NONE) {
             // create the requests and start/dispatch them, then return the results + request IDs.
             for (UploadWidget.Result result : results) {
                 UploadRequest uploadRequest = UploadWidget.preprocessResult(this, result);
-                result.requestId  = requiredAction == UploadWidget.RequiredAction.START_NOW ?
+                result.requestId  = action == UploadWidget.Action.START_NOW ?
                         uploadRequest.startNow(this) : uploadRequest.dispatch(this);
             }
         }

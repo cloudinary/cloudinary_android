@@ -33,12 +33,12 @@ public class UploadWidget {
      */
     public static final String URIS_EXTRA = "uris_extra";
 
-    public static final String REQUIRED_ACTION_EXTRA = "required_action_extra";
+    public static final String ACTION_EXTRA = "required_action_extra";
 
     /**
      * Start the {@link UploadWidgetActivity} with a pre-populated list of files to upload, and return
      * a list of upload request to dispatch. This is equivalent to RequiredAction.NONE.
-     * Deprecated - please use {@link #startActivity(Activity, int, LaunchOptions)} directly.
+     * Deprecated - please use {@link #startActivity(Activity, int, Options)} directly.
      *
      * @param activity    The activity which requested the upload widget.
      * @param requestCode A request code to start the upload widget with.
@@ -46,7 +46,7 @@ public class UploadWidget {
      */
     @Deprecated
     public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> uris) {
-        startActivity(activity, requestCode, new LaunchOptions(RequiredAction.NONE, uris));
+        startActivity(activity, requestCode, new Options(Action.NONE, uris));
     }
 
     /**
@@ -57,7 +57,7 @@ public class UploadWidget {
      * @param requestCode A request code to start the upload widget with.
      */
     public static void startActivity(@NonNull Activity activity, int requestCode) {
-        startActivity(activity, requestCode, new LaunchOptions(RequiredAction.DISPATCH, null));
+        startActivity(activity, requestCode, new Options(Action.DISPATCH, null));
     }
 
     /**
@@ -65,13 +65,13 @@ public class UploadWidget {
      *
      * @param activity      The activity which requested the upload widget.
      * @param requestCode   A request code to start the upload widget with.
-     * @param launchOptions The launch option to define the required upload widget behaviour
+     * @param options The launch option to define the required upload widget behaviour
      */
-    public static void startActivity(@NonNull Activity activity, int requestCode, LaunchOptions launchOptions) {
-        Intent intent = new Intent(activity, UploadWidgetActivity.class).putExtra(REQUIRED_ACTION_EXTRA, launchOptions.requiredAction);
+    public static void startActivity(@NonNull Activity activity, int requestCode, Options options) {
+        Intent intent = new Intent(activity, UploadWidgetActivity.class).putExtra(ACTION_EXTRA, options.action);
 
-        if (launchOptions.uris != null && !launchOptions.uris.isEmpty()) {
-            intent.putParcelableArrayListExtra(URIS_EXTRA, new ArrayList<Parcelable>(launchOptions.uris));
+        if (options.uris != null && !options.uris.isEmpty()) {
+            intent.putParcelableArrayListExtra(URIS_EXTRA, new ArrayList<Parcelable>(options.uris));
         }
 
         activity.startActivityForResult(intent, requestCode);
@@ -216,22 +216,22 @@ public class UploadWidget {
     /**
      * This class is used to define the required launch behaviour of the upload widget.
      */
-    public static class LaunchOptions {
-        final RequiredAction requiredAction;
+    public static class Options {
+        final Action action;
         final Collection<Uri> uris;
 
         /**
          * Construct a new instance to use when launching the upload widget activity.
          *
-         * @param requiredAction Indicates the widget how to handle the selected files. This also
+         * @param action Indicates the widget how to handle the selected files. This also
          *                       affects the result received later in onActivityResult. When the action
          *                       used is DISPATCH or START_NOW the widget returns a list of request IDs.
          *                       When the action is NONE, the widget returns results that needs to be
          *                       processed into UploadRequest, allowing customization before dispatching/starting.
          * @param uris           A list of Uris of files to display and upload.
          */
-        public LaunchOptions(@NonNull RequiredAction requiredAction, @Nullable Collection<Uri> uris) {
-            this.requiredAction = requiredAction;
+        public Options(@NonNull Action action, @Nullable Collection<Uri> uris) {
+            this.action = action;
             this.uris = uris;
         }
     }
@@ -239,7 +239,7 @@ public class UploadWidget {
     /**
      * Define how the upload widget handles the selected files to upload
      */
-    public enum RequiredAction {
+    public enum Action {
         /**
          * Dispatch the selected files within the upload widget, and return request IDs.
          */
