@@ -1,4 +1,12 @@
 
+1.28.2 / 2020-05-13
+==================
+
+New functionality
+-----------------
+  * Add a fully-automatic mode to the Upload Widget (#113)
+
+
 1.27.0 / 2020-04-06
 ==================
 
