@@ -6,10 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.cloudinary.android.CloudinaryRequest;
+import com.cloudinary.android.download.DownloadRequestCallback;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -217,25 +214,22 @@ public class ImageActivity extends AppCompatActivity {
             }
         });
 
-        GlideApp.with(imageView)
-                .load(new CloudinaryRequest.Builder(data.getPublicId())
-                        .transformation(data.getTransformation())
-                        .responsive(FIT)
-                        .build())
-                .addListener(new RequestListener<Drawable>() {
+        MediaManager.get().download(this)
+                .load(data.getPublicId())
+                .transformation(data.getTransformation())
+                .responsive(FIT)
+                .callback(new DownloadRequestCallback() {
                     @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        showSnackBar("Error loading resource: " + e.getMessage());
+                    public void onSuccess() {
                         progressBar.setVisibility(View.GONE);
-                        return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                    public void onFailure(Throwable t) {
                         progressBar.setVisibility(View.GONE);
-                        return false;
                     }
-                }).into(imageView);
+                })
+                .into(imageView);
     }
 
     @Override

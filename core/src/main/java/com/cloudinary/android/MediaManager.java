@@ -15,6 +15,8 @@ import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.callback.UploadResult;
 import com.cloudinary.android.callback.UploadStatus;
+import com.cloudinary.android.download.DownloadRequestBuilder;
+import com.cloudinary.android.download.DownloadRequestBuilderFactory;
 import com.cloudinary.android.payload.ByteArrayPayload;
 import com.cloudinary.android.payload.FilePayload;
 import com.cloudinary.android.payload.LocalUriPayload;
@@ -57,6 +59,7 @@ public class MediaManager {
     private final ExecutorService executor;
 
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
+    private DownloadRequestBuilderFactory downloadRequestBuilderFactory;
 
     private MediaManager(@NonNull Context context, @Nullable SignatureProvider signatureProvider, @Nullable Map config) {
         executor = new ThreadPoolExecutor(4, 4,
@@ -441,5 +444,27 @@ public class MediaManager {
 
     void execute(Runnable runnable) {
         executor.execute(runnable);
+    }
+
+    /**
+     * Set a {@link DownloadRequestBuilderFactory} factory that will construct the
+     * {@link DownloadRequestBuilder} instance, to be used when creating download requests
+     * using {@link #download(Context)}.
+     */
+    public void setDownloadRequestBuilderFactory(DownloadRequestBuilderFactory factory) {
+        downloadRequestBuilderFactory = factory;
+    }
+
+    /**
+     * Create a new {@link DownloadRequestBuilder} to be used to create a download request.
+     * @param context Android context
+     * @return The {@link DownloadRequestBuilder} that will create the download request.
+     */
+    public DownloadRequestBuilder download(@NonNull Context context) {
+        if (downloadRequestBuilderFactory == null) {
+            throw new IllegalStateException("Must set a factory before downloading.");
+        }
+
+        return downloadRequestBuilderFactory.createDownloadRequestBuilder(context);
     }
 }

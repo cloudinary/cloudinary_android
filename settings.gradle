@@ -1,2 +1,2 @@
 rootProject.name = 'cloudinary-android'
-include ':all', ':core', ':preprocess', ':ui', ':sample', ':glide-integration'
+include ':all', ':core', ':preprocess', ':ui', ':sample', ':glide-integration', ':download'

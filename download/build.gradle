@@ -4,7 +4,6 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
-
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 29
@@ -13,6 +12,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        multiDexEnabled true
+
+        manifestPlaceholders = [cloudinaryUrl: getCloudinaryUrl() ?: ""]
     }
 
     buildTypes {
@@ -25,22 +27,22 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api project(path: ':core')
-    api project(path: ':preprocess')
-    api project(path: ':ui')
-    api project(path: ':download')
+    implementation project(':core')
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    compileOnly 'com.squareup.picasso:picasso:2.71828'
+    compileOnly 'com.facebook.fresco:fresco:2.2.0'
+    compileOnly 'com.github.bumptech.glide:glide:4.11.0'
+
     testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'org.mockito:mockito-android:2.24.0'
 }
 
 ext {
-    publishArtifactId = 'cloudinary-android'
-    publishArtifactName = 'Cloudinary Android Library'
-    jarFileName = "all"
+    publishArtifactId = 'cloudinary-android-download'
+    publishArtifactName = 'Cloudinary Android Download Library'
+    jarFileName = "download"
 }
 
 apply from: '../publish.gradle'
