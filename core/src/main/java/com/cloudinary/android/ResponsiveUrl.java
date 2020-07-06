@@ -176,18 +176,31 @@ public class ResponsiveUrl {
      * @return The url with the responsive transformation.
      */
     private Url buildUrl(View view, Url baseUrl) {
+        int contentWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
+        int contentHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
+
+        return buildUrl(baseUrl, contentWidth, contentHeight);
+    }
+
+    /**
+     * Construct the final url with the dimensions included as the last transformation in the url.
+     *
+     * @param baseUrl   The base cloudinary Url to chain the transformation to.
+     * @param width     The width to adapt the image width to.
+     * @param height    The height to adapt the image height to.
+     * @return The url with the responsive transformation.
+     */
+    public Url buildUrl(Url baseUrl, int width, int height) {
         // add a new transformation on top of anything already there:
         Url url = baseUrl.clone();
         url.transformation().chain();
 
         if (autoHeight) {
-            int contentHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
-            url.transformation().height(trimAndRoundUp(contentHeight));
+            url.transformation().height(trimAndRoundUp(height));
         }
 
         if (autoWidth) {
-            int contentWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
-            url.transformation().width(trimAndRoundUp(contentWidth));
+            url.transformation().width(trimAndRoundUp(width));
         }
 
         url.transformation().crop(cropMode).gravity(gravity);

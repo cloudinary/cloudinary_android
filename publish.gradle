@@ -19,7 +19,16 @@ if (hasProperty("ossrhPassword")) {
             mavenAar(MavenPublication) {
                 from components.android
 
-//                artifact(file("$buildDir/outputs/aar/lib-release.aar.asc")) {
+                artifact(file("$buildDir/libs/$jarFileName-$version-javadoc.jar.asc")) {
+                    classifier = 'javadoc'
+                    extension = 'jar.asc'
+                }
+
+                artifact(file("$buildDir/libs/$jarFileName-$version-sources.jar.asc")) {
+                    classifier = 'sources'
+                    extension = 'jar.asc'
+                }
+
                 artifact(file("$buildDir/outputs/aar/$jarFileName-release.aar.asc")) {
                     classifier = null
                     extension = 'aar.asc'
@@ -102,7 +111,7 @@ if (hasProperty("ossrhPassword")) {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -110,10 +119,10 @@ task javadoc(type: Javadoc) {
     android.libraryVariants.all { var -> classpath += var.javaCompileProvider.get().classpath }
 }
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
+
 artifacts {
-    archives javadocJar
-    archives sourcesJar
+    archives javadocJar, sourcesJar
 }

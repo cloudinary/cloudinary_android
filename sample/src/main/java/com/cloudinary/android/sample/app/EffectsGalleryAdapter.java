@@ -13,7 +13,6 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.ResponsiveUrl;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.model.EffectData;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -72,7 +71,7 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
                 .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {
                     @Override
                     public void onUrlReady(Url url) {
-                        Picasso.get().load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
+                        GlideApp.with(holder.imageView).load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
                     }
                 });
 

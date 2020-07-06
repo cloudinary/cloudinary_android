@@ -2,10 +2,10 @@ package com.cloudinary.android.sample.app;
 
 import android.content.ClipData;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-
 import com.cloudinary.android.download.DownloadRequestCallback;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
