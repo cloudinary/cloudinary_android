@@ -16,7 +16,6 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.ResponsiveUrl;
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.model.Resource;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -164,7 +163,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.errorDescription.setText(resource.getLastErrorDesc());
         boolean isVideo = resource.getResourceType().equals("video");
         int placeHolder = isVideo ? R.drawable.video_placeholder : R.drawable.placeholder;
-        Picasso.get().load(resource.getLocalUri()).placeholder(placeHolder).centerCrop().resizeDimen(R.dimen.card_image_width, R.dimen.card_height).into(holder.imageView);
+        GlideApp.with(holder.imageView).load(resource.getLocalUri()).placeholder(placeHolder).centerCrop().override(R.dimen.card_image_width, R.dimen.card_height).into(holder.imageView);
         holder.retryButton.setTag(resource);
         holder.cancelButton.setTag(resource);
         holder.rescheduleLabel.setVisibility(resource.getStatus() == Resource.UploadStatus.RESCHEDULED ? View.VISIBLE : View.GONE);
@@ -223,7 +222,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final int placeholder = resource.getResourceType().equals("image") ? R.drawable.placeholder : R.drawable.video_placeholder;
 
         if (local) {
-            Picasso.get().load(resource.getLocalUri()).placeholder(placeholder).centerCrop().resize(requiredSize, requiredSize).into(holder.imageView);
+            GlideApp.with(holder.imageView).load(resource.getLocalUri()).placeholder(placeholder).centerCrop().override(requiredSize).into(holder.imageView);
         } else {
             String publicId = resource.getCloudinaryPublicId();
             Url url = MediaManager.get().url().publicId(publicId).resourceType(resource.getResourceType()).format("webp");
@@ -231,7 +230,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .generate(url, holder.imageView, new ResponsiveUrl.Callback() {
                         @Override
                         public void onUrlReady(Url url) {
-                            Picasso.get().load(url.generate()).placeholder(placeholder).into(holder.imageView);
+                            GlideApp.with(holder.imageView).load(url.generate()).placeholder(placeholder).into(holder.imageView);
                         }
                     });
         }
