@@ -37,8 +37,6 @@ import com.cloudinary.utils.StringUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.PicassoTools;
 
 import java.util.ArrayList;
 import java.util.List;
