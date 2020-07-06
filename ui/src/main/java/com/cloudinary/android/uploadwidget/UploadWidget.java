@@ -7,13 +7,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.uploadwidget.model.CropPoints;
 import com.cloudinary.android.uploadwidget.ui.UploadWidgetActivity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Helper class to start the UploadWidget and preprocess its results.
@@ -30,16 +33,47 @@ public class UploadWidget {
      */
     public static final String URIS_EXTRA = "uris_extra";
 
+    public static final String ACTION_EXTRA = "required_action_extra";
+
     /**
-     * Start the {@link UploadWidgetActivity}. Please make sure that you have declared it your manifest.
+     * Start the {@link UploadWidgetActivity} with a pre-populated list of files to upload, and return
+     * a list of upload request to dispatch. This is equivalent to RequiredAction.NONE.
+     * Deprecated - please use {@link #startActivity(Activity, int, Options)} directly.
      *
      * @param activity    The activity which requested the upload widget.
      * @param requestCode A request code to start the upload widget with.
-     * @param uris   Uris of the selected media files.
+     * @param uris        Uris of the selected media files.
      */
+    @Deprecated
     public static void startActivity(@NonNull Activity activity, int requestCode, @NonNull ArrayList<Uri> uris) {
-        Intent intent = new Intent(activity, UploadWidgetActivity.class);
-        intent.putParcelableArrayListExtra(URIS_EXTRA, uris);
+        startActivity(activity, requestCode, new Options(Action.NONE, uris));
+    }
+
+    /**
+     * Start the {@link UploadWidgetActivity} configured for full process - Launch file selection UI
+     * as well as dispatching the created upload request automatically.
+     *
+     * @param activity    The activity which requested the upload widget.
+     * @param requestCode A request code to start the upload widget with.
+     */
+    public static void startActivity(@NonNull Activity activity, int requestCode) {
+        startActivity(activity, requestCode, new Options(Action.DISPATCH, null));
+    }
+
+    /**
+     * Start the {@link UploadWidgetActivity} configured according to the supplied launch options.
+     *
+     * @param activity      The activity which requested the upload widget.
+     * @param requestCode   A request code to start the upload widget with.
+     * @param options The launch option to define the required upload widget behaviour
+     */
+    public static void startActivity(@NonNull Activity activity, int requestCode, Options options) {
+        Intent intent = new Intent(activity, UploadWidgetActivity.class).putExtra(ACTION_EXTRA, options.action);
+
+        if (options.uris != null && !options.uris.isEmpty()) {
+            intent.putParcelableArrayListExtra(URIS_EXTRA, new ArrayList<Parcelable>(options.uris));
+        }
+
         activity.startActivityForResult(intent, requestCode);
     }
 
@@ -76,9 +110,9 @@ public class UploadWidget {
      * Preprocess the {@code uploadRequest}'s with the upload widget results.
      *
      * @param uploadRequest Already constructed upload request.
-     * @param result Result data from the upload widget.
+     * @param result        Result data from the upload widget.
      * @return Preprocessed {@link UploadRequest}
-     * @throws IllegalStateException    if {@code uploadRequest} was already dispatched.
+     * @throws IllegalStateException if {@code uploadRequest} was already dispatched.
      */
     public static UploadRequest preprocessResult(Context context, @NonNull UploadRequest uploadRequest, Result result) {
         return UploadWidgetResultProcessor.process(context, uploadRequest, result);
@@ -93,7 +127,9 @@ public class UploadWidget {
     public static void openMediaChooser(Activity activity, int requestCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/jpeg", "image/jpg", "image/png", "video/*"});
@@ -133,6 +169,13 @@ public class UploadWidget {
          */
         public int rotationAngle;
 
+        /**
+         * The request id, in case the full flow was requested and an upload request was already
+         * started or dispatched.
+         */
+        public String requestId;
+
+
         public Result(Uri uri) {
             this.uri = uri;
         }
@@ -142,6 +185,7 @@ public class UploadWidget {
             dest.writeParcelable(uri, flags);
             dest.writeParcelable(cropPoints, flags);
             dest.writeInt(rotationAngle);
+            dest.writeString(requestId);
         }
 
         public static final Creator<Result> CREATOR = new Creator<Result>() {
@@ -160,12 +204,56 @@ public class UploadWidget {
             uri = in.readParcelable(Uri.class.getClassLoader());
             cropPoints = in.readParcelable(CropPoints.class.getClassLoader());
             rotationAngle = in.readInt();
+            requestId = in.readString();
         }
 
         @Override
         public int describeContents() {
             return 0;
         }
+    }
+
+    /**
+     * This class is used to define the required launch behaviour of the upload widget.
+     */
+    public static class Options {
+        final Action action;
+        final Collection<Uri> uris;
+
+        /**
+         * Construct a new instance to use when launching the upload widget activity.
+         *
+         * @param action Indicates the widget how to handle the selected files. This also
+         *                       affects the result received later in onActivityResult. When the action
+         *                       used is DISPATCH or START_NOW the widget returns a list of request IDs.
+         *                       When the action is NONE, the widget returns results that needs to be
+         *                       processed into UploadRequest, allowing customization before dispatching/starting.
+         * @param uris           A list of Uris of files to display and upload.
+         */
+        public Options(@NonNull Action action, @Nullable Collection<Uri> uris) {
+            this.action = action;
+            this.uris = uris;
+        }
+    }
+
+    /**
+     * Define how the upload widget handles the selected files to upload
+     */
+    public enum Action {
+        /**
+         * Dispatch the selected files within the upload widget, and return request IDs.
+         */
+        DISPATCH,
+
+        /**
+         * Immediately start the selected files within the upload widget, and return request IDs.
+         */
+        START_NOW,
+
+        /**
+         * Create the request data and preprocess configuration without starting any request.
+         */
+        NONE,
     }
 
 }

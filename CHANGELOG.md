@@ -1,4 +1,29 @@
 
+1.28.2 / 2020-05-13
+==================
+
+New functionality
+-----------------
+  * Add a fully-automatic mode to the Upload Widget (#113)
+
+
+1.27.0 / 2020-04-06
+==================
+
+New functionality
+-----------------
+  
+  * Separate modules (io, preprocess, ui).
+  * Add support for native Upload-Widget and video preprocessing
+
+Other changes
+-------------
+
+  * Automate publishing script, bump gradle version to 6.0.1 (#105)
+  * Change `compile` to `implementation` in README.MD
+  * Bump cloudinary-core version (#108)
+  * Use cloudinary-java's `isRemoteUrl` (#92)
+  
 1.26.0 / 2019-02-13
 ===================
 
