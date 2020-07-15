@@ -2,15 +2,16 @@ package com.cloudinary.android.sample.app;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.model.Resource;
@@ -54,7 +55,7 @@ public class FailedPagerFragment extends AbstractPagerFragment {
 
     @Override
     protected ResourcesAdapter getAdapter(int thumbSize) {
-        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, new ResourcesAdapter.ImageClickedListener() {
+        return new ResourcesAdapter(new ArrayList<Resource>(), thumbSize, statuses, new ResourcesAdapter.ImageClickedListener() {
             @Override
             public void onImageClicked(Resource resource) {
                 // NOP

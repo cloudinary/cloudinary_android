@@ -1,12 +1,13 @@
 package com.cloudinary.android.sample.app;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
 
 import com.cloudinary.android.sample.R;
 import com.cloudinary.android.sample.model.Resource;
@@ -42,7 +43,7 @@ public class UploadedPageFragment extends AbstractPagerFragment {
 
     @Override
     protected ResourcesAdapter getAdapter(int thumbSize) {
-        return new ResourcesAdapter(getActivity(), new ArrayList<Resource>(), thumbSize, statuses, new ResourcesAdapter.ImageClickedListener() {
+        return new ResourcesAdapter(new ArrayList<Resource>(), thumbSize, statuses, new ResourcesAdapter.ImageClickedListener() {
             @Override
             public void onImageClicked(Resource resource) {
                 ((ResourcesAdapter.ImageClickedListener) getActivity()).onImageClicked(resource);

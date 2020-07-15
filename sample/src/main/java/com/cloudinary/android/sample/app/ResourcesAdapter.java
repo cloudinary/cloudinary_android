@@ -1,7 +1,5 @@
 package com.cloudinary.android.sample.app;
 
-import android.content.Context;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -11,6 +9,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.cloudinary.Url;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.ResponsiveUrl;
@@ -20,6 +21,8 @@ import com.cloudinary.android.sample.model.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cloudinary.android.ResponsiveUrl.Preset.AUTO_FILL;
+
 class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_REGULAR = 0;
     private static final int TYPE_ERROR = 1;
@@ -28,17 +31,10 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ImageClickedListener listener;
     private final List<Resource.UploadStatus> validStatuses;
     private List<ResourceWithMeta> resources;
-    private Context context;
-    private int cardImageHeight;
-    private int cardImageWidth;
-
-    ResourcesAdapter(Context context, List<Resource> resources, int requiredSize, List<Resource.UploadStatus> validStatuses, ImageClickedListener listener) {
-        this.context = context;
+    ResourcesAdapter(List<Resource> resources, int requiredSize, List<Resource.UploadStatus> validStatuses, ImageClickedListener listener) {
         this.listener = listener;
         this.requiredSize = requiredSize;
         this.validStatuses = validStatuses;
-        cardImageWidth = context.getResources().getDimensionPixelSize(R.dimen.card_image_width);
-        cardImageHeight = context.getResources().getDimensionPixelSize(R.dimen.card_height);
 
         this.resources = new ArrayList<>(resources.size());
         for (Resource resource : resources) {
@@ -163,7 +159,10 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.errorDescription.setText(resource.getLastErrorDesc());
         boolean isVideo = resource.getResourceType().equals("video");
         int placeHolder = isVideo ? R.drawable.video_placeholder : R.drawable.placeholder;
-        GlideApp.with(holder.imageView).load(resource.getLocalUri()).placeholder(placeHolder).centerCrop().override(R.dimen.card_image_width, R.dimen.card_height).into(holder.imageView);
+
+        // if we need some specific glide api (override local file dimensions) we can always access it the regular way:
+        Glide.with(holder.imageView).load(resource.getLocalUri()).placeholder(placeHolder).centerCrop().override(R.dimen.card_image_width, R.dimen.card_height).into(holder.imageView);
+
         holder.retryButton.setTag(resource);
         holder.cancelButton.setTag(resource);
         holder.rescheduleLabel.setVisibility(resource.getStatus() == Resource.UploadStatus.RESCHEDULED ? View.VISIBLE : View.GONE);
@@ -222,15 +221,15 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final int placeholder = resource.getResourceType().equals("image") ? R.drawable.placeholder : R.drawable.video_placeholder;
 
         if (local) {
-            GlideApp.with(holder.imageView).load(resource.getLocalUri()).placeholder(placeholder).centerCrop().override(requiredSize).into(holder.imageView);
+            Glide.with(holder.imageView).load(resource.getLocalUri()).placeholder(placeholder).centerCrop().override(requiredSize).into(holder.imageView);
         } else {
             String publicId = resource.getCloudinaryPublicId();
             Url url = MediaManager.get().url().publicId(publicId).resourceType(resource.getResourceType()).format("webp");
-            MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.AUTO_FILL)
+            MediaManager.get().responsiveUrl(AUTO_FILL)
                     .generate(url, holder.imageView, new ResponsiveUrl.Callback() {
                         @Override
                         public void onUrlReady(Url url) {
-                            GlideApp.with(holder.imageView).load(url.generate()).placeholder(placeholder).into(holder.imageView);
+                            Glide.with(holder.imageView).load(url.generate()).placeholder(placeholder).into(holder.imageView);
                         }
                     });
         }

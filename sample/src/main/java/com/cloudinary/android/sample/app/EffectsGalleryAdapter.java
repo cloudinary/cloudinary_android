@@ -1,13 +1,14 @@
 package com.cloudinary.android.sample.app;
 
-import android.content.Context;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.cloudinary.Url;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.ResponsiveUrl;
@@ -22,12 +23,10 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
     private final int requiredSize;
     private final ItemClickListener listener;
     private List<EffectData> images;
-    private Context context;
     private EffectData selected = null;
     private String resourceType;
 
-    EffectsGalleryAdapter(Context context, List<EffectData> images, String resourceType, int requiredSize, ItemClickListener listener) {
-        this.context = context;
+    EffectsGalleryAdapter(List<EffectData> images, String resourceType, int requiredSize, ItemClickListener listener) {
         this.resourceType = resourceType;
         this.images = images;
         this.requiredSize = requiredSize;
@@ -71,7 +70,7 @@ class EffectsGalleryAdapter extends RecyclerView.Adapter<EffectsGalleryAdapter.I
                 .generate(baseUrl, holder.imageView, new ResponsiveUrl.Callback() {
                     @Override
                     public void onUrlReady(Url url) {
-                        GlideApp.with(holder.imageView).load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
+                        Glide.with(holder.imageView).load(url.generate()).placeholder(R.drawable.placeholder).into(holder.imageView);
                     }
                 });
 
