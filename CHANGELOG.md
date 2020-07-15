@@ -1,3 +1,16 @@
+1.30.0 / 2020-07-15
+==================
+New functionality
+-----------------
+
+  * Add Download module (#114)
+  * Add Glide integration (#111)
+  
+Other changes
+-------------
+
+  * Bump gradle and dependencies (#118)
+  * Bump cloudinary-core version to 1.26.0 (#115)
 
 1.28.2 / 2020-05-13
 ==================

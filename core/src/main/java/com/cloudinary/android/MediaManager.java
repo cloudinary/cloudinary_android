@@ -4,9 +4,10 @@ import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.view.View;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Configuration;
@@ -40,7 +41,7 @@ import static com.cloudinary.android.ResponsiveUrl.Preset;
  * Must be initialized before use, see {@link #init(Context, SignatureProvider, Map)}.
  */
 public class MediaManager {
-    public static final String VERSION = "1.28.2";
+    public static final String VERSION = "1.30.0";
     public static final String INTENT_EXTRA_REQUEST_ID = "INTENT_EXTRA_REQUEST_ID";
     public static final String INTENT_EXTRA_REQUEST_RESULT_STATUS = "INTENT_EXTRA_REQUEST_RESULT_STATUS";
     public static final String ACTION_REQUEST_STARTED = "com.cloudinary.ACTION_REQUEST_STARTED";
