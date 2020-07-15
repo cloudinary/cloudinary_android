@@ -10,7 +10,7 @@ allprojects {
         }
 
         dependencies {
-            classpath 'com.android.tools.build:gradle:3.5.3'
+            classpath 'com.android.tools.build:gradle:4.0.0'
             classpath "de.marcphilipp.gradle:nexus-publish-plugin:0.4.0"
             classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.1"
             classpath 'digital.wup:android-maven-publish:3.6.2'

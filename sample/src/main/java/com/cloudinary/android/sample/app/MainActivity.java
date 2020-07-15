@@ -33,7 +33,6 @@ import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.android.sample.persist.ResourceRepo;
 import com.cloudinary.android.uploadwidget.UploadWidget;
 import com.cloudinary.utils.StringUtils;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -397,7 +396,6 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
     public void onDeleteAllLocally() {
         ResourceRepo.getInstance().clear();
         MediaManager.get().cancelAllRequests();
-        GlideApp.get(this).clearMemory();
 
         for (AbstractPagerFragment fragment : getPages()) {
             fragment.clearData();

@@ -11,7 +11,7 @@ import android.os.Looper;
 
 import com.cloudinary.android.LogLevel;
 import com.cloudinary.android.MediaManager;
-import com.cloudinary.android.download.picasso.PicassoDownloadRequestBuilderFactory;
+import com.cloudinary.android.download.glide.GlideDownloadRequestBuilderFactory;
 import com.cloudinary.android.policy.GlobalUploadPolicy;
 import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.android.sample.R;
@@ -35,7 +35,7 @@ public class MainApplication extends Application {
 
         // Mandatory - call a flavor of init. Config can be null if cloudinary_url is provided in the manifest.
         MediaManager.init(this);
-        MediaManager.get().setDownloadRequestBuilderFactory(new PicassoDownloadRequestBuilderFactory());
+        MediaManager.get().setDownloadRequestBuilderFactory(new GlideDownloadRequestBuilderFactory());
 
         // Optional - configure global policy.
         MediaManager.get().setGlobalUploadPolicy(
