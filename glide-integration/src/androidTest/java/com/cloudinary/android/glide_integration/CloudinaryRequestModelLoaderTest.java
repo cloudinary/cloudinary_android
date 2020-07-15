@@ -2,6 +2,9 @@ package com.cloudinary.android.glide_integration;
 
 import android.content.Context;
 
+import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -22,9 +25,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.io.InputStream;
-
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import static com.bumptech.glide.request.target.Target.SIZE_ORIGINAL;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +48,7 @@ public class CloudinaryRequestModelLoaderTest {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         MediaManager.init(context);
         MediaManager.get().getCloudinary().config.cloudName = TEST_CLOUD_NAME;
+        MediaManager.get().getCloudinary().config.secure = true;
     }
 
     @Before
