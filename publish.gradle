@@ -126,3 +126,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives javadocJar, sourcesJar
 }
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
