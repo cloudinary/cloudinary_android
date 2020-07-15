@@ -4,6 +4,8 @@ import android.content.Context;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.ResponsiveUrl;
@@ -15,8 +17,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -42,6 +42,7 @@ public class DownloadRequestBuilderImplTest {
         if (!initialized) {
             MediaManager.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
             cloudName = MediaManager.get().getCloudinary().config.cloudName;
+            MediaManager.get().getCloudinary().config.secure = true;
             initialized = true;
         }
     }
