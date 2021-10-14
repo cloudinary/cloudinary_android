@@ -46,3 +46,9 @@ before_script:
   - adb shell input keyevent 82 &
 
 script: ./gradlew clean connectedCheck
+
+notifications:
+  email:
+    recipients:
+      - sdk_developers@cloudinary.com
+
