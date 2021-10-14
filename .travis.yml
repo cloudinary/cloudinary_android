@@ -51,4 +51,5 @@ notifications:
   email:
     recipients:
       - sdk_developers@cloudinary.com
+      - testchange@example.com
 
