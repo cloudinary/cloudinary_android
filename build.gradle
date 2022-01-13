@@ -3,10 +3,9 @@ allprojects {
     buildscript {
         repositories {
             google()
-            jcenter()
-            maven {
-                url "https://plugins.gradle.org/m2/"
-            }
+            mavenCentral()
+            maven { url "https://plugins.gradle.org/m2/" }
+            maven { url 'https://google.bintray.com/exoplayer/' }
         }
 
         dependencies {
@@ -23,7 +22,6 @@ allprojects {
 
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 
