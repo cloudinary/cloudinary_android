@@ -35,11 +35,14 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.SilenceMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -52,6 +55,8 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Log;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -193,15 +198,21 @@ public class ImageActivity extends AppCompatActivity {
         imageView.setVisibility(View.GONE);
         final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "Cloudinary Sample App"), null);
         final ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        Url baseUrl = MediaManager.get().url().resourceType("video").publicId(data.getPublicId()).transformation(data.getTransformation());
+        Url baseUrl = MediaManager.get().url().secure(true).resourceType("video").publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(exoPlayerView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override
             public void onUrlReady(Url url) {
-                String urlString = url.generate();
+                String urlString = url.secure(true).generate();
+//                String urlString = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+                Log.d("Cloudinary Test", "This is the url: " + urlString);
                 currentUrl = urlString;
-//                MediaSource videoSource = new MediaSourceFac(Uri.parse(urlString), dataSourceFactory, extractorsFactory, null, null);
+                MediaItem mediaItem = new MediaItem.Builder().setUri(Uri.parse(urlString)).build();
+//                MediaSource videoSource = new ProgressiveMediaSource.Factory(Uri.parse(urlString), dataSourceFactory, extractorsFactory, null, null);
+                MediaSource videoSource = new ProgressiveMediaSource
+                        .Factory(dataSourceFactory, extractorsFactory).createMediaSource(mediaItem);
                 exoPlayer.addListener(listener);
-//                exoPlayer.prepare(videoSource);
+                exoPlayer.setMediaSource(videoSource);
+                exoPlayer.getPlayWhenReady();
             }
         });
     }
