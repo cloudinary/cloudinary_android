@@ -9,7 +9,8 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-
+        android.compileOptions.sourceCompatibility 1.8
+        android.compileOptions.targetCompatibility 1.8
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
 
