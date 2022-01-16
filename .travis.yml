@@ -1,4 +1,6 @@
 language: android
+jdk:
+  - oraclejdk8
 dist: trusty
 sudo: required
 
@@ -34,9 +36,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-
-jdk:
-  - oraclejdk8
 
 # Emulator Management: Create, Start and Wait
 before_script:
