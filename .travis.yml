@@ -17,14 +17,14 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-29.0.2
-    - android-21
+    - build-tools-30.0.2
+    - android-24
     - android-29
     - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
     - addon-google_apis-google-25
-    - sys-img-armeabi-v7a-android-21
+    - sys-img-armeabi-v7a-android-24
 
 before_install:
   - yes | sdkmanager "platforms;android-28"
