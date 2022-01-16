@@ -24,10 +24,10 @@ android:
     - extra-google-m2repository
     - extra-android-m2repository
     - addon-google_apis-google-25
-    - sys-img-armeabi-v7a-android-24
+    - sys-img-armeabi-v8a-android-24
 
 before_install:
-  - yes | sdkmanager "platforms;android-28"
+  - yes | sdkmanager "platforms;android-24"
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -39,7 +39,7 @@ cache:
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - echo no | android create avd --force -n test -t android-25
+  - echo no | android create avd --force -n test -t android-24
   - emulator -avd test -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
