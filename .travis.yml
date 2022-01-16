@@ -24,7 +24,7 @@ android:
     - extra-google-m2repository
     - extra-android-m2repository
     - addon-google_apis-google-25
-    - sys-img-armeabi-v8a-android-24
+    - sys-img-armeabi-x86-android-24
 
 before_install:
   - yes | sdkmanager "platforms;android-24"
