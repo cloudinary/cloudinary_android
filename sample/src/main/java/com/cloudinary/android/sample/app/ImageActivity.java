@@ -203,11 +203,9 @@ public class ImageActivity extends AppCompatActivity {
             @Override
             public void onUrlReady(Url url) {
                 String urlString = url.secure(true).generate();
-//                String urlString = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
                 Log.d("Cloudinary Test", "This is the url: " + urlString);
                 currentUrl = urlString;
                 MediaItem mediaItem = new MediaItem.Builder().setUri(Uri.parse(urlString)).build();
-//                MediaSource videoSource = new ProgressiveMediaSource.Factory(Uri.parse(urlString), dataSourceFactory, extractorsFactory, null, null);
                 MediaSource videoSource = new ProgressiveMediaSource
                         .Factory(dataSourceFactory, extractorsFactory).createMediaSource(mediaItem);
                 exoPlayer.addListener(listener);
