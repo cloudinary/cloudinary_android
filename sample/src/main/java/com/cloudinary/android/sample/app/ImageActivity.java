@@ -36,6 +36,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -142,9 +143,9 @@ public class ImageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onPlayerError(ExoPlaybackException e) {
+            public void onPlayerError(PlaybackException error) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ImageActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ImageActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
