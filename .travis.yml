@@ -1,6 +1,6 @@
 language: android
 jdk:
-  - openjdk13
+  - openjdk8
 dist: trusty
 sudo: required
 
@@ -28,7 +28,7 @@ android:
     - sys-img-armeabi-v7a-android-21
 
 before_install:
-  - yes | sdkmanager "platforms;android-31"
+  - yes | sdkmanager "platforms;android-32"
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
