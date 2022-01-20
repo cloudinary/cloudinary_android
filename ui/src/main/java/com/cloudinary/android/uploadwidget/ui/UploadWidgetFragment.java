@@ -39,7 +39,6 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
 
 
     private static final String IMAGES_URIS_LIST_ARG = "images_uris_list_arg";
-    private FloatingActionButton uploadFab;
     private ViewPager mediaViewPager;
     private MediaPagerAdapter mediaPagerAdapter;
     private RecyclerView thumbnailsRecyclerView;
@@ -90,7 +89,7 @@ public class UploadWidgetFragment extends Fragment implements CropRotateFragment
             }
         });
 
-        uploadFab = view.findViewById(R.id.uploadFab);
+        FloatingActionButton uploadFab = view.findViewById(R.id.uploadFab);
         uploadFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
