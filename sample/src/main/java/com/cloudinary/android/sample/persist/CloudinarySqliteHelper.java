@@ -170,7 +170,9 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
     public String getLocalUri(String requestId) {
         Cursor cursor = getReadableDatabase().query(TABLE, null, REQUEST_ID_COL + "=?", new String[]{requestId}, null, null, null);
         if (cursor.moveToFirst()) {
-            return cursor.getString(cursor.getColumnIndex(LOCAL_ID_COL));
+            String cursorString = cursor.getString(cursor.getColumnIndex(LOCAL_ID_COL));
+            cursor.close();
+            return cursorString;
         }
 
         return null;
