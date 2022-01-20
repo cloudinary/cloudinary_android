@@ -1,6 +1,6 @@
 language: android
 jdk:
-  - oraclejdk8
+  - oraclejdk11
 dist: trusty
 sudo: required
 
@@ -19,7 +19,8 @@ android:
     - platform-tools
     - build-tools-30.0.2
     - android-21
-    - android-29
+    - android-31
+    - android 30
     - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
