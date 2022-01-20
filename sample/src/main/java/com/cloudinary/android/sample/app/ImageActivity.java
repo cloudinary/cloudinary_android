@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.app;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
@@ -249,18 +250,17 @@ public class ImageActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            case R.id.menu_url:
-                if (StringUtils.isNotBlank(currentUrl)) {
-                    openUrlWithToast(currentUrl);
-                }
-
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        if (item.getItemId() == R.id.menu_url) {
+            if (StringUtils.isNotBlank(currentUrl)) {
+                openUrlWithToast(currentUrl);
+            }
 
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

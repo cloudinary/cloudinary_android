@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.app;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.Context;
@@ -24,6 +25,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.cloudinary.android.MediaManager;
@@ -195,18 +197,18 @@ public class MainActivity extends AppCompatActivity implements ResourcesAdapter.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_remove_from_local_album:
-                new ClearMediaFromDeviceDialogFragment().show(getSupportFragmentManager(), "ClearMediaDialogTag");
-                return true;
-            case R.id.menu_sync:
-                syncCloudinary();
-                return true;
-            case R.id.menu_remove_from_cloud:
-                new ClearMediaFromEverywhereDialogFragment().show(getSupportFragmentManager(), "ClearRemoteMediaDialogTag");
-                return true;
+        if (item.getItemId() == R.id.menu_remove_from_local_album) {
+            new ClearMediaFromDeviceDialogFragment().show(getSupportFragmentManager(), "ClearMediaDialogTag");
+            return true;
         }
-
+        if (item.getItemId() == R.id.menu_sync) {
+            syncCloudinary();
+            return true;
+        }
+        if (item.getItemId() == R.id.menu_sync) {
+            new ClearMediaFromEverywhereDialogFragment().show(getSupportFragmentManager(), "ClearRemoteMediaDialogTag");
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
