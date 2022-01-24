@@ -41,10 +41,7 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 Add the following dependency to your build.gradle:
 
 `implementation 'com.cloudinary:cloudinary-android:1.30.0'`
-### Manual Setup ######################################################################
-Download the latest cloudinary-android from [here](https://mvnrepository.com/artifact/com.cloudinary/cloudinary-android-core) and the latest cloudinary-core from [here](https://mvnrepository.com/artifact/com.cloudinary/cloudinary-core) and put them in your libs folder.
-
-### Maven Integration ######################################################################
+### Other Options ######################################################################
 The cloudinary_android library is available in [Maven Central](http://repo1.maven.org/maven/). To use it, add the following dependency to your pom.xml:
 
     <dependency>
@@ -52,6 +49,9 @@ The cloudinary_android library is available in [Maven Central](http://repo1.mave
         <artifactId>cloudinary-android</artifactId>
         <version>1.30.0</version>
     </dependency>
+
+Download the latest cloudinary-android from [here](https://mvnrepository.com/artifact/com.cloudinary/cloudinary-android-core) and the latest cloudinary-core from [here](https://mvnrepository.com/artifact/com.cloudinary/cloudinary-core) and put them in your libs folder.
+
 
 ## Usage
 
@@ -144,7 +144,7 @@ The following examples uploads local Uri resource, configured to run immediately
 For security reasons, mobile applications cannot contain the full account credentials, and so they cannot freely upload resources to the cloud.
 Cloudinary provides two different mechanisms to enable end-users to upload resources without providing full credentials.
 
-##### 1. Unsigned uploads using [Upload Presets.](http://cloudinary.com/blog/centralized_control_for_image_upload_image_size_format_thumbnail_generation_tagging_and_more)
+##### 1. Unsigned uploads using [Upload Presets.](https://cloudinary.com/documentation/android_image_and_video_upload)
 You can create an upload preset in your Cloudinary account console, defining rules that limit the formats, transformations, dimensions and more.
 Once the preset is defined, it's name is supplied when calling upload. An upload call will only succeed if the preset name is used and the resource is within the preset's pre-defined limits.
 
