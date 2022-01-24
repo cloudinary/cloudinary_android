@@ -16,7 +16,7 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 - [Installation](#installation)
 - [Usage](#usage)
     - [Setup](#Setup)
-    - [Transform and Optimize Assets](#Transform-and-Optimize-Assets)
+    - [Transform and Optimize Assets](#Transforming and Optimizing Assets)
     - [Uploading Asset](#Uploading)
 
 ## Key Features
@@ -84,7 +84,7 @@ Note: Your API secret should never be exposed in the application.
 
 
 
-### Transform and Optimize Assets
+### Transforming and Optimizing Assets
 
 Any image uploaded to Cloudinary can be transformed and embedded using powerful view helper methods:
 
