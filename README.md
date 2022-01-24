@@ -12,7 +12,7 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 
 ## Table of Contents
 - [Key Features](#key-features)
-- [Compatibility](#Compatibility)
+- [Compatibility](#Version Support)
 - [Installation](#installation)
 - [Usage](#usage)
     - [Setup](#Setup)
@@ -28,9 +28,12 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 * [Upload Policy](https://cloudinary.com/documentation/android_image_and_video_upload#upload_policy)
 * [Error Handling](https://cloudinary.com/documentation/advanced_url_delivery_options#error_handling)
 
-## Compatibility
-* Minimum Android SDK: Cloudinary requires a minimum API level of 19.
-* Compile Android SDK: Cloudinary requires you to compile against API 31 or later.
+## Version Support
+| Cloudinary SDK | Android SDK | 
+|----------------|-------------|
+|      1.x       |    > 14     |
+|      2.x       |    > 19     |
+
 
 ## Installation
 
