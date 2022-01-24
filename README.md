@@ -58,7 +58,7 @@ The cloudinary_android library is available in [Maven Central](http://repo1.mave
 ### Setup
 
 Each request for building a URL of a remote cloud resource must have the `cloud_name` parameter set.
-Setting the `cloud_name` parameter can be done either when initializing the library, or by using the CLOUDINARY_URL meta-data property in `AndroidManifest.xml`.
+You can set the `cloud_name` parameter either when initializing the library, or by using the CLOUDINARY_URL meta-data property in `AndroidManifest.xml`.
 
 The entry point of the library is the `MediaManager` object. `MediaManager.init()` must be called before using the library, preferably in `Application.onCreate()`.
 Here's an example of setting the configuration parameters programmatically in your `Applicaion.onCreate(`:
@@ -71,7 +71,8 @@ Alternatively, When using the meta-data property, no configuration is required:
 
     MediaManager.init(this);
 
-The added property `AndroidManifest.xml`. Note: You should only include the `cloud_name` in the value, the api secret and key should be left out of the application.
+Only the cloud_name should be included. Your API key and secret aren't necessary.
+Note: Your API secret should never be exposed in the application.
 
     <manifest>
         ...
