@@ -102,10 +102,6 @@ Embedding a Facebook profile to match your graphic design is very simple:
 
     MediaManager.get().url().type("facebook").transformation(new Transformation().width(130).height(130).crop("fill").gravity("north_west")).generate("billclinton.jpg")
 
-Same goes for Twitter:
-
-    MediaManager.get().url().type("twitter_name").generate("billclinton.jpg")
-
 ### Uploading Assets
 
 The entry point for upload operations is the `MediaManager.get().upload()` call. All upload operations are dispatched to a background queue, with
