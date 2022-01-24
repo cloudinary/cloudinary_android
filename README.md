@@ -133,7 +133,7 @@ You can also specify your own public ID:
 
 Using `RequestUploadPolicy`, an upload request can be configured to run under specific circumstance, or within a chosen time window:
 
-The following examples uploads local Uri resource, configured to run immediately (the default), with a maximum of 7 retries, and only on an un-metered network (e.g. wifi):
+The following examples uploads local Uri resource, configured to run immediately (the default), with a maximum of 7 retries, and only on an unmetered network (e.g. wifi):
 
     String requestId = MediaManager.get().upload(uri)
         .unsigned("sample_app_preset")
