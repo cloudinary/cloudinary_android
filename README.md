@@ -20,7 +20,13 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
     - [Uploading Asset](#Uploading)
 
 ## Key Features
-- [Image Transformation](https://cloudinary.com/documentation/android_image_manipulation) and [Video Transformation](https://cloudinary.com/documentation/android_video_manipulation) assets (links to docs).
+* [Image Transformation](https://cloudinary.com/documentation/android_image_manipulation)
+* [Video Transformation](https://cloudinary.com/documentation/android_video_manipulation)
+* [Direct File Upload](https://cloudinary.com/documentation/android_image_and_video_upload)
+* [Preprocess](https://cloudinary.com/documentation/android_image_and_video_upload#preprocess_uploads)
+* [Callbacks](https://cloudinary.com/documentation/android_image_and_video_upload#callbacks)
+* [Upload Policy](https://cloudinary.com/documentation/android_image_and_video_upload#upload_policy)
+* [Error Handling](https://cloudinary.com/documentation/advanced_url_delivery_options#error_handling)
 
 ## Compatibility
 * Minimum Android SDK: Cloudinary requires a minimum API level of 19.
