@@ -1,6 +1,6 @@
 Cloudinary Android SDK
 ======================
-[![Build Status](https://api.travis-ci.com/cloudinary/cloudinary-android.svg?branch=master)](https://app.travis-ci.com/github/cloudinary/cloudinary_android)
+[![Build Status](https://api.travis-ci.com/cloudinary/cloudinary_android.svg?branch=master)](https://app.travis-ci.com/github/cloudinary/cloudinary_android)
 
 ## About
 The Cloudinary Android SDK allows you to quickly and easily integrate your application with Cloudinary.
