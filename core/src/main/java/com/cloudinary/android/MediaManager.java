@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Configuration;
 import com.cloudinary.Url;
+import com.cloudinary.android.analytics.AnalyticsUtils;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.callback.UploadResult;
@@ -58,6 +59,8 @@ public class MediaManager {
     private final ImmediateRequestsRunner immediateRequestsRunner;
 
     private final ExecutorService executor;
+
+    private Boolean analytics = true;
 
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
     private DownloadRequestBuilderFactory downloadRequestBuilderFactory;
@@ -111,6 +114,8 @@ public class MediaManager {
                 requestDispatcher.queueRoomFreed();
             }
         });
+
+        setAnalytics(true);
     }
 
     /**
@@ -215,6 +220,14 @@ public class MediaManager {
      */
     public static void setLogLevel(LogLevel logLevel) {
         Logger.logLevel = logLevel;
+    }
+
+    public void setAnalytics(Boolean analytics) {
+        if (!analytics) {
+            cloudinary.setAnalyticsToken(null);
+        } else {
+            cloudinary.setAnalyticsToken(AnalyticsUtils.token);
+        }
     }
 
     /**
