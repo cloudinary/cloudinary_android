@@ -17,7 +17,7 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 - [Usage](#usage)
     - [Setup](#Setup)
     - [Transform and Optimize Assets](#Transforming and Optimizing Assets)
-    - [Uploading Asset](#Uploading)
+    - [Uploading Asset](#Uploading Assets)
 
 ## Key Features
 * [Image Transformation](https://cloudinary.com/documentation/android_image_manipulation)
@@ -106,7 +106,7 @@ Same goes for Twitter:
 
     MediaManager.get().url().type("twitter_name").generate("billclinton.jpg")
 
-### Uploading
+### Uploading Assets
 
 The entry point for upload operations is the `MediaManager.get().upload()` call. All upload operations are dispatched to a background queue, with
 a set of fully customizable rules and limits letting you choose when each upload request should actually run. Requests are automatically rescheduled to be
