@@ -190,3 +190,6 @@ Cloudinary is a powerful media API for websites and mobile apps alike, Cloudinar
 - [Cloudinary Facebook Community](https://www.facebook.com/groups/CloudinaryCommunity): Learn from and offer help to other Cloudinary developers.
 - [Cloudinary Account Registration](https://cloudinary.com/users/register/free): Free Cloudinary account registration.
 - [Cloudinary Website](https://cloudinary.com): Learn about Cloudinary's products, partners, customers, pricing, and more.
+
+## Licence
+Released under the MIT license.
