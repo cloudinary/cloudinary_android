@@ -31,8 +31,8 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 ## Version Support
 | Cloudinary SDK | Android SDK | 
 |----------------|-------------|
-|      1.x       |    > 14     |
 |      2.x       |    > 19     |
+|      1.x       |    > 14     |
 
 
 ## Installation
@@ -170,6 +170,9 @@ where you should implement the call to your server's signing endpoint. This call
             // call server signature endpoint
         }
     }, null);
+
+## Contributions
+See [contributing guidelines](/CONTRIBUTING.md).
 
 ## Get Help
 If you run into an issue or have a question, you can either:
