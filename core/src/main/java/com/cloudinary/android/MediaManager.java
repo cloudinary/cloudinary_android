@@ -27,6 +27,7 @@ import com.cloudinary.android.payload.ResourcePayload;
 import com.cloudinary.android.policy.GlobalUploadPolicy;
 import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.android.signed.SignatureProvider;
+import com.cloudinary.utils.Analytics;
 import com.cloudinary.utils.StringUtils;
 
 import java.util.Map;
@@ -60,8 +61,6 @@ public class MediaManager {
 
     private final ExecutorService executor;
 
-    private Boolean analytics = true;
-
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
     private DownloadRequestBuilderFactory downloadRequestBuilderFactory;
 
@@ -83,11 +82,24 @@ public class MediaManager {
         String cloudinaryUrl = Utils.cloudinaryUrlFromContext(context);
         if (config != null) {
             cloudinary = new Cloudinary(config);
+
         } else if (StringUtils.isNotBlank(cloudinaryUrl)) {
             cloudinary = new Cloudinary(cloudinaryUrl);
         } else {
             cloudinary = new Cloudinary();
         }
+        if (cloudinary.config.analytics == null) {
+            cloudinary.config.analytics = true;
+        }
+        cloudinary.setAnalytics(new Analytics("F", VERSION, System.getProperty("java.version")));
+
+        // set https as default for android P and up - in P the default policy fails all http
+        // requests
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            cloudinary.config.secure = true;
+        }
+
+        // Need to verify if we have analytics value inside config.
 
         callbackDispatcher.registerCallback(new UploadCallback() {
 
@@ -114,8 +126,6 @@ public class MediaManager {
                 requestDispatcher.queueRoomFreed();
             }
         });
-
-        setAnalytics(true);
     }
 
     /**
@@ -222,14 +232,6 @@ public class MediaManager {
         Logger.logLevel = logLevel;
     }
 
-    public void setAnalytics(Boolean analytics) {
-        if (!analytics) {
-            cloudinary.setAnalyticsToken(null);
-        } else {
-            cloudinary.setAnalyticsToken(AnalyticsUtils.token);
-        }
-    }
-
     /**
      * Get an instance of the Cloudinary class for raw operations (not wrapped).
      *
@@ -245,13 +247,6 @@ public class MediaManager {
      */
     public Url url() {
         Url url = cloudinary.url();
-
-        // set https as default for android P and up - in P the default policy fails all http
-        // requests
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            url.secure(true);
-        }
-
         return url;
     }
 

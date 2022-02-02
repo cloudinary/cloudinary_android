@@ -43,7 +43,13 @@ public class DownloadRequestBuilderImplTest {
             MediaManager.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
             cloudName = MediaManager.get().getCloudinary().config.cloudName;
             MediaManager.get().getCloudinary().config.secure = true;
+
+            MediaManager.get().getCloudinary().analytics.setSDKSemver("2.0.0");
+            MediaManager.get().getCloudinary().analytics.setTechVersion("12.0.0");
+
             initialized = true;
+
+
         }
     }
 
@@ -80,7 +86,7 @@ public class DownloadRequestBuilderImplTest {
         sut.load(TEST_PUBLIC_ID);
         sut.into(imageView);
 
-        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/%s", cloudName, TEST_PUBLIC_ID);
+        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/%s%s", cloudName, TEST_PUBLIC_ID,"?_a=AFAACAM0");
         verify(downloadRequestBuilderStrategy, times(1)).load(eq(expectedUrl));
         verify(downloadRequestBuilderStrategy, times(1)).into(imageView);
     }
@@ -91,7 +97,7 @@ public class DownloadRequestBuilderImplTest {
         sut.transformation(new Transformation().width(200).height(400));
         sut.into(imageView);
 
-        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/h_400,w_200/%s", cloudName, TEST_PUBLIC_ID);
+        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/h_400,w_200/%s%s", cloudName, TEST_PUBLIC_ID,"?_a=AFAACAM0");
         verify(downloadRequestBuilderStrategy, times(1)).load(eq(expectedUrl));
         verify(downloadRequestBuilderStrategy, times(1)).into(imageView);
     }
@@ -111,7 +117,7 @@ public class DownloadRequestBuilderImplTest {
         sut.responsive(ResponsiveUrl.Preset.AUTO_FILL);
         sut.into(imageView);
 
-        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/c_fill,g_auto,h_%d,w_%d/%s", cloudName, height, width, TEST_PUBLIC_ID);
+        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/c_fill,g_auto,h_%d,w_%d/%s%s", cloudName, height, width, TEST_PUBLIC_ID,"?_a=AFAACAM0");
         verify(downloadRequestBuilderStrategy, times(1)).load(eq(expectedUrl));
         verify(downloadRequestBuilderStrategy, times(1)).into(imageView);
     }

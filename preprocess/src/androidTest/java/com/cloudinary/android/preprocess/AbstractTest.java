@@ -41,6 +41,10 @@ public class AbstractTest {
                 }
             });
             MediaManager.get().getCloudinary().config.apiSecret = null;
+
+            MediaManager.get().getCloudinary().analytics.setSDKSemver("2.0.0");
+            MediaManager.get().getCloudinary().analytics.setTechVersion("12.0.0");
+
             initialized = true;
         }
     }

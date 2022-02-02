@@ -49,6 +49,8 @@ public class CloudinaryRequestModelLoaderTest {
         MediaManager.init(context);
         MediaManager.get().getCloudinary().config.cloudName = TEST_CLOUD_NAME;
         MediaManager.get().getCloudinary().config.secure = true;
+        MediaManager.get().getCloudinary().analytics.setSDKSemver("2.0.0");
+        MediaManager.get().getCloudinary().analytics.setTechVersion("12.0.0");
     }
 
     @Before
@@ -62,7 +64,7 @@ public class CloudinaryRequestModelLoaderTest {
 
         sut.buildLoadData(model, SIZE_ORIGINAL, SIZE_ORIGINAL, new Options());
 
-        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/%s", TEST_CLOUD_NAME, TEST_PUBLIC_ID);
+        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/%s%s", TEST_CLOUD_NAME, TEST_PUBLIC_ID,"?_a=AFAACAM0");
         verify(urlLoader).buildLoadData(captor.capture(), anyInt(), anyInt(), any(Options.class));
         Assert.assertEquals(expectedUrl, captor.getValue().toStringUrl());
     }
@@ -74,8 +76,7 @@ public class CloudinaryRequestModelLoaderTest {
                 .build();
 
         sut.buildLoadData(model, SIZE_ORIGINAL, SIZE_ORIGINAL, new Options());
-
-        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/h_400,w_200/%s", TEST_CLOUD_NAME, TEST_PUBLIC_ID);
+        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/h_400,w_200/%s%s", TEST_CLOUD_NAME, TEST_PUBLIC_ID,"?_a=AFAACAM0");
         verify(urlLoader).buildLoadData(captor.capture(), anyInt(), anyInt(), any(Options.class));
         Assert.assertEquals(expectedUrl, captor.getValue().toStringUrl());
     }
@@ -87,7 +88,7 @@ public class CloudinaryRequestModelLoaderTest {
 
         sut.buildLoadData(model, SIZE_ORIGINAL, SIZE_ORIGINAL, options);
 
-        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/h_400,w_200/%s", TEST_CLOUD_NAME, TEST_PUBLIC_ID);
+        String expectedUrl = String.format("https://res.cloudinary.com/%s/image/upload/h_400,w_200/%s%s", TEST_CLOUD_NAME, TEST_PUBLIC_ID, "?_a=AFAACAM0");
         verify(urlLoader).buildLoadData(captor.capture(), anyInt(), anyInt(), any(Options.class));
         Assert.assertEquals(expectedUrl, captor.getValue().toStringUrl());
     }
