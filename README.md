@@ -67,7 +67,7 @@ Here's an example of setting the configuration parameters programmatically in yo
      config.put("cloud_name", "myCloudName");
      MediaManager.init(this, config);
 
-Alternatively, When using the meta-data property, no configuration is required:
+Alternatively, you can use the meta-data property. In that case, no configuration is required:
 
     MediaManager.init(this);
 
