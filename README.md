@@ -82,8 +82,6 @@ Note: Your API secret should never be exposed in the application.
         </application>
     <manifest>
 
-
-
 ### Transforming and Optimizing Assets
 
 Any image uploaded to Cloudinary can be transformed and embedded using powerful view helper methods:
