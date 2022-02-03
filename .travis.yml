@@ -32,6 +32,7 @@ android:
     - addon-google_apis-google-25
     - sys-img-armeabi-v7a-android-21
 
+#taken from: https://travis-ci.community/t/sdkmanager-to-run-with-java-11/11978/2
 before_install:
   - touch $HOME/.android/repositories.cfg
   - wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
