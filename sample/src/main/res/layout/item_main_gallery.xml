@@ -7,7 +7,8 @@
         android:id="@+id/image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="center" />
+        android:scaleType="center"
+        android:contentDescription="Main Image" />
 
     <RelativeLayout
         android:id="@+id/buttonsContainer"
@@ -26,7 +27,8 @@
             android:layout_centerVertical="true"
             android:layout_margin="@dimen/default_margin"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_delete_white_24dp" />
+            android:src="@drawable/ic_delete_white_24dp"
+            android:contentDescription="Delete Image" />
 
         <ImageView
             android:id="@+id/videoIcon"
@@ -36,7 +38,8 @@
             android:layout_centerVertical="true"
             android:layout_margin="@dimen/default_margin"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_movie_white_24dp" />
+            android:src="@drawable/ic_movie_white_24dp"
+            android:contentDescription="Video Icon" />
 
     </RelativeLayout>
 
@@ -89,5 +92,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:src="@drawable/ic_clear_white_24dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:contentDescription="Clear Buttom" />
 </RelativeLayout>

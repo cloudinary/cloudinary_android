@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.persist;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -165,6 +166,7 @@ public class CloudinarySqliteHelper extends SQLiteOpenHelper {
         getWritableDatabase().execSQL("DELETE FROM " + TABLE + " WHERE " + LOCAL_ID_COL + "=?", new Object[]{localId});
     }
 
+    @SuppressLint("Range")
     public String getLocalUri(String requestId) {
         Cursor cursor = getReadableDatabase().query(TABLE, null, REQUEST_ID_COL + "=?", new String[]{requestId}, null, null, null);
         if (cursor.moveToFirst()) {

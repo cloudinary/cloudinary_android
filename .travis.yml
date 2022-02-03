@@ -1,12 +1,19 @@
 language: android
+jdk:
+  - openjdk11
 dist: trusty
 sudo: required
 
 global:
-    # switch glibc to a memory conserving mode
-    - MALLOC_ARENA_MAX=2
-    # wait up to 10 minutes for adb to connect to emulator
-    - ADB_INSTALL_TIMEOUT=10
+  # switch glibc to a memory conserving mode
+  - MALLOC_ARENA_MAX=2
+  # wait up to 10 minutes for adb to connect to emulator
+  - ADB_INSTALL_TIMEOUT=10
+env:
+  global:
+    - TARGET_VERSION=30
+    - ANDROID_BUILD_TOOLS_VERSION=30.0.2
+    - ANDROID_HOME=~/android-sdk
 android:
   licenses:
     - 'android-sdk-preview-license-.+'
@@ -15,9 +22,10 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-29.0.2
+    - build-tools-30.0.2
     - android-21
-    - android-29
+    - android-31
+    - android ${TARGET_VERSION}
     - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
@@ -25,7 +33,11 @@ android:
     - sys-img-armeabi-v7a-android-21
 
 before_install:
-  - yes | sdkmanager "platforms;android-28"
+  - touch $HOME/.android/repositories.cfg
+  - wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
+  - unzip commandlinetools.zip -d $ANDROID_HOME/
+  - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "platforms;android-${TARGET_VERSION}" --sdk_root=$ANDROID_HOME
+  - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" --sdk_root=$ANDROID_HOME
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -34,9 +46,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-
-jdk:
-  - oraclejdk8
 
 # Emulator Management: Create, Start and Wait
 before_script:
@@ -51,4 +60,3 @@ notifications:
   email:
     recipients:
       - sdk_developers@cloudinary.com
-

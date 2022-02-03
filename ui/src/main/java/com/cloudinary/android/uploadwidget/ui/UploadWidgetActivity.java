@@ -72,7 +72,7 @@ public class UploadWidgetActivity extends AppCompatActivity implements UploadWid
                 ArrayList<Uri> uris = extractImageUris(data);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+                    final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     for (Uri uri : uris) {
                         if (DocumentsContract.isDocumentUri(this, uri)) {
                             getContentResolver().takePersistableUriPermission(uri, takeFlags);
