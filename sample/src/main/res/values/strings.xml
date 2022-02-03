@@ -1,6 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Cloudinary</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings" tools:keep="@string/action_settings">Settings</string>
     <string name="no_cloud_error_message">Please configure your cloudinary url in your gradle-local.properties file in order to use this app</string>
     <string name="dialog_ok">OK</string>
     <string name="sync">Sync local media with cloud.</string>
