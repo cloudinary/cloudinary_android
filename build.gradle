@@ -5,11 +5,10 @@ allprojects {
             google()
             mavenCentral()
             maven { url "https://plugins.gradle.org/m2/" }
-            maven { url 'https://google.bintray.com/exoplayer/' }
         }
 
         dependencies {
-            classpath 'com.android.tools.build:gradle:4.0.0'
+            classpath 'com.android.tools.build:gradle:7.0.4'
             classpath "de.marcphilipp.gradle:nexus-publish-plugin:0.4.0"
             classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.1"
             classpath 'digital.wup:android-maven-publish:3.6.2'

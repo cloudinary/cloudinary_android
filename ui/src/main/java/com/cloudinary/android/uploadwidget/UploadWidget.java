@@ -125,7 +125,7 @@ public class UploadWidget {
      * @param requestCode A request code to start the native android picker with.
      */
     public static void openMediaChooser(Activity activity, int requestCode) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);

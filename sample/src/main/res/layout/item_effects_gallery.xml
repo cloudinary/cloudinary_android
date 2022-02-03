@@ -9,7 +9,8 @@
         android:layout_width="@dimen/effect_item_size"
         android:layout_height="@dimen/effect_item_size"
         android:layout_margin="@dimen/effect_item_margin"
-        android:scaleType="center" />
+        android:scaleType="center"
+        android:contentDescription="Main Image View" />
 
     <TextView
         android:id="@+id/effectName"

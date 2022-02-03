@@ -265,7 +265,7 @@ public class UploaderTest extends AbstractTest {
         final String sprite_test_tag = String.format("sprite_test_tag_%d", new java.util.Date().getTime());
         cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("tags", sprite_test_tag, "public_id", "sprite_test_tag_1"));
         cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("tags", sprite_test_tag, "public_id", "sprite_test_tag_2"));
-        JSONObject result = new JSONObject(cloudinary.uploader().generateSprite(sprite_test_tag, ObjectUtils.emptyMap()));
+        JSONObject result = new JSONObject(cloudinary.uploader().generateSprite(sprite_test_tag, new HashMap()));
         Assert.assertEquals(2, result.getJSONObject("image_infos").length());
         result = new JSONObject(cloudinary.uploader().generateSprite(sprite_test_tag, ObjectUtils.asMap("transformation", "w_100")));
         assertTrue((result.getString("css_url")).contains("w_100"));
@@ -280,7 +280,7 @@ public class UploaderTest extends AbstractTest {
             return;
         cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_1"));
         cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_2"));
-        JSONObject result = new JSONObject(cloudinary.uploader().multi("multi_test_tag", ObjectUtils.emptyMap()));
+        JSONObject result = new JSONObject(cloudinary.uploader().multi("multi_test_tag", new HashMap()));
         assertTrue((result.getString("url")).endsWith(".gif"));
         result = new JSONObject(cloudinary.uploader().multi("multi_test_tag", ObjectUtils.asMap("transformation", "w_100")));
         assertTrue((result.getString("url")).contains("w_100"));

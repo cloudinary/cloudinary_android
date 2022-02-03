@@ -24,10 +24,6 @@
             android:gravity="center"
             android:textSize="24sp" />
 
-        <androidx.legacy.widget.Space
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
-
         <Button
             android:id="@+id/emptyViewButton"
             android:layout_width="wrap_content"

@@ -39,7 +39,7 @@ public class UploadWidgetTest {
     public IntentsTestRule<MainActivity> intentsTestRule = new IntentsTestRule<>(MainActivity.class);
 
     // TODO: Fix UI tests for travis
-    @Ignore
+    @Ignore("Not supported by Travis")
     @Test
     public void testUploadWidget() {
         UploadWidget.startActivity(intentsTestRule.getActivity(),

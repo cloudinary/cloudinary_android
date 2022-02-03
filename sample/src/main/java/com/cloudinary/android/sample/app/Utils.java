@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -100,6 +101,7 @@ public class Utils {
         return point.x;
     }
 
+    @SuppressLint("Range")
     public static Pair<String, String> getResourceNameAndType(Context context, Uri uri) {
         Cursor cursor = null;
         String type = null;

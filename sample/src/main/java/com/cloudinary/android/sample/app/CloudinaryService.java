@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.app;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -42,6 +43,7 @@ public class CloudinaryService extends ListenerService {
     private Notification.Builder builder;
     private Handler backgroundThreadHandler;
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -70,8 +72,9 @@ public class CloudinaryService extends ListenerService {
         return null;
     }
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     private Notification.Builder getBuilder(String requestId, Resource.UploadStatus status) {
-        Notification.Builder builder = new Notification.Builder(this)
+         Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setAutoCancel(true)
                 .setContentIntent(PendingIntent.getActivity(this, 1234,
