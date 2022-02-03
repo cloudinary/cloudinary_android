@@ -26,10 +26,12 @@ public class AnalyticsTest extends AbstractTest {
     public synchronized static void setup() {
         MediaManager.get().getCloudinary().analytics.setSDKSemver("2.0.0");
         MediaManager.get().getCloudinary().analytics.setTechVersion("13.0.0");
+        MediaManager.get().getCloudinary().config.secure = true;
     }
 
     @Test
     public void testAnalyticsURL() {
+        MediaManager.get().getCloudinary().config.analytics = true;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
         Assert.assertEquals(url, "https://res.cloudinary.com/sdk-test/image/upload/sample?_a=AFAACAN0");
     }
