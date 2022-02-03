@@ -9,6 +9,7 @@ import com.cloudinary.android.signed.Signature;
 import com.cloudinary.android.signed.SignatureProvider;
 import com.cloudinary.utils.StringUtils;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class AnalyticsTest extends AbstractTest {
     }
 
     @Test
-    public void testAnalyticsOffURL() {
+    public void testAnalyticsFalseURL() {
         MediaManager.get().getCloudinary().config.analytics = false;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
         Assert.assertEquals(url, "https://res.cloudinary.com/sdk-test/image/upload/sample");
