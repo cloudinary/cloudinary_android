@@ -26,6 +26,7 @@ import com.cloudinary.android.payload.ResourcePayload;
 import com.cloudinary.android.policy.GlobalUploadPolicy;
 import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.android.signed.SignatureProvider;
+import com.cloudinary.utils.Analytics;
 import com.cloudinary.utils.StringUtils;
 
 import java.util.Map;
@@ -84,6 +85,17 @@ public class MediaManager {
             cloudinary = new Cloudinary(cloudinaryUrl);
         } else {
             cloudinary = new Cloudinary();
+        }
+
+        if (cloudinary.config.analytics == null) {
+            cloudinary.config.analytics = true;
+        }
+        cloudinary.setAnalytics(new Analytics("F", VERSION, System.getProperty("java.version")));
+
+        // set https as default for android P and up - in P the default policy fails all http
+        // requests
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            cloudinary.config.secure = true;
         }
 
         callbackDispatcher.registerCallback(new UploadCallback() {
@@ -232,13 +244,6 @@ public class MediaManager {
      */
     public Url url() {
         Url url = cloudinary.url();
-
-        // set https as default for android P and up - in P the default policy fails all http
-        // requests
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            url.secure(true);
-        }
-
         return url;
     }
 
