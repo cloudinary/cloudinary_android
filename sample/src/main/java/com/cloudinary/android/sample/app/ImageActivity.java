@@ -97,16 +97,7 @@ public class ImageActivity extends AppCompatActivity {
 
 
     private void initExoPlayer() {
-//        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-
-        // track selector is used to navigate between
-        // video using a default seekbar.
-//        TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
-
-        // we are adding our track selector to exoplayer.
         exoPlayer = new SimpleExoPlayer.Builder(this).build();
-
-//        exoPlayer = ExoPlayerFactory.new SimpleInstance(this, trackSelector);
         exoPlayerView = ((PlayerView) findViewById(R.id.exoPlayer));
         exoPlayerView.setPlayer(exoPlayer);
 
