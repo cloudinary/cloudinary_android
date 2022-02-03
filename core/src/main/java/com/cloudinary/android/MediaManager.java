@@ -90,7 +90,7 @@ public class MediaManager {
         if (cloudinary.config.analytics == null) {
             cloudinary.config.analytics = true;
         }
-        cloudinary.setAnalytics(new Analytics("F", VERSION, System.getProperty("java.version")));
+        cloudinary.setAnalytics(new Analytics("F", VERSION, Integer.toString(android.os.Build.VERSION.SDK_INT) + ".0"));
 
         // set https as default for android P and up - in P the default policy fails all http
         // requests
