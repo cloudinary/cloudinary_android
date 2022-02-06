@@ -86,6 +86,9 @@ public class MediaManager {
             cloudinary = new Cloudinary();
         }
 
+        // set https as default for all http requests
+        cloudinary.config.secure = true;
+
         callbackDispatcher.registerCallback(new UploadCallback() {
 
             @Override
@@ -232,13 +235,6 @@ public class MediaManager {
      */
     public Url url() {
         Url url = cloudinary.url();
-
-        // set https as default for android P and up - in P the default policy fails all http
-        // requests
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            url.secure(true);
-        }
-
         return url;
     }
 
