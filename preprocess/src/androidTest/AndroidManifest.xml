@@ -6,6 +6,7 @@
 
     <uses-sdk android:minSdkVersion="9" />
 
+    <!--suppress AndroidDomInspection -->
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.cloudinary.android.preprocess" />

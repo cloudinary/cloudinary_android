@@ -1,9 +1,11 @@
 package com.cloudinary.android.sample.app;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,7 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cloudinary.Url;
@@ -30,25 +31,19 @@ import com.cloudinary.android.sample.core.CloudinaryHelper;
 import com.cloudinary.android.sample.model.EffectData;
 import com.cloudinary.android.sample.model.Resource;
 import com.cloudinary.utils.StringUtils;
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.material.snackbar.Snackbar;
@@ -67,7 +62,7 @@ public class ImageActivity extends AppCompatActivity {
     private TextView descriptionTextView;
     private ProgressBar progressBar;
     private SimpleExoPlayer exoPlayer;
-    private SimpleExoPlayerView exoPlayerView;
+    private PlayerView exoPlayerView;
     private ExoPlayer.EventListener listener;
     private String currentUrl = null;
 
@@ -85,7 +80,7 @@ public class ImageActivity extends AppCompatActivity {
         descriptionTextView = (TextView) findViewById(R.id.effectDescription);
         recyclerView = (RecyclerView) findViewById(R.id.effectsGallery);
         recyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
 
         initExoPlayer();
@@ -102,14 +97,8 @@ public class ImageActivity extends AppCompatActivity {
 
 
     private void initExoPlayer() {
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector =
-                new DefaultTrackSelector(videoTrackSelectionFactory);
-
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-        exoPlayerView = ((SimpleExoPlayerView) findViewById(R.id.exoPlayer));
+        exoPlayer = new SimpleExoPlayer.Builder(this).build();
+        exoPlayerView = ((PlayerView) findViewById(R.id.exoPlayer));
         exoPlayerView.setPlayer(exoPlayer);
 
         listener = new ExoPlayer.EventListener() {
@@ -132,9 +121,9 @@ public class ImageActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onPlayerError(ExoPlaybackException e) {
+            public void onPlayerError(PlaybackException error) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ImageActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(ImageActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -188,15 +177,18 @@ public class ImageActivity extends AppCompatActivity {
         imageView.setVisibility(View.GONE);
         final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "Cloudinary Sample App"), null);
         final ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        Url baseUrl = MediaManager.get().url().resourceType("video").publicId(data.getPublicId()).transformation(data.getTransformation());
+        Url baseUrl = MediaManager.get().url().secure(true).resourceType("video").publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(exoPlayerView, baseUrl, FIT, new ResponsiveUrl.Callback() {
             @Override
             public void onUrlReady(Url url) {
-                String urlString = url.generate();
+                String urlString = url.secure(true).generate();
                 currentUrl = urlString;
-                MediaSource videoSource = new ExtractorMediaSource(Uri.parse(urlString), dataSourceFactory, extractorsFactory, null, null);
+                MediaItem mediaItem = new MediaItem.Builder().setUri(Uri.parse(urlString)).build();
+                MediaSource videoSource = new ProgressiveMediaSource
+                        .Factory(dataSourceFactory, extractorsFactory).createMediaSource(mediaItem);
                 exoPlayer.addListener(listener);
-                exoPlayer.prepare(videoSource);
+                exoPlayer.setMediaSource(videoSource);
+                exoPlayer.getPlayWhenReady();
             }
         });
     }
@@ -234,18 +226,17 @@ public class ImageActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            case R.id.menu_url:
-                if (StringUtils.isNotBlank(currentUrl)) {
-                    openUrlWithToast(currentUrl);
-                }
-
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        if (item.getItemId() == R.id.menu_url) {
+            if (StringUtils.isNotBlank(currentUrl)) {
+                openUrlWithToast(currentUrl);
+            }
 
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
