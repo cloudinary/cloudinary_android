@@ -60,6 +60,9 @@ public class MediaManager {
 
     private final ExecutorService executor;
 
+    // Tech version is the Android SDK (Int) + "0" since the analytics knows to parse major.minor
+    private final String techVersion = Integer.toString(android.os.Build.VERSION.SDK_INT) + ".0";
+
     private GlobalUploadPolicy globalUploadPolicy = GlobalUploadPolicy.defaultPolicy();
     private DownloadRequestBuilderFactory downloadRequestBuilderFactory;
 
@@ -90,7 +93,7 @@ public class MediaManager {
         if (cloudinary.config.analytics == null) {
             cloudinary.config.analytics = true;
         }
-        cloudinary.setAnalytics(new Analytics("F", VERSION, Integer.toString(android.os.Build.VERSION.SDK_INT) + ".0"));
+        cloudinary.setAnalytics(new Analytics("F", VERSION, techVersion));
 
         // set https as default for android P and up - in P the default policy fails all http
         // requests
