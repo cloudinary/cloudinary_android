@@ -49,6 +49,7 @@ public class CloudinaryRequestModelLoaderTest {
         MediaManager.init(context);
         MediaManager.get().getCloudinary().config.cloudName = TEST_CLOUD_NAME;
         MediaManager.get().getCloudinary().config.secure = true;
+        MediaManager.get().getCloudinary().config.analytics = false;
     }
 
     @Before
