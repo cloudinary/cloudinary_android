@@ -43,6 +43,7 @@ public class DownloadRequestBuilderImplTest {
             MediaManager.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
             cloudName = MediaManager.get().getCloudinary().config.cloudName;
             MediaManager.get().getCloudinary().config.secure = true;
+            MediaManager.get().getCloudinary().config.analytics = false;
             initialized = true;
         }
     }
