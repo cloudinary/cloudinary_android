@@ -11,13 +11,13 @@ This Readme provides basic installation and usage information.
 For the complete documentation, see the [Android SDK Guide](https://cloudinary.com/documentation/android_integration).
 
 ## Table of Contents
-- [Key Features](#key-features)
-- [Compatibility](#Version Support)
-- [Installation](#installation)
-- [Usage](#usage)
+- [Key Features](#Key-Features)
+- [Compatibility](#Version-Support)
+- [Installation](#Installation)
+- [Usage](#Usage)
     - [Setup](#Setup)
-    - [Transform and Optimize Assets](#Transforming and Optimizing Assets)
-    - [Uploading Asset](#Uploading Assets)
+    - [Transform and Optimize Assets](#Transforming-and-Optimizing-Assets)
+    - [Uploading Asset](#Uploading-Assets)
 
 ## Key Features
 * [Image Transformation](https://cloudinary.com/documentation/android_image_manipulation)
