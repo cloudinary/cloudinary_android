@@ -43,7 +43,6 @@ public class CloudinaryService extends ListenerService {
     private Notification.Builder builder;
     private Handler backgroundThreadHandler;
 
-    @SuppressLint("UnspecifiedImmutableFlag")
     @Override
     public void onCreate() {
         super.onCreate();
@@ -53,7 +52,7 @@ public class CloudinaryService extends ListenerService {
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(PendingIntent.getActivity(this, 999,
                         new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT).setAction(ACTION_STATE_IN_PROGRESS),
-                        0))
+                        PendingIntent.FLAG_IMMUTABLE))
                 .setOnlyAlertOnce(true)
                 .setOngoing(true);
 
@@ -72,7 +71,7 @@ public class CloudinaryService extends ListenerService {
         return null;
     }
 
-    @SuppressLint("UnspecifiedImmutableFlag")
+
     private Notification.Builder getBuilder(String requestId, Resource.UploadStatus status) {
          Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_launcher)
@@ -80,7 +79,7 @@ public class CloudinaryService extends ListenerService {
                 .setContentIntent(PendingIntent.getActivity(this, 1234,
                         new Intent(this, MainActivity.class)
                                 .setAction(actionFromStatus(status))
-                        , 0))
+                        , PendingIntent.FLAG_IMMUTABLE))
                 .setLargeIcon(getBitmap(requestId));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
