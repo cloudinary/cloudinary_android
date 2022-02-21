@@ -1,3 +1,15 @@
+
+2.0.0 / 2022-02-21
+==================
+New functionality
+-----------------
+  * Set all requests to https
+  * Add SDK analytics feature
+  
+Other changes
+-------------
+  * Update README.md
+
 1.30.0 / 2020-07-15
 ==================
 New functionality
