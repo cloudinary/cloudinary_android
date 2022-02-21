@@ -79,7 +79,6 @@ public class ImageActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.image_view);
         descriptionTextView = (TextView) findViewById(R.id.effectDescription);
         recyclerView = (RecyclerView) findViewById(R.id.effectsGallery);
-        recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
 
