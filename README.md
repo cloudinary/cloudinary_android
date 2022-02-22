@@ -94,6 +94,10 @@ Another example, embedding a smaller version of an uploaded image while generati
 
     MediaManager.get().url().transformation(new Transformation().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
 
+If your application is written in Kotlin you can use the syntax below:
+
+    MediaManager.get().url().transformation(Transformation<Transformation<*>>().width(90).height(90).crop("thumb").gravity("face")).generate("woman.jpg")
+
 You can provide either a Facebook name or a numeric ID of a Facebook profile or a fan page.
 
 Embedding a Facebook profile to match your graphic design is very simple:
