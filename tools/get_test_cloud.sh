@@ -7,7 +7,7 @@ function test_cloud
    APIKEY=$(echo "${CLOUD_DETAILS}" |  python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("%s" % (c["cloudApiKey"]))')
    APISECRET=$(echo "${CLOUD_DETAILS}" |  python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("%s" % (c["cloudApiSecret"]))')
    CLOUD_NAME=$(echo "${CLOUD_DETAILS}" |  python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("%s" % (c["cloudName"]))')
-   echo ${CLOUD_DETAILS} | python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("cloudinary://%s:%s@%s" % (c["cloudApiKey"], c["cloudApiSecret"], c["cloudName"]))'
+   export CLOUDINARY_URL=$(echo ${CLOUD_DETAILS} | python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("cloudinary://%s:%s@%s" % (c["cloudApiKey"], c["cloudApiSecret"], c["cloudName"]))')
    curl \
   -d "name=cloudinary_java_test&unsigned=true" \
   -X POST \
