@@ -37,7 +37,7 @@ ext.loadExtraProperties = { fileName ->
 }
 
 ext.getCloudinaryUrl = { ->
-    return findProperty("cloudinaryUrl") ?: System.getenv('CLOUDINARY_URL')
+    return findProperty("cloudinaryUrl") ?: System.getenv('CLOUDINARY_URL') ?: System.getProperty('CLOUDINARY_URL')
 }
 
 ext.generateAndLoadLocalGradleProperties = { rootPath ->
