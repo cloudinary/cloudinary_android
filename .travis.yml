@@ -2,7 +2,7 @@ language: android
 dist: xenial
 sudo: required
 jdk:
-  - openjdk11
+  - openjdk12
 
 global:
   # switch glibc to a memory conserving mode
