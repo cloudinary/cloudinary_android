@@ -55,8 +55,9 @@ before_script:
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
   - tools/get_test_cloud.sh
+  - echo CLOUDINARY_URL
 
-script: ./gradlew clean connectedCheck
+script: ./gradlew clean connectedCheck -DCLOUDINARY_URL=$CLOUDINARY_URL
 
 notifications:
   email:
