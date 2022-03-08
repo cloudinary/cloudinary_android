@@ -2,7 +2,7 @@ language: android
 dist: trusty
 sudo: required
 jdk:
-  - openjdk11
+  - openjdk10
 
 global:
   # switch glibc to a memory conserving mode
@@ -54,9 +54,9 @@ before_script:
   - emulator -avd test -no-audio -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
-  - tools/get_test_cloud.sh
+  - export CLOUDINARY_URL=$(bash tools/get_test_cloud.sh);
 
-script: ./gradlew clean connectedCheck
+script: ./gradlew clean connectedCheck -DCLOUDINARY_URL=${CLOUDINARY_URL}
 
 notifications:
   email:
