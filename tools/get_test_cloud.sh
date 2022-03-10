@@ -9,9 +9,9 @@ function test_cloud
    CLOUD_NAME=$(echo "${CLOUD_DETAILS}" |  python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("%s" % (c["cloudName"]))')
    CLOUDINARY_URL=$(echo ${CLOUD_DETAILS} | python -c 'import json,sys;c=json.load(sys.stdin)["payload"];print("cloudinary://%s:%s@%s" % (c["cloudApiKey"], c["cloudApiSecret"], c["cloudName"]))')
    curl \
-  -d "name=cloudinary_java_test&unsigned=true" \
+   -d "name=cloudinary_java_test&unsigned=true" \
   -X POST \
-  https://"${APIKEY}":"${APISECRET}"@api.cloudinary.com/v1_1/"${CLOUD_NAME}"/upload_presets
+  https://"${APIKEY}":"${APISECRET}"@api.cloudinary.com/v1_1/"${CLOUD_NAME}"/upload_presets > /dev/null
   echo "${CLOUDINARY_URL}"
 }
 
