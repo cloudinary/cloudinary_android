@@ -217,10 +217,11 @@ public class UploaderTest extends AbstractTest {
     public void testExplicit() throws Exception {
         if (cloudinary.config.apiSecret == null)
             return;
-        JSONObject result = new JSONObject(cloudinary.uploader().explicit("sample",
+        JSONObject uploadResult = new JSONObject(cloudinary.uploader().upload(getAssetStream(TEST_IMAGE), ObjectUtils.emptyMap()));
+        JSONObject result = new JSONObject(cloudinary.uploader().explicit(uploadResult.getString("public_id"),
                 ObjectUtils.asMap("eager", Collections.singletonList(new Transformation().crop("scale").width(2.0)), "type", "upload")));
-        String url = cloudinary.url().transformation(new Transformation().crop("scale").width(2.0)).format("jpg")
-                .version(result.get("version")).generate("sample");
+        String url = cloudinary.url().transformation(new Transformation().crop("scale").width(2.0)).format("png")
+                .version(result.get("version")).generate(uploadResult.getString("public_id"));
         Assert.assertEquals(url, result.getJSONArray("eager").getJSONObject(0).get("url"));
     }
 
