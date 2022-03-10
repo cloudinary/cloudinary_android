@@ -2,7 +2,7 @@ language: android
 dist: trusty
 sudo: required
 jdk:
-  - openjdk8
+  - openjdk11
 
 global:
   # switch glibc to a memory conserving mode
