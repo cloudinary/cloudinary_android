@@ -21,13 +21,13 @@ public class AnalyticsTest extends AbstractTest {
     public void testAnalyticsURL() {
         MediaManager.get().getCloudinary().config.analytics = true;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
-        Assert.assertEquals(url, "https://res.cloudinary.com/sdk-test/image/upload/sample?_a=AFAACAN0");
+        Assert.assertTrue(url.contains("a=AFAACAN0"));
     }
 
     @Test
     public void testAnalyticsFalseURL() {
         MediaManager.get().getCloudinary().config.analytics = false;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
-        Assert.assertEquals(url, "https://res.cloudinary.com/sdk-test/image/upload/sample");
+        Assert.assertFalse(url.contains("a=AFAACAN0"));
     }
 }
