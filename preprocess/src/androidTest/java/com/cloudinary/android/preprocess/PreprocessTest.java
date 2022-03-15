@@ -271,7 +271,7 @@ public class PreprocessTest extends AbstractTest {
         parameters.setHeight(720);
         parameters.setKeyFramesInterval(3);
         parameters.setTargetAudioBitrateKbps(128);
-        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
+        parameters.setTargetVideoBitrateKbps((3 * 1024 * 1024));
 
         Uri outputVideoUri = new Transcode(parameters).execute(context, videoUri);
         File targetVideoFile = new File(outputVideoUri.getPath());
@@ -292,7 +292,7 @@ public class PreprocessTest extends AbstractTest {
         parameters.setHeight(720);
         parameters.setKeyFramesInterval(3);
         parameters.setTargetAudioBitrateKbps(128);
-        parameters.setTargetVideoBitrateKbps((int) (3.3 * 1024 * 1024));
+        parameters.setTargetVideoBitrateKbps( (3 * 1024 * 1024));
 
         VideoPreprocessChain chain = VideoPreprocessChain.videoTranscodingChain(parameters);
         String outputVideoPath = chain.execute(context, payload);
