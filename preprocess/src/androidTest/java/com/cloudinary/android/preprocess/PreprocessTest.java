@@ -258,8 +258,6 @@ public class PreprocessTest extends AbstractTest {
         MediaManager.get().unregisterCallback(statefulCallback);
     }
 
-    // TODO: Fix transcoding tests in travis
-    @Ignore
     @Test
     public void testTranscode() throws IOException, PreprocessException {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -281,8 +279,6 @@ public class PreprocessTest extends AbstractTest {
         Assert.assertTrue(targetVideoFile.length() > 0);
     }
 
-    // TODO: Fix transcoding tests in travis
-    @Ignore
     @Test
     public void testVideoChain() throws IOException, PreprocessException, PayloadNotFoundException {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
