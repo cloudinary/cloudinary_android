@@ -1,4 +1,13 @@
 
+2.1.0 / 2022-03-22
+==================
+Other changes
+-------------
+  * Bump cloudinary-core version to 1.31.0
+  * Add test cloud
+  * Add Immutable flag to pending intent
+  * Update `README.md`
+
 2.0.0 / 2022-02-21
 ==================
 New functionality
