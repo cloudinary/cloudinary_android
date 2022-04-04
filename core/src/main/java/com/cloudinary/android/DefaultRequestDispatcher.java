@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.cloudinary.android.callback.ErrorInfo;
 
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
 class DefaultRequestDispatcher implements RequestDispatcher {
     private static final String TAG = DefaultRequestDispatcher.class.getSimpleName();
 
-    private final Random rand = new Random();
+    private final SecureRandom rand = new SecureRandom();
     private final BackgroundRequestStrategy strategy;
     private final ImmediateRequestsRunner immediateRequestsRunner;
     private final Set<String> abortedRequestIds = new HashSet<>();
