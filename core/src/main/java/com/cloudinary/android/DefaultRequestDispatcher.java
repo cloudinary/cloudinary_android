@@ -6,7 +6,6 @@ import com.cloudinary.android.callback.ErrorInfo;
 
 import java.security.SecureRandom;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 /**
