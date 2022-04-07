@@ -1,4 +1,10 @@
 
+2.2.0 / 2022-04-07
+==================
+Other change
+------------
+  * Bump cloudinary-core version to 1.32.0
+
 2.1.0 / 2022-03-22
 ==================
 Other changes
