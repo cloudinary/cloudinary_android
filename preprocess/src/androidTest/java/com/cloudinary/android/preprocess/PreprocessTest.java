@@ -259,7 +259,7 @@ public class PreprocessTest extends AbstractTest {
     }
 
     // TODO: Fix transcoding tests in travis
-    @Ignore
+//    @Ignore
     @Test
     public void testTranscode() throws IOException, PreprocessException {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -282,7 +282,7 @@ public class PreprocessTest extends AbstractTest {
     }
 
     // TODO: Fix transcoding tests in travis
-    @Ignore
+//    @Ignore
     @Test
     public void testVideoChain() throws IOException, PreprocessException, PayloadNotFoundException {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
