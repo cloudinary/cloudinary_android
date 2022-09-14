@@ -25,11 +25,5 @@ public class AndroidJobStrategyTest extends AbstractTest {
         WorkRequest adapted = AndroidJobStrategy.adapt(request);
 
         Assert.assertNotNull(adapted.getId());
-//        Assert.assertEquals(tenMinutes, adapted.getEndMs());
-//        Assert.assertEquals(true, adapted.requiresCharging());
-//        Assert.assertEquals(false, adapted.requiresDeviceIdle());
-//        Assert.assertEquals(100, adapted.getBackoffMs());
-//        Assert.assertEquals(JobRequest.BackoffPolicy.LINEAR, adapted.getBackoffPolicy());
-//        Assert.assertEquals(9, adapted.getExtras().get("maxErrorRetries"));
     }
 }
