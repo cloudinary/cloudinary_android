@@ -30,21 +30,13 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
     public static WorkRequest adapt(UploadRequest request) {
         UploadPolicy policy = request.getUploadPolicy();
 
-        Constraints constraints = null;
+        Constraints.Builder constraintsBuilder = new Constraints.Builder()
+                .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
+                .setRequiresCharging(policy.isRequiresCharging());
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            constraints = new Constraints.Builder()
-                    .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
-                    .setRequiresCharging(policy.isRequiresCharging())
-                    .setRequiresDeviceIdle(policy.isRequiresIdle())
-                    .setRequiresCharging(true)
-                    .build();
-        } else {
-            constraints = new Constraints.Builder()
-                    .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
-                    .setRequiresCharging(policy.isRequiresCharging())
-                    .setRequiresCharging(true)
-                    .build();
+            constraintsBuilder.setRequiresDeviceIdle(policy.isRequiresIdle());
         }
+        Constraints constraints = constraintsBuilder.build();
 
         Data inputData = request.buildPayload();
 
