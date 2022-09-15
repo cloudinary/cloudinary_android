@@ -4,11 +4,14 @@ import android.content.Context;
 import android.os.PowerManager;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.Operation;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 import androidx.work.Worker;
@@ -18,14 +21,18 @@ import com.cloudinary.android.callback.UploadStatus;
 import com.cloudinary.android.policy.UploadPolicy;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
+    private static final String JOB_TAG = "CLD";
+
     private static final Map<String, WeakReference<Thread>> threads = new ConcurrentHashMap<>();
     private static final Object threadsMapLockObject = new Object();
+    private Context context;
 
     public static WorkRequest adapt(UploadRequest request) {
         UploadPolicy policy = request.getUploadPolicy();
@@ -44,6 +51,7 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
                 .setBackoffCriteria(adaptBackoffPolicy(policy.getBackoffPolicy()),policy.getBackoffMillis(), TimeUnit.MILLISECONDS)
                 .setInputData(inputData)
                 .setConstraints(constraints)
+                .addTag(JOB_TAG)
                 .build();
         return uploadWorkRequest;
     }
@@ -73,7 +81,7 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     @Override
     public void init(Context context) {
-
+        this.context = context;
     }
 
     @Override
@@ -84,26 +92,42 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     @Override
     public void executeRequestsNow(int howMany) {
-
+        //Cant execute manually.
     }
 
     @Override
     public boolean cancelRequest(String requestId) {
-        return false;
+        Operation operation = WorkManager.getInstance().cancelAllWorkByTag(requestId);
+        return operation.getResult().isCancelled();
     }
 
     @Override
     public int cancelAllRequests() {
+        WorkManager.getInstance().cancelAllWork();
         return 0;
     }
 
     @Override
     public int getPendingImmediateJobsCount() {
-        return 0;
+        return getJobCountByState(WorkInfo.State.ENQUEUED);
     }
 
     @Override
     public int getRunningJobsCount() {
+        return getJobCountByState(WorkInfo.State.RUNNING);
+    }
+
+    private int getJobCountByState(WorkInfo.State state) {
+        int counter = 0;
+        List<WorkInfo> list = WorkManager.getInstance().getWorkInfosByTagLiveData(JOB_TAG).getValue();
+        if (list != null) {
+            for (WorkInfo info : list) {
+                if (info.getState() == state) {
+                    counter++;
+                }
+            }
+            return counter;
+        }
         return 0;
     }
 
