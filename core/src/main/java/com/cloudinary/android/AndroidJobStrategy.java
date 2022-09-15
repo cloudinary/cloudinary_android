@@ -202,22 +202,22 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         @Override
         public void putString(String key, String value) {
-            new Data.Builder().putAll(bundle).putString(key, value).build();
+            putIntoExistingDataObject().putString(key, value).build();
         }
 
         @Override
         public void putInt(String key, int value) {
-            new Data.Builder().putAll(bundle).putInt(key, value).build();
+            putIntoExistingDataObject().putInt(key, value).build();
         }
 
         @Override
         public void putLong(String key, long value) {
-            new Data.Builder().putAll(bundle).putLong(key, value).build();
+            putIntoExistingDataObject().putLong(key, value).build();
         }
 
         @Override
         public void putBoolean(String key, boolean value) {
-            new Data.Builder().putAll(bundle).putBoolean(key, value).build();
+            putIntoExistingDataObject().putBoolean(key, value).build();
         }
 
         @Override
@@ -238,6 +238,10 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         @Override
         public boolean getBoolean(String key, boolean defaultValue) {
             return bundle.getBoolean(key, defaultValue);
+        }
+
+        private Data.Builder putIntoExistingDataObject() {
+            return new Data.Builder().putAll(bundle);
         }
     }
 }
