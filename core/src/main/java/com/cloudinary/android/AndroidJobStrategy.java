@@ -222,7 +222,7 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         @Override
         public String getString(String key, String defaultValue) {
-            return bundle.getString(key);
+            return (bundle.getString(key) != null) ? bundle.getString(key) : defaultValue;
         }
 
         @Override
