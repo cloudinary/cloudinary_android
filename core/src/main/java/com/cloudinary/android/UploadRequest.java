@@ -3,6 +3,7 @@ package com.cloudinary.android;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.work.Data;
 
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
@@ -331,6 +332,16 @@ public class UploadRequest<T extends Payload> {
         target.putString("requestId", getRequestId());
         target.putInt("maxErrorRetries", getUploadPolicy().getMaxErrorRetries());
         target.putString("options", getOptionsString());
+    }
+
+    public Data buildPayload() {
+        Data data = new Data.Builder()
+                .putString("uri", getPayload().toUri())
+                .putString("requestId", getRequestId())
+                .putInt("maxErrorRetries", getUploadPolicy().getMaxErrorRetries())
+                .putString("options", getOptionsString())
+                .build();
+        return data;
     }
 
     /**
