@@ -1,6 +1,7 @@
 package com.cloudinary.android;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.work.Data;
@@ -18,7 +19,11 @@ import com.cloudinary.android.preprocess.PreprocessException;
 import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.utils.ObjectUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -334,14 +339,22 @@ public class UploadRequest<T extends Payload> {
         target.putString("options", getOptionsString());
     }
 
-    public Data buildPayload() {
-        Data data = new Data.Builder()
-                .putString("uri", getPayload().toUri())
-                .putString("requestId", getRequestId())
-                .putInt("maxErrorRetries", getUploadPolicy().getMaxErrorRetries())
-                .putString("options", getOptionsString())
-                .build();
-        return data;
+    public Data buildPayload(File payloadFile) {
+        Data.Builder dataBuilder = new Data.Builder();
+
+        /*
+         * Store Payload data on temporary file in preparation for [{@link com.cloudinary.android.AndroidJobStrategy.UploadJob}].
+         */
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(payloadFile))) {
+            PayloadData data = new PayloadData(getPayload().toUri(), getRequestId(), getUploadPolicy().getMaxErrorRetries(), getOptionsString());
+            oos.writeObject(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        dataBuilder.putString(PayloadData.KEY, payloadFile.getAbsolutePath());
+
+        return dataBuilder.build();
     }
 
     /**
@@ -380,5 +393,43 @@ public class UploadRequest<T extends Payload> {
         public void onReschedule(String requestId, ErrorInfo error) {
             callback.onReschedule(requestId, error);
         }
+    }
+
+    public static class PayloadData implements Serializable {
+
+        public transient final static String KEY = "payload_file_path";
+
+        private final String uri;
+        private final String requestId;
+        private final int maxErrorRetries;
+        private final String options;
+
+        public PayloadData() {
+            this(null, null, 1, null);
+        }
+
+        public PayloadData(String uri, String requestId, int maxErrorRetries, String options) {
+            this.uri = uri;
+            this.requestId = requestId;
+            this.maxErrorRetries = maxErrorRetries;
+            this.options = options;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public String getRequestId() {
+            return requestId;
+        }
+
+        public int getMaxErrorRetries() {
+            return maxErrorRetries;
+        }
+
+        public String getOptions() {
+            return options;
+        }
+
     }
 }
