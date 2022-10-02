@@ -1,59 +1,49 @@
 package com.cloudinary.android;
 
 import android.content.Context;
-import android.os.PowerManager;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.Operation;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.cloudinary.android.callback.UploadStatus;
 import com.cloudinary.android.policy.UploadPolicy;
 
-import java.lang.ref.WeakReference;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     private static final String JOB_TAG = "CLD";
 
-    private static final Map<String, WeakReference<Thread>> threads = new ConcurrentHashMap<>();
-    private static final Object threadsMapLockObject = new Object();
     private Context context;
 
-    public static WorkRequest adapt(UploadRequest request) {
+    public static OneTimeWorkRequest adapt(UploadRequest<?> request, File payloadFile) {
         UploadPolicy policy = request.getUploadPolicy();
 
-        Constraints.Builder constraintsBuilder = new Constraints.Builder()
-                .setRequiredNetworkType(adaptNetworkType(policy.getNetworkType()))
-                .setRequiresCharging(policy.isRequiresCharging());
+        Constraints.Builder constraintsBuilder = new Constraints.Builder().setRequiredNetworkType(adaptNetworkType(policy.getNetworkType())).setRequiresCharging(policy.isRequiresCharging());
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             constraintsBuilder.setRequiresDeviceIdle(policy.isRequiresIdle());
         }
         Constraints constraints = constraintsBuilder.build();
 
-        Data inputData = request.buildPayload();
+        Data inputData = request.buildPayload(payloadFile);
 
-        OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadJob.class)
-                .setBackoffCriteria(adaptBackoffPolicy(policy.getBackoffPolicy()),policy.getBackoffMillis(), TimeUnit.MILLISECONDS)
-                .setInputData(inputData)
-                .setConstraints(constraints)
-                .addTag(JOB_TAG)
-                .build();
-        return uploadWorkRequest;
+        return new OneTimeWorkRequest.Builder(UploadJob.class).setBackoffCriteria(adaptBackoffPolicy(policy.getBackoffPolicy()), policy.getBackoffMillis(), TimeUnit.MILLISECONDS).setInputData(inputData).setConstraints(constraints).addTag(JOB_TAG).build();
     }
 
     private static BackoffPolicy adaptBackoffPolicy(UploadPolicy.BackoffPolicy backoffPolicy) {
@@ -85,9 +75,20 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
     }
 
     @Override
-    public void doDispatch(UploadRequest request) {
-        WorkRequest uploadWorkRequest = adapt(request);
-        WorkManager.getInstance().enqueue(uploadWorkRequest);
+    public void doDispatch(@SuppressWarnings("rawtypes") @NonNull UploadRequest request) {
+        File cacheDir = context.getCacheDir();
+        try {
+            // Prepare payload file placeholder to temporarily store payload data.
+            File payloadFile = File.createTempFile("payload", request.getRequestId(), cacheDir);
+            OneTimeWorkRequest uploadWorkRequest = adapt(request, payloadFile);
+            WorkManager.getInstance(context).beginUniqueWork(
+                    // Use request ID as unique work name
+                    request.getRequestId(),
+                    // If work already exist, do nothing.
+                    ExistingWorkPolicy.KEEP, uploadWorkRequest).enqueue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -97,13 +98,13 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     @Override
     public boolean cancelRequest(String requestId) {
-        Operation operation = WorkManager.getInstance().cancelAllWorkByTag(requestId);
+        Operation operation = WorkManager.getInstance(context).cancelAllWorkByTag(requestId);
         return operation.getResult().isCancelled();
     }
 
     @Override
     public int cancelAllRequests() {
-        WorkManager.getInstance().cancelAllWork();
+        WorkManager.getInstance(context).cancelAllWork();
         return 0;
     }
 
@@ -119,7 +120,7 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     private int getJobCountByState(WorkInfo.State state) {
         int counter = 0;
-        List<WorkInfo> list = WorkManager.getInstance().getWorkInfosByTagLiveData(JOB_TAG).getValue();
+        List<WorkInfo> list = WorkManager.getInstance(context).getWorkInfosByTagLiveData(JOB_TAG).getValue();
         if (list != null) {
             for (WorkInfo info : list) {
                 if (info.getState() == state) {
@@ -133,9 +134,8 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     public static final class UploadJob extends Worker {
 
-        private Context context;
-        private String requestId;
-        private WorkerParameters workParams;
+        private final Context context;
+        private final WorkerParameters workParams;
 
         public UploadJob(@NonNull Context context, @NonNull WorkerParameters workerParams) {
             super(context, workerParams);
@@ -146,35 +146,27 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         @NonNull
         @Override
         public Result doWork() {
-            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            final PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CLD:UPLOADER");
-            requestId = workParams.getInputData().getString("requestId");
-            registerThread();
+            // Removed Wakelock logic as it causes RuntimeException ("WakeLock under-locked")
 
-            wl.acquire();
-            try {
+            // Prepare extract payload data from temporary file.
+            String payloadFilePath = workParams.getInputData().getString(UploadRequest.PayloadData.KEY);
+            if (payloadFilePath == null) {
+                // NO Payload input file created prior to request.
+                return Result.failure();
+            }
+            File payloadFile = new File(payloadFilePath);
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(payloadFile))) {
+                UploadRequest.PayloadData payloadData = (UploadRequest.PayloadData) ois.readObject();
+                AndroidJobStrategy.AndroidJobRequestParams jobInputData = new AndroidJobStrategy.AndroidJobRequestParams(payloadData);
 
                 // call the generic processor:
-                UploadStatus result = MediaManager.get().processRequest(context, new AndroidJobStrategy.AndroidJobRequestParams(workParams.getInputData()));
+                UploadStatus result = MediaManager.get().processRequest(context, jobInputData);
                 return adaptResult(result);
-            } finally {
-                wl.release();
-                unregisterThread();
-            }
-        }
 
-        private void registerThread() {
-            synchronized (threadsMapLockObject) {
-                threads.put(requestId, new WeakReference<>(Thread.currentThread()));
-            }
-        }
-
-        private void unregisterThread() {
-            synchronized (threadsMapLockObject) {
-                WeakReference<Thread> removed = threads.remove(requestId);
-                if (removed != null) {
-                    removed.clear();
-                }
+            } catch (NullPointerException | IOException | ClassNotFoundException e) {
+                // Unable to deserialize payload data from file.
+                e.printStackTrace();
+                return Result.failure();
             }
         }
 
@@ -194,54 +186,54 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
     }
 
     private static final class AndroidJobRequestParams implements RequestParams {
-        private final Data bundle;
+        private final Bundle data;
 
-        private AndroidJobRequestParams(Data bundle) {
-            this.bundle = bundle;
+        private AndroidJobRequestParams(UploadRequest.PayloadData payloadData) {
+            this.data = new Bundle();
+            this.data.putString("uri", payloadData.getUri());
+            this.data.putString("requestId", payloadData.getRequestId());
+            this.data.putInt("maxErrorRetries", payloadData.getMaxErrorRetries());
+            this.data.putString("options", payloadData.getOptions());
         }
 
         @Override
         public void putString(String key, String value) {
-            putIntoExistingDataObject().putString(key, value).build();
+            data.putString(key, value);
         }
 
         @Override
         public void putInt(String key, int value) {
-            putIntoExistingDataObject().putInt(key, value).build();
+            data.putInt(key, value);
         }
 
         @Override
         public void putLong(String key, long value) {
-            putIntoExistingDataObject().putLong(key, value).build();
+            data.putLong(key, value);
         }
 
         @Override
         public void putBoolean(String key, boolean value) {
-            putIntoExistingDataObject().putBoolean(key, value).build();
+            data.putBoolean(key, value);
         }
 
         @Override
         public String getString(String key, String defaultValue) {
-            return (bundle.getString(key) != null) ? bundle.getString(key) : defaultValue;
+            return (data.getString(key) != null) ? data.getString(key) : defaultValue;
         }
 
         @Override
         public int getInt(String key, int defaultValue) {
-            return bundle.getInt(key, defaultValue);
+            return data.getInt(key, defaultValue);
         }
 
         @Override
         public long getLong(String key, long defaultValue) {
-            return bundle.getLong(key, defaultValue);
+            return data.getLong(key, defaultValue);
         }
 
         @Override
         public boolean getBoolean(String key, boolean defaultValue) {
-            return bundle.getBoolean(key, defaultValue);
-        }
-
-        private Data.Builder putIntoExistingDataObject() {
-            return new Data.Builder().putAll(bundle);
+            return data.getBoolean(key, defaultValue);
         }
     }
 }

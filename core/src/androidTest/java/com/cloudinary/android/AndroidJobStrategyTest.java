@@ -16,12 +16,25 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class AndroidJobStrategyTest extends AbstractTest {
+
+    private File payloadFile;
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        if(payloadFile != null) {
+            //noinspection ResultOfMethodCallIgnored
+            payloadFile.delete();
+        }
+    }
 
     @Test
     public void testAdapter() throws InterruptedException, IOException, NoSuchFieldException, IllegalAccessException {
@@ -30,7 +43,9 @@ public class AndroidJobStrategyTest extends AbstractTest {
         int tenMinutes = 10 * 60 * 1000;
         UploadRequest<FilePayload> request = buildUploadRequest(payload, tenMinutes);
 
-        WorkRequest adapted = AndroidJobStrategy.adapt(request);
+        payloadFile = File.createTempFile("payload", request.getRequestId());
+
+        WorkRequest adapted = AndroidJobStrategy.adapt(request, payloadFile);
         Class obj = adapted.getClass().getSuperclass();
         Field field = obj.getDeclaredField("mWorkSpec");
         field.setAccessible(true);
