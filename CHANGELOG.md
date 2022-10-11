@@ -1,4 +1,10 @@
 
+2.3.0 / 2022-10-11
+==================
+Other changes
+-------------
+  * Replace EverNote with Android WorkManager
+
 2.2.0 / 2022-04-07
 ==================
 Other change
