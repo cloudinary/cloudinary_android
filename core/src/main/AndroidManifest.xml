@@ -2,5 +2,5 @@
     package="com.cloudinary.android.core">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <application android:fullBackupContent="@xml/backup_config" />
+    <application />
 </manifest>
