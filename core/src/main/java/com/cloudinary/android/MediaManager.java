@@ -43,6 +43,7 @@ import static com.cloudinary.android.ResponsiveUrl.Preset;
  */
 public class MediaManager {
     public static final String VERSION = "2.3.1";
+    public static final String NEW_VARIABLE = "";
     public static final String INTENT_EXTRA_REQUEST_ID = "INTENT_EXTRA_REQUEST_ID";
     public static final String INTENT_EXTRA_REQUEST_RESULT_STATUS = "INTENT_EXTRA_REQUEST_RESULT_STATUS";
     public static final String ACTION_REQUEST_STARTED = "com.cloudinary.ACTION_REQUEST_STARTED";
