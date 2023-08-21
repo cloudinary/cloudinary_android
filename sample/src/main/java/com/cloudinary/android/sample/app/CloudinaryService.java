@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.TypedValue;
@@ -41,14 +42,14 @@ public class CloudinaryService extends ListenerService {
     private NotificationManager notificationManager;
     private AtomicInteger idsProvider = new AtomicInteger(1000);
     private Map<String, Integer> requestIdsToNotificationIds = new ConcurrentHashMap<>();
-    private Notification.Builder builder;
+    private NotificationCompat.Builder builder;
     private Handler backgroundThreadHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        builder = new Notification.Builder(this);
+        builder = new NotificationCompat.Builder(this, MainApplication.NOTIFICATION_CHANNEL_ID);
         builder.setContentTitle("Uploading to Cloudinary...")
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(PendingIntent.getActivity(this, 999,
@@ -73,8 +74,8 @@ public class CloudinaryService extends ListenerService {
     }
 
 
-    private Notification.Builder getBuilder(String requestId, Resource.UploadStatus status) {
-         Notification.Builder builder = new Notification.Builder(this)
+    private NotificationCompat.Builder getBuilder(String requestId, Resource.UploadStatus status) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainApplication.NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setAutoCancel(true)
                 .setContentIntent(PendingIntent.getActivity(this, 1234,
@@ -259,7 +260,7 @@ public class CloudinaryService extends ListenerService {
                 getBuilder(requestId, Resource.UploadStatus.FAILED)
                         .setContentTitle("Error uploading.")
                         .setContentText(error.getDescription())
-                        .setStyle(new Notification.BigTextStyle()
+                        .setStyle(new NotificationCompat.BigTextStyle()
                                 .setBigContentTitle("Error uploading.")
                                 .bigText(error.getDescription()))
                         .build());
