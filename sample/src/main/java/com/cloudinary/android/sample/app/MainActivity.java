@@ -42,7 +42,7 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("Depreication")
+@SuppressWarnings("deprecation")
 public class MainActivity extends AppCompatActivity implements ResourcesAdapter.ImageClickedListener, DeleteRequestsCallback {
     public static final int PAGE_COUNT = 4;
     public static final int UPLOADED_PAGE_POSITION = 0;
