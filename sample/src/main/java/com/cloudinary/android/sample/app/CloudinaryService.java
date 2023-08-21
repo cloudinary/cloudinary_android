@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.TypedValue;
 
@@ -87,7 +88,7 @@ public class CloudinaryService extends ListenerService {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setColor(getResources().getColor(R.color.colorPrimary));
+            builder.setColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
 
         return builder;
@@ -151,7 +152,7 @@ public class CloudinaryService extends ListenerService {
             notificationManager.cancel(id);
         }
     }
-
+    @SuppressWarnings("deprecation")
     private boolean sendBroadcast(Resource updatedResource) {
         // This is called from background threads and the main thread  may touch the resource and delete it
         // in the meantime (from the activity) - verify it's still around before sending the broadcast
@@ -179,6 +180,7 @@ public class CloudinaryService extends ListenerService {
                         .build());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public synchronized void onProgress(String requestId, long bytes, long totalBytes) {
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_UPLOAD_PROGRESS).putExtra("requestId", requestId).putExtra("bytes", bytes).putExtra("totalBytes", totalBytes));
