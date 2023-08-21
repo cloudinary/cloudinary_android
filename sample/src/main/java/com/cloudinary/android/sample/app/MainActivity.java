@@ -1,6 +1,5 @@
 package com.cloudinary.android.sample.app;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.Context;
@@ -25,7 +24,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.cloudinary.android.MediaManager;
