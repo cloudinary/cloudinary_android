@@ -147,14 +147,11 @@ public class CropRotateFragment extends Fragment {
                 return false;
             }
         });
-
+        setToolbarIfNeeded();
         return view;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
+    private void setToolbarIfNeeded() {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity != null) {
             Toolbar toolbar = getActivity().findViewById(R.id.cropRotateToolbar);
