@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.DocumentsContract;
 import androidx.core.util.Pair;
 import android.view.WindowManager;
@@ -94,11 +95,16 @@ public class Utils {
                 + '/' + res.getResourceTypeName(resourceId) + '/' + res.getResourceEntryName(resourceId));
     }
 
+    @SuppressWarnings("deprecation")
     public static int getScreenWidth(Context context) {
         WindowManager window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
-        window.getDefaultDisplay().getSize(point);
-        return point.x;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return window.getCurrentWindowMetrics().getBounds().width();
+        } else {
+            window.getDefaultDisplay().getSize(point);
+            return point.x;
+        }
     }
 
     @SuppressLint("Range")
