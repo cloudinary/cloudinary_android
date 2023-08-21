@@ -1,11 +1,9 @@
 package com.cloudinary.android.sample.app;
 
-import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,18 +32,15 @@ import com.cloudinary.utils.StringUtils;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.TracksInfo;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -61,9 +56,9 @@ public class ImageActivity extends AppCompatActivity {
     private int thumbHeight;
     private TextView descriptionTextView;
     private ProgressBar progressBar;
-    private SimpleExoPlayer exoPlayer;
+    private ExoPlayer exoPlayer;
     private PlayerView exoPlayerView;
-    private ExoPlayer.EventListener listener;
+    private Player.Listener listener;
     private String currentUrl = null;
 
     @Override
@@ -96,37 +91,31 @@ public class ImageActivity extends AppCompatActivity {
 
 
     private void initExoPlayer() {
-        exoPlayer = new SimpleExoPlayer.Builder(this).build();
+        exoPlayer = new ExoPlayer.Builder(this).build();
         exoPlayerView = ((PlayerView) findViewById(R.id.exoPlayer));
         exoPlayerView.setPlayer(exoPlayer);
 
-        listener = new ExoPlayer.EventListener() {
+        listener = new Player.Listener() {
 
             @Override
-            public void onTracksChanged(TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
-                if (trackGroupArray.length > 0) {
+            public void onTracksInfoChanged(TracksInfo tracksInfo) {
+                Player.Listener.super.onTracksInfoChanged(tracksInfo);
+                if (tracksInfo.getTrackGroupInfos().isEmpty()) {
                     progressBar.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void onLoadingChanged(boolean b) {
-                progressBar.setVisibility(b ? View.VISIBLE : View.GONE);
-            }
-
-            @Override
-            public void onPlayerStateChanged(boolean b, int i) {
-
+            public void onIsLoadingChanged(boolean isLoading) {
+                Player.Listener.super.onIsLoadingChanged(isLoading);
+                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
 
             @Override
             public void onPlayerError(PlaybackException error) {
+                Player.Listener.super.onPlayerError(error);
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(ImageActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
 
             }
         };
@@ -174,7 +163,7 @@ public class ImageActivity extends AppCompatActivity {
     private void loadVideo(final EffectData data) {
         progressBar.setVisibility(View.VISIBLE);
         imageView.setVisibility(View.GONE);
-        final DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "Cloudinary Sample App"), null);
+        final DataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this);
         final ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
         Url baseUrl = MediaManager.get().url().secure(true).resourceType("video").publicId(data.getPublicId()).transformation(data.getTransformation());
         MediaManager.get().responsiveUrl(exoPlayerView, baseUrl, FIT, new ResponsiveUrl.Callback() {
