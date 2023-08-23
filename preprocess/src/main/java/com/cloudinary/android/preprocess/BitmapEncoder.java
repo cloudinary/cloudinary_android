@@ -87,9 +87,8 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
             case WEBP:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     return Bitmap.CompressFormat.WEBP_LOSSY;
-                } else {
-                    return Bitmap.CompressFormat.WEBP;
                 }
+                return Bitmap.CompressFormat.WEBP;
             case JPEG:
                 return Bitmap.CompressFormat.JPEG;
             case PNG:

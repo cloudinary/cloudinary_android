@@ -99,12 +99,11 @@ public class Utils {
     public static int getScreenWidth(Context context) {
         WindowManager window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Point point = new Point();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return window.getCurrentWindowMetrics().getBounds().width();
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window.getDefaultDisplay().getSize(point);
             return point.x;
         }
+        return window.getCurrentWindowMetrics().getBounds().width();
     }
 
     @SuppressLint("Range")

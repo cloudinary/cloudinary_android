@@ -263,11 +263,13 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         String text = holder.statusText.getContext().getString(R.string.uploading, progressStr);
         SpannableString spannableString = new SpannableString(text);
+        ForegroundColorSpan color;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            spannableString.setSpan(new ForegroundColorSpan(holder.statusText.getContext().getColor(R.color.buttonColor)), text.indexOf(progressStr), text.length(), 0);
+            color = new ForegroundColorSpan(holder.statusText.getContext().getColor(R.color.buttonColor));
         } else {
-            spannableString.setSpan(new ForegroundColorSpan(holder.statusText.getContext().getResources().getColor(R.color.buttonColor)), text.indexOf(progressStr), text.length(), 0);
+            color = new ForegroundColorSpan(holder.statusText.getContext().getResources().getColor(R.color.buttonColor));
         }
+        spannableString.setSpan(color, text.indexOf(progressStr), text.length(), 0);
         holder.statusText.setText(spannableString);
     }
 
