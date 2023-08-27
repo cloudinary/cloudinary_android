@@ -1,6 +1,5 @@
 package com.cloudinary.android.sample.app;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.Context;
@@ -25,7 +24,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.cloudinary.android.MediaManager;
@@ -42,6 +40,7 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class MainActivity extends AppCompatActivity implements ResourcesAdapter.ImageClickedListener, DeleteRequestsCallback {
     public static final int PAGE_COUNT = 4;
     public static final int UPLOADED_PAGE_POSITION = 0;

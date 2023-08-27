@@ -2,6 +2,7 @@ package com.cloudinary.android.preprocess;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 
 import com.cloudinary.android.preprocess.ResourceCreationException;
 import com.cloudinary.android.preprocess.ResourceEncoder;
@@ -80,9 +81,13 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
         return file;
     }
 
+    @SuppressWarnings("deprecation")
     private Bitmap.CompressFormat adaptFormat(Format format) {
         switch (format) {
             case WEBP:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    return Bitmap.CompressFormat.WEBP_LOSSY;
+                }
                 return Bitmap.CompressFormat.WEBP;
             case JPEG:
                 return Bitmap.CompressFormat.JPEG;

@@ -1,5 +1,6 @@
 package com.cloudinary.android.sample.app;
 
+import android.os.Build;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -235,6 +236,7 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void setProgress(ResourceViewHolder holder, ResourceWithMeta resourceWithMeta) {
         holder.progressBar.setVisibility(View.VISIBLE);
         ((ViewGroup)holder.progressBar.getParent()).findViewById(R.id.progressContainer).setVisibility(View.VISIBLE);
@@ -261,7 +263,13 @@ class ResourcesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         String text = holder.statusText.getContext().getString(R.string.uploading, progressStr);
         SpannableString spannableString = new SpannableString(text);
-        spannableString.setSpan(new ForegroundColorSpan(holder.statusText.getContext().getResources().getColor(R.color.buttonColor)), text.indexOf(progressStr), text.length(), 0);
+        ForegroundColorSpan color;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            color = new ForegroundColorSpan(holder.statusText.getContext().getColor(R.color.buttonColor));
+        } else {
+            color = new ForegroundColorSpan(holder.statusText.getContext().getResources().getColor(R.color.buttonColor));
+        }
+        spannableString.setSpan(color, text.indexOf(progressStr), text.length(), 0);
         holder.statusText.setText(spannableString);
     }
 

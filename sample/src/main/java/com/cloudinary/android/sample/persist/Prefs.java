@@ -1,7 +1,8 @@
 package com.cloudinary.android.sample.persist;
 
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
+import androidx.preference.PreferenceManager;
 
 import com.cloudinary.android.sample.app.MainApplication;
 

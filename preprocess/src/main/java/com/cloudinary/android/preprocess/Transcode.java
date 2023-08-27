@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi;
 
 import com.linkedin.android.litr.MediaTransformer;
 import com.linkedin.android.litr.TransformationListener;
+import com.linkedin.android.litr.TransformationOptions;
 import com.linkedin.android.litr.analytics.TrackTransformationInfo;
 
 import java.io.File;
@@ -55,14 +56,14 @@ public class Transcode implements Preprocess<Uri> {
 
         TransformationListener transformationListener = new VideoTransformationListener();
         MediaTransformer mediaTransformer = new MediaTransformer(context.getApplicationContext());
+        TransformationOptions options = new TransformationOptions.Builder().setGranularity(MediaTransformer.GRANULARITY_DEFAULT).build();
         mediaTransformer.transform(parameters.getRequestId(),
                 resource,
                 targetFilePath,
                 targetVideoFormat,
                 targetAudioFormat,
                 transformationListener,
-                MediaTransformer.GRANULARITY_DEFAULT,
-                null);
+                options);
 
         synchronized (lockObject) {
             try {
