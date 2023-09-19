@@ -14,6 +14,7 @@ android {
         consumerProguardFiles 'consumer-rules.pro'
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+
     }
 
     buildTypes {
