@@ -20,13 +20,15 @@ public class CldVideoPlayer {
         initPlayer(context, url);
     }
     public CldVideoPlayer(Context context, String publicId, Transformation transformation) {
-        transformation.streamingProfile("auto");
+        if(transformation == null) {
+            transformation = new Transformation().streamingProfile("auto");
+        }
         url = MediaManager.get().url().resourceType("video").transformation(transformation).format("m3u8").generate(publicId);
         initPlayer(context, url);
     }
 
     public CldVideoPlayer(Context context, String publicId, Transformation transformation, Boolean automaticStreamingProfile) {
-        if (automaticStreamingProfile) {
+        if (automaticStreamingProfile && transformation == null) {
             transformation.streamingProfile("auto");
             transformation.fetchFormat("m3u8");
         }
