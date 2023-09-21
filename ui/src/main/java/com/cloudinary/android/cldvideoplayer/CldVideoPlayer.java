@@ -1,12 +1,15 @@
 package com.cloudinary.android.cldvideoplayer;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+
+import java.net.URL;
 
 
 public class CldVideoPlayer {
@@ -15,33 +18,39 @@ public class CldVideoPlayer {
 
     String url;
 
+    public CldVideoPlayer(Context context, URL url) {
+        String tempUrl = url.toString();
+        this.url = tempUrl.toString();
+        initPlayer(context, tempUrl);
+    }
+
     public CldVideoPlayer(Context context, String publicId) {
-        url = MediaManager.get().url().resourceType("video").transformation(new Transformation().streamingProfile("auto")).format("m3u8").generate(publicId);
-        initPlayer(context, url);
+        initiliaze(context, publicId, null, true);
     }
     public CldVideoPlayer(Context context, String publicId, Transformation transformation) {
-        if(transformation == null) {
-            transformation = new Transformation().streamingProfile("auto");
-        }
-        url = MediaManager.get().url().resourceType("video").transformation(transformation).format("m3u8").generate(publicId);
-        initPlayer(context, url);
+        initiliaze(context, publicId, transformation, true);
     }
 
     public CldVideoPlayer(Context context, String publicId, Transformation transformation, Boolean automaticStreamingProfile) {
+        initiliaze(context, publicId, transformation, automaticStreamingProfile);
+    }
+
+    private void initiliaze(Context context, String publicId, Transformation transformation, Boolean automaticStreamingProfile) {
         if (automaticStreamingProfile && transformation == null) {
+            transformation = new Transformation();
             transformation.streamingProfile("auto");
-            transformation.fetchFormat("m3u8");
+            this.url = MediaManager.get().url().resourceType("video").transformation(transformation).format("m3u8").generate(publicId);
+        } else {
+            this.url = MediaManager.get().url().resourceType("video").transformation(transformation).generate(publicId);
         }
-        url = MediaManager.get().url().resourceType("video").transformation(transformation).generate(publicId);
+
         initPlayer(context, url);
     }
 
     private void initPlayer(Context context, String url) {
         player = new ExoPlayer.Builder(context).build();
-        MediaItem mediaItem = MediaItem.fromUri(url);
-        player.setMediaItem(mediaItem);
+        player.setMediaItem(MediaItem.fromUri(url));
         player.prepare();
-        player.play();
     }
 
     public void play() {
@@ -58,5 +67,5 @@ public class CldVideoPlayer {
         return player;
     }
 
-    public String getUrl() { return url; }
+    public String getUrl() { return this.url; }
 }
