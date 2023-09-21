@@ -19,9 +19,8 @@ public class CldVideoPlayer {
     String url;
 
     public CldVideoPlayer(Context context, URL url) {
-        String tempUrl = url.toString();
-        this.url = tempUrl.toString();
-        initPlayer(context, tempUrl);
+        this.url = url.toString();
+        initPlayer(context, this.url);
     }
 
     public CldVideoPlayer(Context context, String publicId) {
