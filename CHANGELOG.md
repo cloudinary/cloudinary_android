@@ -1,3 +1,9 @@
+2.4.0 / 2022-10-01
+==================
+New functionality
+-----------------
+  * Add Video Player widget
+
 2.3.1 / 2022-12-12
 ==================
 Other changes
