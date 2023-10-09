@@ -3,11 +3,12 @@ package com.cloudinary.android.cldvideoplayer;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
 
 import java.net.URL;
 

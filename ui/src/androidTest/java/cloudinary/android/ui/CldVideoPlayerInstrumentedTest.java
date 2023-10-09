@@ -1,4 +1,4 @@
-package cloudinary.android.sample;
+package cloudinary.android.ui;
 
 import android.content.Context;
 import android.os.Handler;
@@ -9,10 +9,11 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.cloudinary.Transformation;
+import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.cldvideoplayer.CldVideoPlayer;
-import com.google.android.exoplayer2.ExoPlayer;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,6 +27,12 @@ import java.util.concurrent.TimeUnit;
 public class CldVideoPlayerInstrumentedTest {
 
     private Context context;
+
+    @BeforeClass
+    public synchronized static void initLibrary() {
+        MediaManager.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
+        MediaManager.get().getCloudinary().config.cloudName = "demo";
+    }
 
     @Before
     public void setUp() {
