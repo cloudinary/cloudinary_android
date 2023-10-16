@@ -1,5 +1,7 @@
 package com.cloudinary.android;
 
+import android.util.Log;
+
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.junit.Assert;
@@ -13,7 +15,8 @@ public class AnalyticsTest extends AbstractTest {
     @BeforeClass
     public synchronized static void setup() {
         MediaManager.get().getCloudinary().analytics.setSDKSemver("2.0.0");
-        MediaManager.get().getCloudinary().analytics.setTechVersion("13.0.0");
+        MediaManager.get().getCloudinary().analytics.setTechVersion("33.0");
+        MediaManager.get().getCloudinary().analytics.osVersion = "33.0";
         MediaManager.get().getCloudinary().config.secure = true;
     }
 
@@ -21,7 +24,8 @@ public class AnalyticsTest extends AbstractTest {
     public void testAnalyticsURL() {
         MediaManager.get().getCloudinary().config.analytics = true;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
-        Assert.assertTrue(url.contains("a=AFAACAN0"));
+        Log.d("TEST", url);
+        Assert.assertTrue(url.contains("a=CAFAACAhAAh0"));
     }
 
     @Test
