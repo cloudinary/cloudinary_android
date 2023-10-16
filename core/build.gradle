@@ -59,7 +59,6 @@ dependencies {
     androidTestImplementation 'org.awaitility:awaitility:3.1.6'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.4.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: "protobuf-lite"
     })
     androidTestImplementation 'androidx.annotation:annotation:1.2.0'
     androidTestImplementation 'androidx.test:runner:1.4.0'
