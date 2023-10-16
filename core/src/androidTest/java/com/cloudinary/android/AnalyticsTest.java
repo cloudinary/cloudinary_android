@@ -1,7 +1,5 @@
 package com.cloudinary.android;
 
-import android.util.Log;
-
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.junit.Assert;
