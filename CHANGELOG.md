@@ -1,3 +1,10 @@
+2.5.0 / 2022-10-17
+==================
+Other changes
+-------------
+  * Update analytics token
+  * Migrate video player to Media3
+
 2.4.0 / 2022-10-01
 ==================
 New functionality
