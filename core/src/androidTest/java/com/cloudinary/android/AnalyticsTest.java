@@ -13,7 +13,8 @@ public class AnalyticsTest extends AbstractTest {
     @BeforeClass
     public synchronized static void setup() {
         MediaManager.get().getCloudinary().analytics.setSDKSemver("2.0.0");
-        MediaManager.get().getCloudinary().analytics.setTechVersion("13.0.0");
+        MediaManager.get().getCloudinary().analytics.setTechVersion("33.0");
+        MediaManager.get().getCloudinary().analytics.osVersion = "33.0";
         MediaManager.get().getCloudinary().config.secure = true;
     }
 
@@ -21,7 +22,7 @@ public class AnalyticsTest extends AbstractTest {
     public void testAnalyticsURL() {
         MediaManager.get().getCloudinary().config.analytics = true;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
-        Assert.assertTrue(url.contains("a=AFAACAN0"));
+        Assert.assertTrue(url.contains("a=CAFAACAhAAh0"));
     }
 
     @Test

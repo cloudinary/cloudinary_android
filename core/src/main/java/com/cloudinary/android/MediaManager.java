@@ -93,7 +93,7 @@ public class MediaManager {
         if (cloudinary.config.analytics == null) {
             cloudinary.config.analytics = true;
         }
-        cloudinary.setAnalytics(new Analytics("F", VERSION, techVersion));
+        cloudinary.setAnalytics(new Analytics("F", VERSION, techVersion, "A", techVersion));
 
         // set https as default for all http requests
         cloudinary.config.secure = true;
