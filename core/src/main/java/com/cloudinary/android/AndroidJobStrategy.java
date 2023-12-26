@@ -2,7 +2,6 @@ package com.cloudinary.android;
 
 import android.content.Context;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
@@ -23,12 +22,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
     private static final String JOB_TAG = "CLD";
+
+    private static final Map<String, WeakReference<Thread>> threads = new ConcurrentHashMap<>();
+    private static final Object threadsMapLockObject = new Object();
 
     private Context context;
 
@@ -43,7 +48,7 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         Data inputData = request.buildPayload(payloadFile);
 
-        return new OneTimeWorkRequest.Builder(UploadJob.class).setBackoffCriteria(adaptBackoffPolicy(policy.getBackoffPolicy()), policy.getBackoffMillis(), TimeUnit.MILLISECONDS).setInputData(inputData).setConstraints(constraints).addTag(JOB_TAG).build();
+        return new OneTimeWorkRequest.Builder(UploadJob.class).setBackoffCriteria(adaptBackoffPolicy(policy.getBackoffPolicy()), policy.getBackoffMillis(), TimeUnit.MILLISECONDS).setInputData(inputData).setConstraints(constraints).addTag(request.getRequestId()).build();
     }
 
     private static BackoffPolicy adaptBackoffPolicy(UploadPolicy.BackoffPolicy backoffPolicy) {
@@ -99,13 +104,46 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
     @Override
     public boolean cancelRequest(String requestId) {
         Operation operation = WorkManager.getInstance(context).cancelAllWorkByTag(requestId);
+        killThread(requestId);
         return operation.getResult().isCancelled();
     }
 
     @Override
     public int cancelAllRequests() {
         WorkManager.getInstance(context).cancelAllWork();
+        killAllThreads();
         return 0;
+    }
+
+    private void killThread(String requestId) {
+        synchronized (threadsMapLockObject) {
+            WeakReference<Thread> ref = threads.remove(requestId);
+            if (ref != null) {
+                Thread thread = ref.get();
+                if (thread != null) {
+                    thread.interrupt();
+                }
+
+                ref.clear();
+            }
+        }
+    }
+
+    private void killAllThreads() {
+        synchronized (threadsMapLockObject) {
+            for (String requestId : threads.keySet()) {
+                WeakReference<Thread> ref = threads.get(requestId);
+                Thread thread = ref.get();
+
+                if (thread != null) {
+                    thread.interrupt();
+                }
+
+                ref.clear();
+            }
+
+            threads.clear();
+        }
     }
 
     @Override
@@ -137,10 +175,33 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         private final Context context;
         private final WorkerParameters workParams;
 
+        private String requestId;
+
         public UploadJob(@NonNull Context context, @NonNull WorkerParameters workerParams) {
             super(context, workerParams);
             this.context = context;
             this.workParams = workerParams;
+        }
+
+        @Override
+        public void onStopped() {
+            super.onStopped();
+            unregisterThread(requestId);
+        }
+
+        private void registerThread(String requestId, Thread thread) {
+            synchronized (threadsMapLockObject) {
+                threads.put(requestId, new WeakReference<>(thread));
+            }
+        }
+
+        private void unregisterThread(String requestId) {
+            synchronized (threadsMapLockObject) {
+                WeakReference<Thread> removed = threads.remove(requestId);
+                if(removed != null) {
+                    removed.clear();
+                }
+            }
         }
 
         @NonNull
@@ -154,19 +215,21 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
                 // NO Payload input file created prior to request.
                 return Result.failure();
             }
+
             File payloadFile = new File(payloadFilePath);
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(payloadFile))) {
                 UploadRequest.PayloadData payloadData = (UploadRequest.PayloadData) ois.readObject();
                 AndroidJobStrategy.AndroidJobRequestParams jobInputData = new AndroidJobStrategy.AndroidJobRequestParams(payloadData);
-
-                // call the generic processor:
-                UploadStatus result = MediaManager.get().processRequest(context, jobInputData);
+                requestId = payloadData.getRequestId();
+                registerThread(requestId, Thread.currentThread());
+                UploadStatus result = MediaManager.get().processRequest(context, jobInputData); // Replace this with your actual upload logic
                 return adaptResult(result);
-
-            } catch (NullPointerException | IOException | ClassNotFoundException e) {
+            } catch (NullPointerException | IOException | ClassNotFoundException e ) {
                 // Unable to deserialize payload data from file.
                 e.printStackTrace();
                 return Result.failure();
+            } finally {
+                unregisterThread(requestId);
             }
         }
 
