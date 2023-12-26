@@ -197,9 +197,11 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
         private void unregisterThread(String requestId) {
             synchronized (threadsMapLockObject) {
-                WeakReference<Thread> removed = threads.remove(requestId);
-                if(removed != null) {
-                    removed.clear();
+                if(requestId != null) {
+                    WeakReference<Thread> removed = threads.remove(requestId);
+                    if (removed != null) {
+                        removed.clear();
+                    }
                 }
             }
         }
@@ -207,6 +209,7 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         @NonNull
         @Override
         public Result doWork() {
+
             // Prepare extract payload data from temporary file.
             String payloadFilePath = workParams.getInputData().getString(UploadRequest.PayloadData.KEY);
             if (payloadFilePath == null) {
