@@ -207,8 +207,6 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         @NonNull
         @Override
         public Result doWork() {
-            // Removed Wakelock logic as it causes RuntimeException ("WakeLock under-locked")
-
             // Prepare extract payload data from temporary file.
             String payloadFilePath = workParams.getInputData().getString(UploadRequest.PayloadData.KEY);
             if (payloadFilePath == null) {
