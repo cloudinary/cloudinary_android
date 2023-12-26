@@ -1,3 +1,9 @@
+2.5.1 / 2022-12-26
+==================
+Other changes
+-------------
+ * Update `AndroidJobStrategy` cancel requests
+
 2.5.0 / 2022-10-17
 ==================
 Other changes
