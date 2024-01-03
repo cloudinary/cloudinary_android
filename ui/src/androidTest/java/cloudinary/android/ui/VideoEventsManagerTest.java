@@ -40,8 +40,6 @@ public class VideoEventsManagerTest {
         assertEquals(32, userId.length()); // Assuming user ID length is 32 characters
     }
 
-    // Add other test cases for different methods...
-
     @Test
     public void sendViewStartEvent_EventAddedToQueue() {
         // Create mock data
