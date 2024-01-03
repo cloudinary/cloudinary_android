@@ -1,14 +1,16 @@
 package com.cloudinary.android.cldvideoplayer;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 
-import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.cldvideoplayer.analytics.VideoEventsManager;
+import com.cloudinary.android.cldvideoplayer.analytics.models.AnalyticsType;
+import com.cloudinary.android.cldvideoplayer.analytics.models.TrackingType;
 
 import java.net.URL;
 
@@ -18,6 +20,11 @@ public class CldVideoPlayer {
     ExoPlayer player;
 
     String url;
+
+    VideoEventsManager videoEventsManager;
+
+    boolean viewStartSent = false;
+    private boolean analytics = true;
 
     public CldVideoPlayer(Context context, URL url) {
         this.url = url.toString();
@@ -48,14 +55,73 @@ public class CldVideoPlayer {
     }
 
     private void initPlayer(Context context, String url) {
+        videoEventsManager = new VideoEventsManager(context);
         player = new ExoPlayer.Builder(context).build();
         player.setMediaItem(MediaItem.fromUri(url));
+        setListeners();
         player.prepare();
+    }
+
+    private void setListeners() {
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(@Player.State int state) {
+                Player.Listener.super.onPlaybackStateChanged(state);
+                if (state == Player.STATE_READY && !viewStartSent && analytics) {
+                    viewStartSent = true;
+                    videoEventsManager.sendViewStartEvent(url, null);
+                    int duration = (int) player.getDuration() / 1000;
+                    videoEventsManager.sendLoadMetadataEvent(duration, null);
+                }
+            }
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                Player.Listener.super.onIsPlayingChanged(isPlaying);
+                if(analytics) {
+                    if (isPlaying) {
+                        videoEventsManager.sendPlayEvent(null);
+                    } else {
+                        videoEventsManager.sendPauseEvent(null);
+                    }
+                }
+            }
+        });
+    }
+
+    public void releasePlayer() {
+        if (player != null) {
+            player.release();
+            player = null;
+            if(analytics) {
+                videoEventsManager.sendViewEndEvent(null);
+                videoEventsManager.sendEvents();
+            }
+        }
     }
 
     public void play() {
         if (player != null) {
             player.play();
+        }
+    }
+
+    public void setAnalytics(AnalyticsType type, String cloudName, String publicId) {
+        switch (type) {
+            case AUTO:
+                analytics = true;
+                videoEventsManager.trackingType = TrackingType.AUTO;
+                videoEventsManager.cloudName = (cloudName != null) ? cloudName : MediaManager.get().getCloudinary().config.cloudName;
+                videoEventsManager.publicId = (publicId != null) ? cloudName : "";
+                break;
+            case MANUAL:
+                analytics = true;
+                videoEventsManager.trackingType = TrackingType.MANUAL;
+                videoEventsManager.cloudName = (cloudName != null) ? cloudName : MediaManager.get().getCloudinary().config.cloudName;
+                videoEventsManager.publicId = (publicId != null) ? cloudName : "";
+                break;
+            case DISABLED:
+                analytics = false;
+                break;
         }
     }
 
