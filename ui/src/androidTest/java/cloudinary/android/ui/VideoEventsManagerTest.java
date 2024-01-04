@@ -27,7 +27,9 @@ public class VideoEventsManagerTest {
     @BeforeClass
     public static void setUp() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        MediaManager.init(context);
+        if(MediaManager.get() == null) {
+            MediaManager.init(context);
+        }
         videoEventsManager = new VideoEventsManager(context);
         videoEventsManager.cloudName = "TestCloudName";
         videoEventsManager.publicId = "TestPublicId";
