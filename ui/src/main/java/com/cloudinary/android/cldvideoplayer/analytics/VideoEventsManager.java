@@ -153,7 +153,7 @@ public class VideoEventsManager {
     private String buildFormDataPart(String boundary, String name, String value) {
         StringBuilder formData = new StringBuilder();
         formData.append("--").append(boundary).append("\r\n");
-        formData.append("Content-Disposition: form-data; name=").append(name).append("\r\n\r\n");
+        formData.append("Content-Disposition: form-data; name=\"").append(name).append("\"\r\n\r\n");
         formData.append(value).append("\r\n");
         return formData.toString();
     }
