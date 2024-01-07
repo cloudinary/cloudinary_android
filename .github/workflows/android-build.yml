@@ -56,8 +56,12 @@ jobs:
             bash tools/get_test_cloud.sh > cloudinary_url.txt
             echo "CLOUDINARY_URL=$(cat cloudinary_url.txt)" >> $GITHUB_ENV
 
-      - name: Use Cloudinary URL in Further Steps
-        run: echo $CLOUDINARY_URL
+      - name: Wait for Emulator
+        run: |
+            emulator -list-avds  # Lists available emulators for reference
+            emulator -avd your_emulator_name -no-window -no-audio &
+            android-wait-for-emulator
+            adb devices  # Check if the emulator is recognized as a connected device
 
       - name: Build and Test
         run: ./gradlew clean connectedCheck
