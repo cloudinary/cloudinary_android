@@ -44,6 +44,13 @@ jobs:
           echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> $GITHUB_ENV
           source $GITHUB_ENV
 
+      - name: Use Updated Emulator Command
+        run: |
+          $ANDROID_HOME/emulator/emulator -list-avds
+          $ANDROID_HOME/emulator/emulator -avd your_emulator_name -no-window -no-audio &
+          android-wait-for-emulator
+          adb devices
+
       - name: List Available Emulators
         run: |
           sdkmanager --list
