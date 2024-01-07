@@ -51,13 +51,6 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
-      - name: Create and Start Emulator
-        run: |
-          echo no | android create avd --force -n test -t android-21
-          emulator -avd test -no-audio -no-window &
-          android-wait-for-emulator
-          adb shell input keyevent 82
-
       - name: Set Cloudinary URL
         run: export CLOUDINARY_URL=$(bash tools/get_test_cloud.sh)
 
