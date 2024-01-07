@@ -3,11 +3,11 @@ name: Android Build and Test
 on:
   push:
     branches:
-      - feature/github_actions  # Update with your branch name
+      - '*'
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You may choose another supported OS
+    runs-on: ubuntu-latest
 
     env:
       TARGET_VERSION: 30
