@@ -56,6 +56,18 @@ jobs:
             bash tools/get_test_cloud.sh > cloudinary_url.txt
             echo "CLOUDINARY_URL=$(cat cloudinary_url.txt)" >> $GITHUB_ENV
 
+      - name: Check Emulator Command Availability
+        run: |
+          which emulator  # Check if emulator command is available
+          echo $PATH      # Check the PATH variable contents for emulator directory
+
+      - name: Start Emulator
+        run: |
+          emulator -list-avds
+          emulator -avd your_emulator_name -no-window -no-audio &
+          android-wait-for-emulator
+          adb devices
+
       - name: Wait for Emulator
         run: |
             emulator -list-avds  # Lists available emulators for reference
