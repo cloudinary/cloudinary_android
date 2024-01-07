@@ -33,7 +33,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(path: ':core')
     api project(path: ':preprocess')
-    api project(path: ':ui')
     api project(path: ':download')
 
     implementation 'androidx.appcompat:appcompat:1.3.0'
