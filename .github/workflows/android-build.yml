@@ -3,11 +3,11 @@ name: Cloudinary Android SDK Build and Test
 on:
   push:
     branches:
-      - feature/github_actions  # Update with your branch name
+      - main  # Update with your branch name
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # You may choose another supported OS
+    runs-on: ubuntu-latest
 
     env:
       TARGET_VERSION: 30
@@ -22,18 +22,17 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '11'
-          distribution: 'adopt'  # or 'temurin' based on your preference
+          distribution: 'adopt'
 
       - name: Download and Install Android SDK
         run: |
           mkdir -p $ANDROID_HOME
           wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
           unzip -q commandlinetools.zip -d $ANDROID_HOME/
-          yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "platforms;android-${TARGET_VERSION}" --sdk_root=$ANDROID_HOME
-          yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" --sdk_root=$ANDROID_HOME
+          mv $ANDROID_HOME/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest
 
       - name: Accept Android Licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager --licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Cache Gradle Dependencies
         uses: actions/cache@v2
