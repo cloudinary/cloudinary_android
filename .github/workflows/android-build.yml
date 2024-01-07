@@ -24,6 +24,9 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Download and Install Android SDK
         run: |
           mkdir -p $ANDROID_HOME
