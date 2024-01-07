@@ -3,7 +3,7 @@ name: Android Build and Test
 on:
   push:
     branches:
-      - main  # Update with your branch name
+      - feature/github_actions  # Update with your branch name
 
 jobs:
   build:
@@ -23,6 +23,9 @@ jobs:
         with:
           java-version: '11'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Download and Install Android SDK
         run: |
           mkdir -p $ANDROID_HOME
@@ -32,7 +35,7 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" --sdk_root=$ANDROID_HOME
 
       - name: Accept Android Licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager --licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Cache Gradle Dependencies
         uses: actions/cache@v2
