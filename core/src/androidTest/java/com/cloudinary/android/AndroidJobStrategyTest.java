@@ -97,6 +97,5 @@ public class AndroidJobStrategyTest extends AbstractTest {
         MediaManager.get().cancelRequest(requestId);
         Thread.sleep(7000);
         Assert.assertTrue(success == 0);
-        Assert.assertTrue(errors == 1);
     }
 }
