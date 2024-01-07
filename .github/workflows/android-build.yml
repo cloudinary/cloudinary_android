@@ -3,7 +3,7 @@ name: Cloudinary Android SDK Build and Test
 on:
   push:
     branches:
-      - master  # Update with your branch name
+      - feature/github_actions  # Update with your branch name
 
 jobs:
   build:
