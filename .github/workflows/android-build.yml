@@ -54,10 +54,7 @@ jobs:
       - name: Set Cloudinary URL
         run: |
             bash tools/get_test_cloud.sh > cloudinary_url.txt
-
-      - name: Read Cloudinary URL and Set as Environment Variable
-        id: cloudinary
-        run: echo "::set-env name=CLOUDINARY_URL::$(cat cloudinary_url.txt)"
+            echo "CLOUDINARY_URL=$(cat cloudinary_url.txt)" >> $GITHUB_ENV
 
       - name: Use Cloudinary URL in Further Steps
         run: echo $CLOUDINARY_URL
