@@ -32,11 +32,16 @@ jobs:
           mkdir -p $ANDROID_HOME
           wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
           unzip -q commandlinetools.zip -d $ANDROID_HOME/
-          yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "platforms;android-${TARGET_VERSION}" --sdk_root=$ANDROID_HOME
-          yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" --sdk_root=$ANDROID_HOME
+          echo 'export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin' >> $GITHUB_ENV
+          source $GITHUB_ENV
 
       - name: Accept Android Licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        run: yes | sdkmanager --licenses
+
+      - name: List Available Emulators
+        run: |
+          sdkmanager --list
+          emulator -list-avds  # Check available AVDs
 
       - name: Install SDK components
         run: |
