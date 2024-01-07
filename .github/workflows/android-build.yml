@@ -35,8 +35,7 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" --sdk_root=$ANDROID_HOME
 
       - name: Accept Android Licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
+        run: yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager --licenses
 
       - name: Cache Gradle Dependencies
         uses: actions/cache@v2
