@@ -52,7 +52,15 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
       - name: Set Cloudinary URL
-        run: export CLOUDINARY_URL=$(bash tools/get_test_cloud.sh)
+        run: |
+            bash tools/get_test_cloud.sh > cloudinary_url.txt
+
+      - name: Read Cloudinary URL and Set as Environment Variable
+        id: cloudinary
+        run: echo "::set-env name=CLOUDINARY_URL::$(cat cloudinary_url.txt)"
+
+      - name: Use Cloudinary URL in Further Steps
+        run: echo $CLOUDINARY_URL
 
       - name: Build and Test
         run: ./gradlew clean connectedCheck
