@@ -38,10 +38,12 @@ jobs:
       - name: Accept Android Licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
-      - name: Create AVD
+      - name: Install SDK components
         run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-31"
-          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n testRunner -d 19 -k "system-images;android-31;google_apis;x86_64"
+            echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "system-images;android-31;google_apis;x86_64"
+
+      - name: Create AVD
+        run: echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n testRunner -d 19 -k "system-images;android-31;google_apis;x86_64"
 
       - name: Cache Gradle Dependencies
         uses: actions/cache@v2
