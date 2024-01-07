@@ -1,3 +1,9 @@
+2.6.1 / 2022-01-07
+==================
+New functionality
+-----------------
+ * Video play analytics
+
 2.5.1 / 2022-12-26
 ==================
 Other changes
