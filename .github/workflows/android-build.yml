@@ -38,6 +38,9 @@ jobs:
       - name: Accept Android Licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
+      - name: Create AVD
+        run: echo no | avdmanager create avd --force -n test -k "system-images;android-21;default;armeabi-v7a"
+
       - name: Cache Gradle Dependencies
         uses: actions/cache@v2
         with:
