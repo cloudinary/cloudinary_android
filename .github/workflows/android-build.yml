@@ -16,7 +16,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-      - name: run tests
+      - name: Set Cloudinary URL
+        run: |
+            bash tools/get_test_cloud.sh > cloudinary_url.txt
+            echo "CLOUDINARY_URL=$(cat cloudinary_url.txt)" >> $GITHUB_ENV
+
+      - name: Build and Test
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -24,11 +29,3 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           script: ./gradlew connectedCheck
-
-      - name: Set Cloudinary URL
-        run: |
-            bash tools/get_test_cloud.sh > cloudinary_url.txt
-            echo "CLOUDINARY_URL=$(cat cloudinary_url.txt)" >> $GITHUB_ENV
-
-      - name: Build and Test
-        run: ./gradlew clean connectedCheck
