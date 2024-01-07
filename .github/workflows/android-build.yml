@@ -38,6 +38,12 @@ jobs:
       - name: Accept Android Licenses
         run: yes | sdkmanager --licenses
 
+      - name: Update Emulator
+        run: |
+          sdkmanager "emulator" # Install or update emulator
+          echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> $GITHUB_ENV
+          source $GITHUB_ENV
+
       - name: List Available Emulators
         run: |
           sdkmanager --list
