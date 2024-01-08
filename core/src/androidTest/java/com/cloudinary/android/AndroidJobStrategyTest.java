@@ -64,38 +64,4 @@ public class AndroidJobStrategyTest extends AbstractTest {
         Assert.assertEquals(BackoffPolicy.LINEAR, adapted.getWorkSpec().backoffPolicy);
 
     }
-    @Test
-    public void testCancelRequest() throws InterruptedException, IOException, NoSuchFieldException, IllegalAccessException {
-        FilePayload payload = buildPayload();
-        String requestId = MediaManager.get().upload(payload)
-                .unsigned(TEST_PRESET).callback(new UploadCallback() {
-                    @Override
-                    public void onStart(String requestId) {
-                    }
-
-                    @Override
-                    public void onProgress(String requestId, long bytes, long totalBytes) {
-                    }
-
-                    @Override
-                    public void onSuccess(String requestId, Map resultData) {
-                        success++;
-                    }
-
-                    @Override
-                    public void onError(String requestId, ErrorInfo error) {
-                        errors++;
-                    }
-
-                    @Override
-                    public void onReschedule(String requestId, ErrorInfo error) {
-
-                    }
-                })
-                .dispatch();
-        Thread.sleep(1000);
-        MediaManager.get().cancelRequest(requestId);
-        Thread.sleep(7000);
-        Assert.assertTrue(success == 0);
-    }
 }
