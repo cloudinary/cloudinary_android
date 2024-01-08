@@ -13,6 +13,10 @@ jobs:
         api-level: [31]
         target: [default]
     steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '8'
       - name: checkout
         uses: actions/checkout@v3
 
