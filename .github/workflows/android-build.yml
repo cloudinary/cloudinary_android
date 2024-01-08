@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '8'
       - name: checkout
         uses: actions/checkout@v3
