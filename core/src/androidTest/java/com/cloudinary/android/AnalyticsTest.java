@@ -22,7 +22,7 @@ public class AnalyticsTest extends AbstractTest {
     public void testAnalyticsURL() {
         MediaManager.get().getCloudinary().config.analytics = true;
         String url = MediaManager.get().getCloudinary().url().generate("sample");
-        Assert.assertTrue(url.contains("a=CAFAACAhAAh0"));
+        Assert.assertTrue(url.contains("a=DAFAACAhAhA0"));
     }
 
     @Test
