@@ -1,3 +1,10 @@
+2.7.1 / 2024-01-15
+==================
+Other changes
+-------------
+* Update Java SDK
+* Fix bug related to cancel all upload requests
+
 2.6.1 / 2022-01-07
 ==================
 New functionality
