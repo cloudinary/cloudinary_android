@@ -108,11 +108,9 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         return operation.getResult().isCancelled();
     }
 
-    @Override
     public int cancelAllRequests() {
         WorkManager.getInstance(context).cancelAllWork();
-        killAllThreads();
-        return 0;
+        return killAllThreads();
     }
 
     private void killThread(String requestId) {
@@ -129,8 +127,9 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
         }
     }
 
-    private void killAllThreads() {
+    private int killAllThreads() {
         synchronized (threadsMapLockObject) {
+            int size = threads.size();
             for (String requestId : threads.keySet()) {
                 WeakReference<Thread> ref = threads.get(requestId);
                 Thread thread = ref.get();
@@ -141,8 +140,8 @@ public class AndroidJobStrategy implements BackgroundRequestStrategy {
 
                 ref.clear();
             }
-
             threads.clear();
+            return size;
         }
     }
 
