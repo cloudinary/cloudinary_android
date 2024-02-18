@@ -43,6 +43,7 @@ public class CldVideoPlayer {
     }
 
     private void initiliaze(Context context, String publicId, Transformation transformation, Boolean automaticStreamingProfile) {
+        MediaManager.get().getCloudinary().analytics.setFeatureFlag("F");
         if (automaticStreamingProfile && transformation == null) {
             transformation = new Transformation();
             transformation.streamingProfile("auto");
@@ -50,7 +51,7 @@ public class CldVideoPlayer {
         } else {
             this.url = MediaManager.get().url().resourceType("video").transformation(transformation).generate(publicId);
         }
-
+        MediaManager.get().getCloudinary().analytics.setFeatureFlag("0");
         initPlayer(context, url);
     }
 
