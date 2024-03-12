@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
         }
 
         MultipartUtility multipart = null;
-        HttpURLConnection connection;
+        HttpURLConnection connection = null;
 
         try {
             int connectTimeout = options.get("connect_timeout") != null ? (int) options.get("connect_timeout") : 0;
@@ -108,6 +109,8 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
             }
 
             connection = multipart.execute();
+        } catch(InterruptedIOException e ) {
+            e.printStackTrace();
         } finally {
             if (multipart != null){
                 // Closing more than once has no effect so we can call it safely without having to check state
