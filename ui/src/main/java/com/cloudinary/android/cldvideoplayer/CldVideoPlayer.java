@@ -32,14 +32,18 @@ public class CldVideoPlayer {
     }
 
     public CldVideoPlayer(Context context, String publicId) {
-        initiliaze(context, publicId, null, true);
+        initiliaze(context, publicId, null, false);
     }
     public CldVideoPlayer(Context context, String publicId, Transformation transformation) {
-        initiliaze(context, publicId, transformation, true);
+        initiliaze(context, publicId, transformation, false);
     }
 
     public CldVideoPlayer(Context context, String publicId, Transformation transformation, Boolean automaticStreamingProfile) {
         initiliaze(context, publicId, transformation, automaticStreamingProfile);
+    }
+
+    public CldVideoPlayer(Context context, String publicId, Boolean automaticStreamingProfile) {
+        initiliaze(context, publicId, null, automaticStreamingProfile);
     }
 
     private void initiliaze(Context context, String publicId, Transformation transformation, Boolean automaticStreamingProfile) {
