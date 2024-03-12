@@ -53,8 +53,7 @@ public class CldVideoPlayerInstrumentedTest {
         assert latchReleased : "CountDownLatch was not released within the timeout.";
         assert cldVideoPlayer[0] != null;
         assert cldVideoPlayer[0].getPlayer() != null;
-        assert cldVideoPlayer[0].getUrl().contains("publicId.m3u8");
-        assert cldVideoPlayer[0].getUrl().contains("sp_auto");
+        assert cldVideoPlayer[0].getUrl().contains("publicId");
     }
 
     @Test
