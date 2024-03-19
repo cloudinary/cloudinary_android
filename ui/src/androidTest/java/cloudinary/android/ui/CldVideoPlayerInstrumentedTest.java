@@ -54,6 +54,7 @@ public class CldVideoPlayerInstrumentedTest {
         assert cldVideoPlayer[0] != null;
         assert cldVideoPlayer[0].getPlayer() != null;
         assert cldVideoPlayer[0].getUrl().contains("publicId");
+        assert !cldVideoPlayer[0].getUrl().contains(".m3u8");
     }
 
     @Test
