@@ -1,15 +1,4 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="grid_divider_width">2dp</dimen>
-    <dimen name="effect_item_margin">4dp</dimen>
-    <dimen name="card_height">180dp</dimen>
-    <dimen name="card_image_width">96dp</dimen>
-    <dimen name="default_margin">8dp</dimen>
-    <dimen name="description_indent">24dp</dimen>
-    <dimen name="try_now_bottom_margin">17dp</dimen>
-    <dimen name="try_now_end_margin">24dp</dimen>
-    <dimen name="buttons_container_height">36dp</dimen>
-    <dimen name="cancel_request_width">24dp</dimen>
-    <dimen name="effect_item_size">120dp</dimen>
-
+    <dimen name="item_spacing">8dp</dimen>
 </resources>

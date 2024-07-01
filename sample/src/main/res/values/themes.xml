@@ -1,0 +1,30 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.CloudinarySampleApp" parent="Theme.AppCompat.NoActionBar">
+        <!-- Customize your light theme here. -->
+         <item name="colorPrimary">@color/button_primary</item>
+    </style>
+
+    <style name="Theme.CloudinarySampleApp" parent="Base.Theme.CloudinarySampleApp">
+            <item name="android:statusBarColor">@android:color/holo_red_light</item>
+    </style>
+
+    <style name="FullScreen" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    <style name="BottomNavigationItemSelectedStyle" parent="Widget.Design.BottomNavigationView">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    <style name="BottomNavigationView" parent="Widget.Design.BottomNavigationView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="LaunchTheme" parent="FullScreen">
+        <item name="android:windowBackground">@drawable/launch_screen_background</item>
+    </style>
+</resources>
