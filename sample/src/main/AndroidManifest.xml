@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cloudinary.android.sample">
+<manifest
+    package="com.cloudinary.sample"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- Devices running Android 13 (API level 33) or higher -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- To handle the reselection within the app on devices running Android 14
+         or higher if your app targets Android 14 (API level 34) or higher.  -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
+
     <application
-        android:name=".app.MainApplication"
-        android:allowBackup="false"
-        android:icon="@drawable/ic_launcher"
+        android:name="com.cloudinary.sample.CloudinarySampleApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="false"
-        android:theme="@style/AppTheme">
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/Theme.CloudinarySampleApp"
+        tools:targetApi="31">
         <activity
-            android:name=".app.MainActivity"
-            android:label="@string/app_name"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name="com.cloudinary.sample.splash.SplashScreenActivity"
+            android:theme="@style/LaunchTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
         </activity>
         <activity
-            android:name=".app.ImageActivity"
+            android:name="com.cloudinary.sample.main.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <service android:name=".app.CloudinaryService"
-            android:exported="false"/>
-
-        <meta-data
-            android:name="cloudinaryCallbackService"
-            android:value="com.cloudinary.android.sample.app.CloudinaryService" />
-
-        <meta-data
-            android:name="CLOUDINARY_URL"
-            android:value="${cloudinaryUrl}" />
+            android:theme="@style/Theme.CloudinarySampleApp">
+        </activity>
+        <activity android:name="com.cloudinary.sample.main.delivery.base.BaseActivity">
+        </activity>
+        <activity android:name="com.cloudinary.sample.main.video.feed.VideoFeedActivity"
+            android:theme="@style/FullScreen">
+        </activity>
+        <activity android:name="com.cloudinary.sample.main.upload.NoCloudActivity"/>
+        <activity android:name="com.cloudinary.sample.main.upload.WebViewActivity"/>
     </application>
 
 </manifest>
