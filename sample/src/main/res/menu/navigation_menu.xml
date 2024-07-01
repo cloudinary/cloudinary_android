@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_delivery"
+        android:icon="@drawable/delivery_icon"
+        android:title="@string/delivery" />
+    <item
+        android:id="@+id/navigation_upload"
+        android:icon="@drawable/upload_icon"
+        android:title="@string/upload" />
+    <item
+        android:id="@+id/navigation_widgets"
+        android:icon="@drawable/widgets_icon"
+        android:title="@string/widgets" />
+    <item
+        android:id="@+id/navigation_video"
+        android:icon="@drawable/video_icon"
+        android:title="@string/video" />
+</menu>
