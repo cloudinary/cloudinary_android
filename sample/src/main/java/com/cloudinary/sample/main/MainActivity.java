@@ -49,9 +49,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, NoCloudActivity.class);
             startActivity(intent);
         } else {
-            if(MediaManager.get() == null) {
-                CloudinaryHelper.setMediaManager(getBaseContext(), cloudName);
-            }
+            CloudinaryHelper.setMediaManager(getBaseContext(), cloudName);
         }
     }
 
