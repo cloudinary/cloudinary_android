@@ -59,5 +59,6 @@
     <string name="open_gallery">Open Gallery</string>
     <string name="pre_process">Pre Process Image</string>
     <string name="modify_your_image">Modify your image before upload</string>
+    <string name="upload_preset_text">To ensure successful uploads, you must create an upload preset called \"android_sample\" in your account and set it to \"unsigned\". With this preset, uploads will succeed.</string>
 
 </resources>
