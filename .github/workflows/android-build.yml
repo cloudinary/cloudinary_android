@@ -5,6 +5,7 @@ on:
     branches:
       - 'feature/github_actions'
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,11 +31,11 @@ jobs:
         run: |
           sudo mkdir -p $ANDROID_HOME/cmdline-tools
           sudo chown $USER $ANDROID_HOME -R
-          wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
+          wget "https://dl.google.com/android/repository/commandlinetools-linux-8210871_latest.zip" -O commandlinetools.zip
           unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-${{ env.TARGET_VERSION }}" "build-tools;${{ env.ANDROID_BUILD_TOOLS_VERSION }}" "platform-tools"
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "system-images;android-21;default;armeabi-v7a"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "system-images;android-30;default;armeabi-v7a"
 
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=$ANDROID_HOME
@@ -60,7 +61,7 @@ jobs:
 
       - name: Create Android AVD
         run: |
-          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-21;default;armeabi-v7a" -f
+          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-30;default;armeabi-v7a" -f
           $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window &
           adb wait-for-device
           adb shell input keyevent 82
