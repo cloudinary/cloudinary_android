@@ -14,7 +14,7 @@ jobs:
       ADB_INSTALL_TIMEOUT: 10
       TARGET_VERSION: 30
       ANDROID_BUILD_TOOLS_VERSION: 30.0.2
-      ANDROID_HOME: ${{ runner.temp }}/android-sdk
+      ANDROID_HOME: /usr/local/android-sdk
 
     steps:
       - name: Checkout repository
