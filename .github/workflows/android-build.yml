@@ -32,13 +32,15 @@ jobs:
           sudo chown $USER $ANDROID_HOME -R
           wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
           unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-          # Ensure the correct subdirectory is used for sdkmanager
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-${{ env.TARGET_VERSION }}" "build-tools;${{ env.ANDROID_BUILD_TOOLS_VERSION }}" "platform-tools"
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "system-images;android-21;default;armeabi-v7a"
 
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=$ANDROID_HOME
+
+      - name: Add Android SDK to PATH
+        run: echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
 
       - name: Prepare Gradle
         run: |
