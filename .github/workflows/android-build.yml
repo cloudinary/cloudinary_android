@@ -3,10 +3,10 @@ name: Android Build and Test
 on:
   push:
     branches:
-      - '**'  # Triggers on any branch push, adjust as needed
+      - '**'
   pull_request:
     branches:
-      - '**'  # Triggers on any PR, adjust as needed
+      - '**'
 
 jobs:
   build:
@@ -54,19 +54,25 @@ jobs:
           cd $ANDROID_HOME/cmdline-tools/latest/bin
           echo no | ./avdmanager create avd -n test -k "system-images;android-21;google_apis;armeabi-v7a" --force
 
+      - name: Start ADB Server
+        run: adb start-server
+
       - name: Start Emulator
         run: |
           echo "Starting emulator..."
           export PATH=$PATH:$ANDROID_HOME/emulator
           emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics &
           # Wait for the emulator to start up
-          sleep 120  # Increase wait time if needed
+          sleep 120
 
       - name: Check ADB Devices
         run: adb devices
 
       - name: Check Emulator Version
         run: adb shell getprop ro.build.version.sdk
+
+      - name: Check Emulator Status
+        run: adb shell getprop sys.boot_completed
 
       - name: Export CLOUDINARY_URL
         run: |
