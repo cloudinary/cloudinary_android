@@ -43,9 +43,15 @@ jobs:
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-${TARGET_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "system-images;android-21;default;armeabi-v7a"
 
+      - name: Install SDK Packages
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-${TARGET_VERSION}"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
+
       - name: Create AVD
         run: |
-          echo no | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-21;default;armeabi-v7a" --force
+          echo no | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-21;google_apis;armeabi-v7a" --force
 
       - name: Start Emulator
         run: |
