@@ -37,8 +37,15 @@ jobs:
       - name: Install Android SDK components
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
+          # Install necessary SDK components
+          ./sdkmanager "platforms;android-${TARGET_VERSION}"
+          ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
           ./sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
-          ./sdkmanager --licenses
+
+      - name: Accept SDK Licenses
+        run: |
+          cd $ANDROID_HOME/cmdline-tools/latest/bin
+          yes | ./sdkmanager --licenses
 
       - name: Create AVD
         run: |
@@ -48,6 +55,7 @@ jobs:
       - name: Start Emulator
         run: |
           emulator -avd test -no-audio -no-window &
+          # Wait for the emulator to start up
           sleep 60  # Adjust the duration as needed
 
       - name: Run tests
