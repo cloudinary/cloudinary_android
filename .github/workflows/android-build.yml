@@ -34,26 +34,21 @@ jobs:
           sudo mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           rm commandlinetools.zip
 
-      - name: List available system images
+      - name: Install Android SDK components
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
-
-      - name: Accept licenses and install SDK components
-        run: |
-          echo y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-${TARGET_VERSION}"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
+          cd $ANDROID_HOME/cmdline-tools/latest/bin
+          ./sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
+          ./sdkmanager --licenses
 
       - name: Create AVD
         run: |
-          echo no | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-21;google_apis;armeabi-v7a" --force
+          cd $ANDROID_HOME/cmdline-tools/latest/bin
+          echo no | ./avdmanager create avd -n test -k "system-images;android-21;google_apis;armeabi-v7a" --force
 
       - name: Start Emulator
         run: |
           emulator -avd test -no-audio -no-window &
-          android-wait-for-emulator
+          sleep 60  # Adjust the duration as needed
 
       - name: Run tests
         run: ./gradlew clean connectedCheck
