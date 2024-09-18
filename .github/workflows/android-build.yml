@@ -34,18 +34,20 @@ jobs:
           sudo mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           rm commandlinetools.zip
 
-      - name: Install Android SDK components
-        run: |
-          cd $ANDROID_HOME/cmdline-tools/latest/bin
-          # Install necessary SDK components
-          ./sdkmanager "platforms;android-${TARGET_VERSION}"
-          ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
-          ./sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
-
-      - name: Accept SDK Licenses
+      - name: Accept Android SDK Licenses
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
           yes | ./sdkmanager --licenses
+
+      - name: Install Android SDK components
+        run: |
+          cd $ANDROID_HOME/cmdline-tools/latest/bin
+          ./sdkmanager "platform-tools"
+          ./sdkmanager "emulator"
+          ./sdkmanager "tools"
+          ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+          ./sdkmanager "platforms;android-${TARGET_VERSION}"
+          ./sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
 
       - name: Create AVD
         run: |
