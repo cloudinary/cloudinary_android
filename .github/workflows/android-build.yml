@@ -38,6 +38,8 @@ jobs:
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
           yes | ./sdkmanager --licenses
+          cd $ANDROID_HOME\sdk\tools\bin
+          yes | ./sdkmanager --licenses
 
       - name: Install Android SDK components
         run: |
