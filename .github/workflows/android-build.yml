@@ -9,47 +9,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      TARGET_VERSION: 30
-      ANDROID_BUILD_TOOLS_VERSION: 30.0.2
-      ANDROID_HOME: /usr/local/android-sdk
-      MALLOC_ARENA_MAX: 2
-      ADB_INSTALL_TIMEOUT: 20
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 11
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
           java-version: '11'
 
-      - name: Install command line tools
+      - name: Install SDK Command Line Tools
         run: |
           sudo mkdir -p $ANDROID_HOME/cmdline-tools
-          sudo wget "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip" -O commandlinetools.zip
-          sudo unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-          sudo mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          rm commandlinetools.zip
+          wget "https://dl.google.com/android/repository/commandlinetools-linux-8210871_latest.zip" -O commandlinetools.zip
+          unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-${TARGET_VERSION}"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-21;default;armeabi-v7a"
 
-      - name: List available system images
+      - name: Create AVD
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
+          echo no | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-21;default;armeabi-v7a" --force
 
-      - name: Install Android SDK components without `yes`
+      - name: Start emulator
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-${TARGET_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "system-images;android-30;default;armeabi-v7a"
-
-      - name: Start Android Emulator
-        run: |
-          echo no | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-21;default;arm64-v8a" --force
-          $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -gpu swiftshader_indirect &
-          adb wait-for-device
-          adb shell input keyevent 82
-        timeout-minutes: 10
+          emulator -avd test -no-audio -no-window &
+          android-wait-for-emulator
 
       - name: Run tests
         run: ./gradlew clean connectedCheck
+
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
