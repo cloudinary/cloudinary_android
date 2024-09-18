@@ -47,12 +47,12 @@ jobs:
           ./sdkmanager "tools"
           ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
           ./sdkmanager "platforms;android-${TARGET_VERSION}"
-          ./sdkmanager "system-images;android-30;google_apis;arm64-v8a"
+          ./sdkmanager "system-images;android-30;google_apis;x86"
 
       - name: Create AVD
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
-          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;arm64-v8a" --force
+          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
 
       - name: Start ADB Server
         run: adb start-server
