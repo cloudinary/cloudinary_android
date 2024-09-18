@@ -56,6 +56,8 @@ jobs:
 
       - name: Start Emulator
         run: |
+          echo "Starting emulator..."
+          export PATH=$PATH:$ANDROID_HOME/emulator
           emulator -avd test -no-audio -no-window &
           # Wait for the emulator to start up
           sleep 60  # Adjust the duration as needed
