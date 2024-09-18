@@ -37,7 +37,7 @@ jobs:
       - name: Install Android SDK components without `yes`
         run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-${TARGET_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "system-images;android-21;default;armeabi-v7a"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-${TARGET_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "system-images;android-30;default;armeabi-v7a"
 
       - name: Start Android Emulator
         run: |
