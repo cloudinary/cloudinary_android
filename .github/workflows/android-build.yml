@@ -34,12 +34,8 @@ jobs:
           sudo mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
           rm commandlinetools.zip
 
-      - name: Accept Android SDK Licenses
-        run: |
-          cd $ANDROID_HOME/sdk/tools/bin
-          yes | ./sdkmanager --licenses
-          cd $ANDROID_HOME/cmdline-tools/latest/bin
-          yes | ./sdkmanager --licenses
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
 
       - name: Install Android SDK components
         run: |
