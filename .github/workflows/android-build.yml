@@ -3,8 +3,10 @@ name: Android Build and Test
 on:
   push:
     branches:
-      - 'feature/github_actions'
-
+      - '**'  # Triggers on any branch push, adjust as needed
+  pull_request:
+    branches:
+      - '**'  # Triggers on any PR, adjust as needed
 
 jobs:
   build:
@@ -57,6 +59,11 @@ jobs:
           emulator -avd test -no-audio -no-window &
           # Wait for the emulator to start up
           sleep 60  # Adjust the duration as needed
+
+      - name: Export CLOUDINARY_URL
+        run: |
+          export CLOUDINARY_URL=$(bash tools/get_test_cloud.sh)
+          echo "CLOUDINARY_URL=$CLOUDINARY_URL" >> $GITHUB_ENV
 
       - name: Run tests
         run: ./gradlew clean connectedCheck
