@@ -38,16 +38,13 @@ jobs:
         run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
 
-      - name: Install Android SDK components without `yes`
+      - name: Accept licenses and install SDK components
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-${TARGET_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "system-images;android-21;default;armeabi-v7a"
-
-      - name: Install SDK Packages
-        run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-${TARGET_VERSION}"
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
+          echo y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-${TARGET_VERSION}"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-21;google_apis;armeabi-v7a"
 
       - name: Create AVD
         run: |
