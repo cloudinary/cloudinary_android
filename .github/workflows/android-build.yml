@@ -1,12 +1,6 @@
 name: Android Build and Test
 
-on:
-  push:
-    branches:
-      - '**'
-  pull_request:
-    branches:
-      - '**'
+on: [push, pull_request]
 
 jobs:
   build:
@@ -27,14 +21,6 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '11'
-
-      - name: Install command line tools
-        run: |
-          sudo mkdir -p $ANDROID_HOME/cmdline-tools
-          sudo wget "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip" -O commandlinetools.zip
-          sudo unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-          sudo mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-          rm commandlinetools.zip
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -70,15 +56,6 @@ jobs:
           emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics &
           # Wait for the emulator to start up
           sleep 120
-
-      - name: Check ADB Devices
-        run: adb devices
-
-      - name: Check Emulator Version
-        run: adb shell getprop ro.build.version.sdk
-
-      - name: Check Emulator Status
-        run: adb shell getprop sys.boot_completed
 
       - name: Export CLOUDINARY_URL
         run: |
