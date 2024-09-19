@@ -1,3 +1,12 @@
+3.0.0 / 2024-19-09
+==================
+
+Other Changes
+-------------
+* Bump fresco version
+* Bump Java minimum version to 11
+* Bump minSdkVersion to 21
+
 2.8.0 / 2024-01-15
 ==================
 Other Changes

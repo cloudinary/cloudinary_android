@@ -31,8 +31,9 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 ## Version Support
 | Cloudinary SDK | Android SDK | 
 |----------------|-------------|
-|      2.x       |    > 19     |
-|      1.x       |    > 14     |
+| 3.x            | > 21        |
+| 2.x            | > 19        |
+| 1.x            | > 14        |
 
 
 ## Installation
@@ -40,14 +41,14 @@ For the complete documentation, see the [Android SDK Guide](https://cloudinary.c
 ### Gradle Integration
 Add the following dependency to your build.gradle:
 
-`implementation 'com.cloudinary:cloudinary-android:2.8.0'`
+`implementation 'com.cloudinary:cloudinary-android:3.0.0'`
 ### Other Options ######################################################################
 The cloudinary_android library is available in [Maven Central](http://repo1.maven.org/maven/). To use it, add the following dependency to your pom.xml:
 
     <dependency>
         <groupId>com.cloudinary</groupId>
         <artifactId>cloudinary-android</artifactId>
-        <version>2.8.0</version>
+        <version>3.0.0</version>
     </dependency>
 
 Download the latest cloudinary-android from [here](https://mvnrepository.com/artifact/com.cloudinary/cloudinary-android-core) and the latest cloudinary-core from [here](https://mvnrepository.com/artifact/com.cloudinary/cloudinary-core) and put them in your libs folder.
