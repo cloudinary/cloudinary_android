@@ -9,7 +9,7 @@ android {
     defaultConfig {
         compileSdk 33
         applicationId "com.cloudinary.sample"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
