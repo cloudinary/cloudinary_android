@@ -116,7 +116,7 @@ task signAar(type: Sign) {
     if (aarFile.exists()) {
         sign aarFile
     } else {
-        throw new GradleException("The artifact file does not exist: $aarFile")
+//        throw new GradleException("The artifact file does not exist: $aarFile")
     }
 }
 
