@@ -19,6 +19,8 @@ if (hasProperty("ossrhTokenPassword")) {
             mavenAar(MavenPublication) {
                 from components.android
 
+                artifact("$buildDir/outputs/aar/$jarFileName-release.aar")
+
                 artifact(file("$buildDir/libs/$jarFileName-$version-javadoc.jar.asc")) {
                     classifier = 'javadoc'
                     extension = 'jar.asc'
