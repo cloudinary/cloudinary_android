@@ -16,7 +16,6 @@ import com.cloudinary.android.UploadRequest;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.uploadwidget.UploadWidget;
-import com.cloudinary.sample.databinding.UploadChoiceFragmentBinding;
 import com.cloudinary.sample.databinding.UploadWidgetFragmentBinding;
 import com.cloudinary.sample.helpers.Utils;
 

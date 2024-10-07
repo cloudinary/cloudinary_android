@@ -10,7 +10,6 @@ import android.webkit.WebView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.cloudinary.sample.databinding.ActivityBaseBinding;
 import com.cloudinary.sample.databinding.NoCloudFragmentBinding;
 import com.cloudinary.sample.helpers.CloudinaryHelper;
 

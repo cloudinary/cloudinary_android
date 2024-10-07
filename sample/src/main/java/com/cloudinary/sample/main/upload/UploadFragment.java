@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.cloudinary.sample.databinding.UploadChoiceFragmentBinding;
 import com.cloudinary.sample.databinding.UploadFragmentBinding;
 import com.cloudinary.sample.main.delivery.base.BaseActivity;
 import com.cloudinary.sample.main.delivery.base.BaseActivityType;

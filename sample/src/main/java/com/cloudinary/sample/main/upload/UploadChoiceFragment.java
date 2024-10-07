@@ -15,7 +15,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.cloudinary.sample.databinding.UploadChoiceFragmentBinding;
-import com.cloudinary.sample.databinding.VideoFragmentBinding;
 import com.cloudinary.sample.main.widgets.upload_widget.UploadWidgetFragment;
 
 
