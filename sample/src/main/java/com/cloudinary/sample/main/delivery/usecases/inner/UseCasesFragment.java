@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.cloudinary.sample.databinding.TransformationFragmentBinding;
 import com.cloudinary.sample.databinding.UsecasesFragmentBinding;
 import com.cloudinary.sample.main.delivery.usecases.OnUseCaseItemSelectedListener;
 import com.cloudinary.sample.main.delivery.usecases.inner.adapt.AdaptToScreenSizeFragment;

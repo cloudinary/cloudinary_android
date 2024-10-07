@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.cloudinary.android.preprocess.Preprocess;
-import com.cloudinary.android.preprocess.PreprocessChain;
 
 /**
  * Preprocess implementation for resizing. Send an instance to {@link PreprocessChain#addStep(Preprocess)}

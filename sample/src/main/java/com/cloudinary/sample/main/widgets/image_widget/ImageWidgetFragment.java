@@ -1,7 +1,5 @@
 package com.cloudinary.sample.main.widgets.image_widget;
 
-import static java.util.Objects.requireNonNull;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +13,6 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.download.fresco.FrescoDownloadRequestBuilderFactory;
 import com.cloudinary.android.download.glide.GlideDownloadRequestBuilderFactory;
 import com.cloudinary.android.download.picasso.PicassoDownloadRequestBuilderFactory;
-import com.cloudinary.sample.GlideApp;
 import com.cloudinary.sample.databinding.ImageWidgetFragmentBinding;
 import com.facebook.drawee.view.SimpleDraweeView;
 

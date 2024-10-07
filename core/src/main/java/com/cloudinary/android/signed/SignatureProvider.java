@@ -1,10 +1,5 @@
 package com.cloudinary.android.signed;
 
-import android.content.Context;
-
-import com.cloudinary.android.MediaManager;
-import com.cloudinary.android.UploadRequest;
-
 import java.util.Map;
 
 /**

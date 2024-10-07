@@ -2,22 +2,11 @@ package com.cloudinary.android;
 
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
-import androidx.test.internal.util.ReflectionUtil;
-import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.work.BackoffPolicy;
-import androidx.work.Constraints;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
-import androidx.work.impl.model.WorkSpec;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.android.callback.ErrorInfo;
-import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.android.payload.FilePayload;
-import com.cloudinary.utils.ObjectUtils;
 
-import org.cloudinary.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,8 +14,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.util.Map;
 
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class AndroidJobStrategyTest extends AbstractTest {

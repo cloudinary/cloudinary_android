@@ -14,7 +14,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.cloudinary.sample.R;
 import com.cloudinary.sample.databinding.ActivityBaseBinding;
-import com.cloudinary.sample.databinding.ActivityMainBinding;
 import com.cloudinary.sample.databinding.HeadingBinding;
 import com.cloudinary.sample.helpers.StringHelper;
 import com.cloudinary.sample.main.delivery.optimization.OptimizationFragment;

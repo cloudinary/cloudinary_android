@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cloudinary.sample.R;
-import com.cloudinary.sample.databinding.TransformationCellBinding;
 import com.cloudinary.sample.databinding.UsecasesCellBinding;
 import com.cloudinary.sample.main.delivery.usecases.OnUseCaseItemSelectedListener;
 

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.cloudinary.android.MediaManager;
 import com.cloudinary.sample.R;
 import com.cloudinary.sample.helpers.CloudinaryHelper;
 import com.cloudinary.sample.main.delivery.DeliveryFragment;

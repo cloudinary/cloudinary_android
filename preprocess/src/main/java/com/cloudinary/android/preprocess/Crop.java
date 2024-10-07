@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 
 import com.cloudinary.android.preprocess.Preprocess;
-import com.cloudinary.android.preprocess.PreprocessChain;
 import com.cloudinary.android.preprocess.PreprocessException;
 
 /**
