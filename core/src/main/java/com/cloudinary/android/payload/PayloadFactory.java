@@ -5,7 +5,9 @@ import android.net.Uri;
 /**
  * This class is used to construct Payload instances from URIs.
  */
-public class PayloadFactory {
+public final class PayloadFactory {
+    private PayloadFactory() {}
+
     private static final String TAG = PayloadFactory.class.getSimpleName();
 
     /**

@@ -12,7 +12,8 @@ import com.cloudinary.android.preprocess.Rotate;
 import com.cloudinary.android.uploadwidget.utils.MediaType;
 import com.cloudinary.android.uploadwidget.utils.UriUtils;
 
-class UploadWidgetResultProcessor {
+final class UploadWidgetResultProcessor {
+    private UploadWidgetResultProcessor() {}
 
     static UploadRequest process(Context context, UploadWidget.Result result) {
         UploadRequest uploadRequest = MediaManager.get().upload(result.uri);

@@ -11,7 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BitmapUtils {
+public final class BitmapUtils {
+    private BitmapUtils() {}
 
     /**
      * Decode a sampled bitmap to the required width and height.

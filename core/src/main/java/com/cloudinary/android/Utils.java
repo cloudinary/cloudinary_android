@@ -5,7 +5,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 
-public class Utils {
+public final class Utils {
+    private Utils() {}
+
     public static String cloudinaryUrlFromContext(Context context) {
         String url = "";
         try {

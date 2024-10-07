@@ -8,7 +8,8 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import android.webkit.MimeTypeMap;
 
-public class UriUtils {
+public final class UriUtils {
+    private UriUtils() {}
 
     /**
      * Get the media type of the Uri.

@@ -21,7 +21,8 @@ import java.util.Collection;
 /**
  * Helper class to start the UploadWidget and preprocess its results.
  */
-public class UploadWidget {
+public final class UploadWidget {
+    private UploadWidget() {}
 
     /**
      * The key used to pass upload widget result data back from {@link UploadWidgetActivity}.

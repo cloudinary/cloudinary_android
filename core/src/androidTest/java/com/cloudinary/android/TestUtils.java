@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class TestUtils {
+public final class TestUtils {
+    private TestUtils() {}
+
     public static AbstractUploaderStrategy replaceWithTimeoutStrategy(Cloudinary cloudinary) throws NoSuchFieldException, IllegalAccessException, IOException {
         return TestUtils.replaceStrategyForIntsance(cloudinary, new AbstractUploaderStrategy() {
 

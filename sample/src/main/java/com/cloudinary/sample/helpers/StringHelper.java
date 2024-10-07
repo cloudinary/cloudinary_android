@@ -1,6 +1,7 @@
 package com.cloudinary.sample.helpers;
 
-public class StringHelper {
+public final class StringHelper {
+    private StringHelper() {}
 
     public static String captialLetter(String input) {
 
