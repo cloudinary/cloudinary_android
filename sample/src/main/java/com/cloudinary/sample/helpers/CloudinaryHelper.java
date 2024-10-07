@@ -7,7 +7,8 @@ import com.cloudinary.android.MediaManager;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CloudinaryHelper {
+public final class CloudinaryHelper {
+    private CloudinaryHelper() {}
 
     public static void setMediaManager(Context context, String cloudName) {
         Map config = new HashMap();

@@ -8,7 +8,8 @@ import android.graphics.drawable.Drawable;
 
 import com.cloudinary.sample.R;
 
-public class Utils {
+public final class Utils {
+    private Utils() {}
 
     public static String UPLOAD_PRESET = "android_sample";
     public static String getImageWidhtAndHeightString(Drawable drawable) {
