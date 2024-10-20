@@ -6,7 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
-public class Utils {
+public final class Utils {
+    private Utils() {}
 
     public static String UPLOAD_PRESET = "android_sample";
     public static String getImageWidhtAndHeightString(Drawable drawable) {

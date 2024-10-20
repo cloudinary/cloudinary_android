@@ -2,7 +2,9 @@ package com.cloudinary.android;
 
 import android.util.Log;
 
-public class Logger {
+public final class Logger {
+    private Logger() {}
+
     static LogLevel logLevel = LogLevel.ERROR;
 
     public static void i(String tag, String message) {
