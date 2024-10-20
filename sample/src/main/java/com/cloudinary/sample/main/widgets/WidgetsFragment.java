@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import androidx.media3.common.Player;
 
 import com.cloudinary.android.cldvideoplayer.CldVideoPlayer;
-import com.cloudinary.sample.databinding.DeliveryFragementBinding;
 import com.cloudinary.sample.databinding.WidgetsFragementBinding;
 import com.cloudinary.sample.main.delivery.base.BaseActivity;
 import com.cloudinary.sample.main.delivery.base.BaseActivityType;

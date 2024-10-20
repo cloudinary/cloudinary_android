@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
 import com.cloudinary.android.preprocess.Preprocess;
-import com.cloudinary.android.preprocess.PreprocessChain;
 
 /**
  * Preprocess for rotating. Send an instance to {@link PreprocessChain#addStep(Preprocess)} to rotate an image.

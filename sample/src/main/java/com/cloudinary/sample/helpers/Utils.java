@@ -6,8 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
-import com.cloudinary.sample.R;
-
 public class Utils {
 
     public static String UPLOAD_PRESET = "android_sample";
