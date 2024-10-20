@@ -1,6 +1,5 @@
 package com.cloudinary.android.download;
 
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import com.cloudinary.Transformation;

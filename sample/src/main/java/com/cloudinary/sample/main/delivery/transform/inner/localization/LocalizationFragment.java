@@ -14,7 +14,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cloudinary.sample.databinding.LocalizationFragmentBinding;
-import com.cloudinary.sample.databinding.OptimizationFragmentBinding;
 import com.cloudinary.sample.helpers.views.RevealImageView;
 
 

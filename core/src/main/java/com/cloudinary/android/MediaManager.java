@@ -1,9 +1,7 @@
 package com.cloudinary.android;
 
-import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -24,7 +22,6 @@ import com.cloudinary.android.payload.LocalUriPayload;
 import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.ResourcePayload;
 import com.cloudinary.android.policy.GlobalUploadPolicy;
-import com.cloudinary.android.policy.UploadPolicy;
 import com.cloudinary.android.signed.SignatureProvider;
 import com.cloudinary.utils.Analytics;
 import com.cloudinary.utils.StringUtils;

@@ -11,7 +11,6 @@ import androidx.media3.common.Player;
 
 import com.cloudinary.android.cldvideoplayer.CldVideoPlayer;
 import com.cloudinary.sample.databinding.AdaptToScreenSizeBinding;
-import com.cloudinary.sample.databinding.ConditionalProductBadgingBinding;
 
 public class AdaptToScreenSizeFragment extends Fragment {
     AdaptToScreenSizeBinding binding;

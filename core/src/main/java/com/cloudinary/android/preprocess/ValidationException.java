@@ -1,8 +1,5 @@
 package com.cloudinary.android.preprocess;
 
-import android.content.Context;
-
-import com.cloudinary.android.preprocess.Preprocess;
 import com.cloudinary.android.preprocess.PreprocessException;
 
 /**

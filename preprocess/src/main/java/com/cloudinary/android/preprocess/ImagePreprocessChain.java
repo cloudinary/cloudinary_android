@@ -2,8 +2,6 @@ package com.cloudinary.android.preprocess;
 
 import android.graphics.Bitmap;
 
-import com.cloudinary.android.UploadRequest;
-
 /**
  * A preprocess chain to run on images before uploading. Pass an instance of a populated chain to {@link UploadRequest#preprocess(PreprocessChain)}.
  * The processing steps will run by the order in which they were added to the chain. This chain uses the default Bitmap encoder/decoder, however custom implementations
