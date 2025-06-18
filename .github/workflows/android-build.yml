@@ -1,4 +1,4 @@
-name: Android Workflow
+name: Test
 
 on: [push, pull_request]
 
@@ -16,11 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: 'adopt'
+          java-version: '11'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -30,11 +30,12 @@ jobs:
           cd $ANDROID_HOME/cmdline-tools/latest/bin
           ./sdkmanager "platform-tools"
           ./sdkmanager "emulator"
+          ./sdkmanager "tools"
           ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
           ./sdkmanager "platforms;android-${TARGET_VERSION}"
-          ./sdkmanager "system-images;android-30;google_apis;x86_64"
+          ./sdkmanager "system-images;android-30;google_apis;x86"
 
-      - name: Enable KVM (safe for CI even if no hardware accel)
+      - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
@@ -43,7 +44,7 @@ jobs:
       - name: Create AVD
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
-          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force
+          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
 
       - name: Start ADB Server
         run: adb start-server
@@ -52,23 +53,9 @@ jobs:
         run: |
           echo "Starting emulator..."
           export PATH=$PATH:$ANDROID_HOME/emulator
-          nohup emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics -accel off > /tmp/emulator.log 2>&1 &
-
-          echo "Waiting for emulator device..."
-          adb wait-for-device
-
-          echo "Waiting for emulator to boot..."
-          boot_completed=""
-          until [[ "$boot_completed" == "1" ]]; do
-            sleep 5
-            boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-          done
-
-          adb shell input keyevent 82
-          echo "Emulator is fully booted."
-
-      - name: Verify emulator is running
-        run: adb devices
+          emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics &
+          # Wait for the emulator to start up
+          sleep 120
 
       - name: Export CLOUDINARY_URL
         run: |
@@ -77,7 +64,3 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean connectedCheck --stacktrace
-
-      - name: Dump emulator log on failure
-        if: failure()
-        run: cat /tmp/emulator.log
