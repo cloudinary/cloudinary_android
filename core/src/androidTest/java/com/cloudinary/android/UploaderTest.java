@@ -88,7 +88,7 @@ public class UploaderTest extends AbstractTest {
         Map<String, Object> to_sign = new HashMap<String, Object>();
         to_sign.put("public_id", result.getString("public_id"));
         to_sign.put("version", ObjectUtils.asString(result.get("version")));
-        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret, cloudinary.config.signatureVersion);
         Assert.assertEquals(result.get("signature"), expected_signature);
     }
 
@@ -119,7 +119,7 @@ public class UploaderTest extends AbstractTest {
         Map<String, Object> to_sign = new HashMap<String, Object>();
         to_sign.put("public_id", result.getString("public_id"));
         to_sign.put("version", ObjectUtils.asString(result.get("version")));
-        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret, cloudinary.config.signatureVersion);
         Assert.assertEquals(result.get("signature"), expected_signature);
     }
 
@@ -135,7 +135,7 @@ public class UploaderTest extends AbstractTest {
         to_sign.put("public_id", result.getString("public_id"));
         to_sign.put("version", ObjectUtils.asString(result.get("version")));
         Log.d("TestRunner", cloudinary.config.apiSecret);
-        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret, cloudinary.config.signatureVersion);
         Assert.assertEquals(result.get("signature"), expected_signature);
     }
 
@@ -149,7 +149,7 @@ public class UploaderTest extends AbstractTest {
         Map<String, Object> to_sign = new HashMap<String, Object>();
         to_sign.put("public_id", (String) result.get("public_id"));
         to_sign.put("version", ObjectUtils.asString(result.get("version")));
-        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret, cloudinary.config.signatureVersion);
         Assert.assertEquals(result.get("signature"), expected_signature);
     }
 
@@ -167,7 +167,7 @@ public class UploaderTest extends AbstractTest {
         Map<String, Object> to_sign = new HashMap<String, Object>();
         to_sign.put("public_id", (String) result.get("public_id"));
         to_sign.put("version", ObjectUtils.asString(result.get("version")));
-        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret);
+        String expected_signature = cloudinary.apiSignRequest(to_sign, cloudinary.config.apiSecret, cloudinary.config.signatureVersion);
         Assert.assertEquals(result.get("signature"), expected_signature);
     }
 
@@ -182,7 +182,7 @@ public class UploaderTest extends AbstractTest {
 
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("timestamp", Long.valueOf(System.currentTimeMillis() / 1000L).toString());
-        params.put("signature", this.cloudinary.apiSignRequest(params, apiSecret));
+        params.put("signature", this.cloudinary.apiSignRequest(params, apiSecret, cloudinary.config.signatureVersion));
         Cloudinary emptyCloudinary = new Cloudinary(config);
         JSONObject result = new JSONObject(emptyCloudinary.uploader().upload(getAssetStream(TEST_IMAGE), params));
         Assert.assertEquals(result.getLong("width"), 241L);
@@ -190,7 +190,7 @@ public class UploaderTest extends AbstractTest {
         Map<String, Object> to_sign = new HashMap<String, Object>();
         to_sign.put("public_id", result.getString("public_id"));
         to_sign.put("version", ObjectUtils.asString(result.get("version")));
-        String expected_signature = cloudinary.apiSignRequest(to_sign, apiSecret);
+        String expected_signature = cloudinary.apiSignRequest(to_sign, apiSecret, cloudinary.config.signatureVersion);
         Assert.assertEquals(result.get("signature"), expected_signature);
     }
 
