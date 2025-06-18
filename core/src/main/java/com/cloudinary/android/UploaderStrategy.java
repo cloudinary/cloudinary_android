@@ -54,7 +54,7 @@ public class UploaderStrategy extends AbstractUploaderStrategy {
                 if (apiSecret == null)
                     throw new IllegalArgumentException("Must supply api_secret");
                 params.put("timestamp", Long.valueOf(System.currentTimeMillis() / 1000L).toString());
-                params.put("signature", this.cloudinary().apiSignRequest(params, apiSecret));
+                params.put("signature", this.cloudinary().apiSignRequest(params, apiSecret, this.cloudinary().config.signatureVersion));
                 params.put("api_key", apiKey);
             }
         }
