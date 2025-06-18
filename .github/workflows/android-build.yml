@@ -32,9 +32,9 @@ jobs:
           ./sdkmanager "emulator"
           ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
           ./sdkmanager "platforms;android-${TARGET_VERSION}"
-          ./sdkmanager "system-images;android-30;google_apis;x86"
+          ./sdkmanager "system-images;android-30;google_apis;x86_64"
 
-      - name: Enable KVM
+      - name: Enable KVM (safe for CI even if no hardware accel)
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
@@ -43,7 +43,7 @@ jobs:
       - name: Create AVD
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
-          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force
 
       - name: Start ADB Server
         run: adb start-server
@@ -52,23 +52,19 @@ jobs:
         run: |
           echo "Starting emulator..."
           export PATH=$PATH:$ANDROID_HOME/emulator
-          nohup emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics > /dev/null 2>&1 &
-          
-          # Wait for ADB to detect the device
+          nohup emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics -accel off > /tmp/emulator.log 2>&1 &
+
           echo "Waiting for emulator device..."
           adb wait-for-device
 
-          # Poll for full boot
-          boot_completed=""
           echo "Waiting for emulator to boot..."
+          boot_completed=""
           until [[ "$boot_completed" == "1" ]]; do
             sleep 5
             boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
           done
 
-          # Optional: unlock the screen (some test frameworks expect an unlocked device)
           adb shell input keyevent 82
-
           echo "Emulator is fully booted."
 
       - name: Verify emulator is running
@@ -81,3 +77,7 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean connectedCheck --stacktrace
+
+      - name: Dump emulator log on failure
+        if: failure()
+        run: cat /tmp/emulator.log
