@@ -52,9 +52,27 @@ jobs:
         run: |
           echo "Starting emulator..."
           export PATH=$PATH:$ANDROID_HOME/emulator
-          emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics &
-          # Wait for emulator to fully boot
-          sleep 120
+          nohup emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics > /dev/null 2>&1 &
+          
+          # Wait for ADB to detect the device
+          echo "Waiting for emulator device..."
+          adb wait-for-device
+
+          # Poll for full boot
+          boot_completed=""
+          echo "Waiting for emulator to boot..."
+          until [[ "$boot_completed" == "1" ]]; do
+            sleep 5
+            boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+          done
+
+          # Optional: unlock the screen (some test frameworks expect an unlocked device)
+          adb shell input keyevent 82
+
+          echo "Emulator is fully booted."
+
+      - name: Verify emulator is running
+        run: adb devices
 
       - name: Export CLOUDINARY_URL
         run: |
