@@ -43,8 +43,13 @@ jobs:
 
       - name: Create AVD
         run: |
-          cd $ANDROID_HOME/cmdline-tools/latest/bin
-          echo no | ./avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+
+      - name: List AVDs (debug)
+        run: |
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+          avdmanager list avd
 
       - name: Start ADB Server
         run: adb start-server
@@ -52,10 +57,18 @@ jobs:
       - name: Start Emulator
         run: |
           echo "Starting emulator..."
-          export PATH=$PATH:$ANDROID_HOME/emulator
-          emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics &
+          export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin
+          # Verify AVD exists before starting
+          avdmanager list avd
+          emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics -verbose &
+
+      - name: Wait for emulator
+        run: |
           # Wait for the emulator to start up
-          sleep 120
+          echo "Waiting for emulator to boot..."
+          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+          adb devices
+          echo "Emulator is ready"
 
       - name: Export CLOUDINARY_URL
         run: |
