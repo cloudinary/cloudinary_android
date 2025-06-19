@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'com.cloudinary.android.ui'
     compileSdk 34
 
 

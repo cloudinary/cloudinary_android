@@ -22,6 +22,7 @@ public class ResponsiveTest extends AbstractTest {
     public static void setUp() throws Exception {
         String url = Utils.cloudinaryUrlFromContext(InstrumentationRegistry.getInstrumentation().getContext());
         cloudinary = new Cloudinary(url);
+        cloudinary.config.analytics = false;
     }
 
     /**

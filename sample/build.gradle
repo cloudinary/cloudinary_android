@@ -7,6 +7,7 @@ android {
     }
 
     defaultConfig {
+        namespace 'com.cloudinary.sample'
         compileSdk 34
         applicationId "com.cloudinary.sample"
         minSdkVersion 21
