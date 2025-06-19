@@ -11,7 +11,6 @@ import com.cloudinary.android.payload.LocalUriPayload;
 import com.cloudinary.android.payload.Payload;
 import com.cloudinary.android.payload.PayloadFactory;
 import com.cloudinary.android.payload.PayloadNotFoundException;
-import com.cloudinary.android.payload.ResourcePayload;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,7 +18,10 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -64,10 +66,26 @@ public class PayloadTest extends AbstractTest {
     }
 
     @Test
-    public void testResourcePayload() throws PayloadNotFoundException {
-        ResourcePayload payload = new ResourcePayload(com.cloudinary.android.core.test.R.raw.old_logo);
+    public void testResourcePayload() throws PayloadNotFoundException, IOException {
+        InputStream is = InstrumentationRegistry.getInstrumentation()
+                .getContext()
+                .getAssets()
+                .open("images/old_logo.png");
+
+        File tempFile = File.createTempFile("old_logo", ".png");
+
+        try (OutputStream os = new FileOutputStream(tempFile)) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length); // ✅ the actual fix
+            }
+        }
+
+        Payload<String> payload = new FilePayload(tempFile.getAbsolutePath());
         verifyLengthAndRecreation(payload, 3381);
     }
+
 
     private void verifyLengthAndRecreation(Payload payload, long expectedLength) throws PayloadNotFoundException {
         assertEquals(expectedLength, payload.getLength(InstrumentationRegistry.getInstrumentation().getContext()));

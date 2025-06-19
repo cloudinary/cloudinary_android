@@ -51,6 +51,7 @@ public class UploaderTest extends AbstractTest {
         String url = Utils.cloudinaryUrlFromContext(InstrumentationRegistry.getInstrumentation().getContext());
         cloudinary = new Cloudinary(url);
         cloudinary.config.analytics = false;
+        cloudinary.config.secure = false;
         if (StringUtils.isBlank(url)) {
             throw new IllegalArgumentException("UploaderTest - No cloudinary url configured");
         }

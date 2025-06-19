@@ -1,6 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'com.cloudinary.android.core'
+    testNamespace 'com.cloudinary.android.test'
     compileSdk 34
 
 

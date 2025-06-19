@@ -1,1 +1,4 @@
-<manifest package="com.cloudinary.android.download" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- rest of manifest -->
+</manifest>
