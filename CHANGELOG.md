@@ -1,3 +1,12 @@
+3.1.0 / 2025-19-06
+==================
+
+Other Changes
+-------------
+* Bump Java SDK version
+* Make utility classes proper utilities 
+* Bump api level to 34
+
 3.0.2 / 2024-25-09
 ==================
 
