@@ -19,23 +19,6 @@ if (hasProperty("ossrhTokenPassword")) {
             mavenAar(MavenPublication) {
                 from components.android
 
-                artifact("$buildDir/outputs/aar/$jarFileName-release.aar")
-
-                artifact(file("$buildDir/libs/$jarFileName-$version-javadoc.jar.asc")) {
-                    classifier = 'javadoc'
-                    extension = 'jar.asc'
-                }
-
-                artifact(file("$buildDir/libs/$jarFileName-$version-sources.jar.asc")) {
-                    classifier = 'sources'
-                    extension = 'jar.asc'
-                }
-
-                artifact(file("$buildDir/outputs/aar/$jarFileName-release.aar.asc")) {
-                    classifier = null
-                    extension = 'aar.asc'
-                }
-
                 pom {
                     name = publishArtifactName
                     packaging = 'aar'
@@ -63,28 +46,6 @@ if (hasProperty("ossrhTokenPassword")) {
                         url = scmUrl
                     }
                 }
-
-                pom.withXml {
-                    def pomFile = file("${project.buildDir}/generated-pom.xml")
-                    writeTo(pomFile)
-                    def pomAscFile = signing.sign(pomFile).signatureFiles[0]
-                    artifact(pomAscFile) {
-                        classifier = null
-                        extension = 'pom.asc'
-                    }
-                }
-
-                project.tasks.signArchives.signatureFiles.each {
-                    artifact(it) {
-                        def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
-                        if (matcher.find()) {
-                            classifier = matcher.group(1)
-                        } else {
-                            classifier = null
-                        }
-                        extension = 'jar.asc'
-                    }
-                }
             }
         }
 
@@ -96,46 +57,27 @@ if (hasProperty("ossrhTokenPassword")) {
                 }
             }
         }
+    }
 
-        model {
-            tasks.generatePomFileForMavenAarPublication {
-                destination = file("$buildDir/generated-pom.xml")
-            }
-            tasks.publishMavenAarPublicationToMavenLocal {
-                dependsOn project.tasks.signArchives
-            }
-            tasks.publishMavenAarPublicationToSonatypeRepository {
-                dependsOn project.tasks.signArchives
-            }
+    // Configure signing to happen after evaluation
+    afterEvaluate {
+        signing.sign publishing.publications.mavenAar
+    }
+}
+
+// Enable sources and javadoc generation for Android libraries
+android {
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
         }
     }
 }
 
-task signAar(type: Sign) {
-    def aarFile = file("$buildDir/outputs/aar/$jarFileName-release.aar")
-    if (aarFile.exists()) {
-        sign aarFile
-    } else {
-//        throw new GradleException("The artifact file does not exist: $aarFile")
-    }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier = 'sources'
-}
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    android.libraryVariants.all { var -> classpath += var.javaCompileProvider.get().classpath }
-}
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
+// Ensure signing happens before publishing
+tasks.withType(PublishToMavenRepository) {
+    dependsOn tasks.withType(Sign)
 }
 
 tasks.withType(GenerateModuleMetadata) {
