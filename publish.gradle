@@ -1,29 +1,33 @@
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
-apply plugin: "de.marcphilipp.nexus-publish"
-apply plugin: "io.codearte.nexus-staging"
-apply plugin: 'digital.wup.android-maven-publish'
 
-if (hasProperty("ossrhTokenPassword")) {
-    signing {
-        sign configurations.archives
+// === Configure Android publishing (sources/javadoc jars) ===
+android {
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
+}
 
-    nexusStaging {
-        packageGroup = group
-        username = project.hasProperty("ossrhToken") ? project.ext["ossrhToken"] : ""
-        password = project.hasProperty("ossrhTokenPassword") ? project.ext["ossrhTokenPassword"] : ""
-    }
+def getReleaseComponent() {
+    return components.findByName("release")
+}
 
+// === Publishing Configuration ===
+afterEvaluate {
     publishing {
         publications {
-            mavenAar(MavenPublication) {
-                from components.android
+            release(MavenPublication) {
+                from getReleaseComponent()
+
+                groupId = publishGroupId
+                artifactId = publishArtifactId
+                version = publishVersion
 
                 pom {
                     name = publishArtifactName
-                    packaging = 'aar'
-                    groupId = publishGroupId
-                    artifactId = publishArtifactId
                     description = publishDescription
                     url = githubUrl
                     licenses {
@@ -32,7 +36,6 @@ if (hasProperty("ossrhTokenPassword")) {
                             url = licenseUrl
                         }
                     }
-
                     developers {
                         developer {
                             id = developerId
@@ -49,37 +52,19 @@ if (hasProperty("ossrhTokenPassword")) {
             }
         }
 
-        nexusPublishing {
-            repositories {
-                sonatype {
-                    username = project.hasProperty("ossrhToken") ? project.ext["ossrhToken"] : ""
-                    password = project.hasProperty("ossrhTokenPassword") ? project.ext["ossrhTokenPassword"] : ""
+        repositories {
+            maven {
+                name = "Sonatype"
+                url = uri("https://s01.oss.sonatype.org/content/repositories/releases/")
+                credentials {
+                    username = System.getenv("OSSRH_USERNAME")
+                    password = System.getenv("OSSRH_PASSWORD")
                 }
             }
         }
     }
 
-    // Configure signing to happen after evaluation
-    afterEvaluate {
-        signing.sign publishing.publications.mavenAar
+    signing {
+        sign publishing.publications.release
     }
-}
-
-// Enable sources and javadoc generation for Android libraries
-android {
-    publishing {
-        singleVariant('release') {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
-}
-
-// Ensure signing happens before publishing
-tasks.withType(PublishToMavenRepository) {
-    dependsOn tasks.withType(Sign)
-}
-
-tasks.withType(GenerateModuleMetadata) {
-    enabled = false
 }

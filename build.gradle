@@ -25,6 +25,7 @@ allprojects {
     }
 
     project.ext.set("publishGroupId", group)
+    project.ext.set("publishVersion", version)
 }
 
 ext.loadExtraProperties = { fileName ->
