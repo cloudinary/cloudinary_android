@@ -63,9 +63,10 @@ afterEvaluate {
             }
         }
     }
+
     signing {
         useInMemoryPgpKeys(
-                System.getenv("SIGNING_KEY"),
+                new String(Base64.decoder.decode(System.getenv("SIGNING_KEY")), "UTF-8"),
                 System.getenv("SIGNING_PASSWORD")
         )
         sign publishing.publications.release
