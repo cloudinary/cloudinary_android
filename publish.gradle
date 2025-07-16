@@ -65,10 +65,26 @@ afterEvaluate {
     }
 
     signing {
-        useInMemoryPgpKeys(
-                new String(Base64.decoder.decode(System.getenv("SIGNING_KEY")), "UTF-8"),
-                System.getenv("SIGNING_PASSWORD")
-        )
-        sign publishing.publications.release
+        signing {
+            def base64Key = System.getenv("SIGNING_KEY") ?: project.findProperty("signing.key")
+            def password = System.getenv("SIGNING_PASSWORD") ?: project.findProperty("signing.password")
+
+            if (!base64Key) throw new GradleException("SIGNING_KEY is missing or null.")
+            if (!password) throw new GradleException("SIGNING_PASSWORD is missing or null.")
+
+            def decodedKey = new String(Base64.decoder.decode(base64Key as String), "UTF-8")
+
+            if (!decodedKey.startsWith("-----BEGIN PGP PRIVATE KEY BLOCK-----")) {
+                throw new GradleException("SIGNING_KEY does not decode into a valid key block.")
+            }
+
+            try {
+                useInMemoryPgpKeys(decodedKey, password)
+            } catch (MissingMethodException e) {
+                throw new GradleException("`useInMemoryPgpKeys()` not found. Is the signing plugin applied?")
+            }
+
+            sign publishing.publications.release
+        }
     }
 }
