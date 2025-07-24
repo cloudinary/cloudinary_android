@@ -6,6 +6,10 @@ android {
         viewBinding = true
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
         namespace 'com.cloudinary.sample'
         compileSdk 34

@@ -1,143 +1,67 @@
-apply plugin: 'signing'
-apply plugin: "de.marcphilipp.nexus-publish"
-apply plugin: "io.codearte.nexus-staging"
-apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: 'maven-publish'
 
-if (hasProperty("ossrhTokenPassword")) {
-    signing {
-        sign configurations.archives
-    }
+// Simple module-level publishing for manual upload to Central Portal
+if (hasProperty("ossrhTokenPassword") || hasProperty("centralPassword")) {
 
-    nexusStaging {
-        packageGroup = group
-        username = project.hasProperty("ossrhToken") ? project.ext["ossrhToken"] : ""
-        password = project.hasProperty("ossrhTokenPassword") ? project.ext["ossrhTokenPassword"] : ""
-    }
-
-    publishing {
-        publications {
-            mavenAar(MavenPublication) {
-                from components.android
-
-                artifact("$buildDir/outputs/aar/$jarFileName-release.aar")
-
-                artifact(file("$buildDir/libs/$jarFileName-$version-javadoc.jar.asc")) {
-                    classifier = 'javadoc'
-                    extension = 'jar.asc'
-                }
-
-                artifact(file("$buildDir/libs/$jarFileName-$version-sources.jar.asc")) {
-                    classifier = 'sources'
-                    extension = 'jar.asc'
-                }
-
-                artifact(file("$buildDir/outputs/aar/$jarFileName-release.aar.asc")) {
-                    classifier = null
-                    extension = 'aar.asc'
-                }
-
-                pom {
-                    name = publishArtifactName
-                    packaging = 'aar'
-                    groupId = publishGroupId
+    // Use afterEvaluate to ensure Android components are available
+    afterEvaluate {
+        publishing {
+            publications {
+                mavenAar(MavenPublication) {
+                    // Set correct coordinates
+                    groupId = group
                     artifactId = publishArtifactId
-                    description = publishDescription
-                    url = githubUrl
-                    licenses {
-                        license {
-                            name = licenseName
-                            url = licenseUrl
-                        }
-                    }
+                    version = version
+                    
+                    // Include the AAR artifact and components properly for Android
+                    from components.release
 
-                    developers {
-                        developer {
-                            id = developerId
-                            name = developerName
-                            email = developerEmail
-                        }
-                    }
-                    scm {
-                        connection = scmConnection
-                        developerConnection = scmDeveloperConnection
-                        url = scmUrl
-                    }
-                }
-
-                pom.withXml {
-                    def pomFile = file("${project.buildDir}/generated-pom.xml")
-                    writeTo(pomFile)
-                    def pomAscFile = signing.sign(pomFile).signatureFiles[0]
-                    artifact(pomAscFile) {
-                        classifier = null
-                        extension = 'pom.asc'
-                    }
-                }
-
-                project.tasks.signArchives.signatureFiles.each {
-                    artifact(it) {
-                        def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
-                        if (matcher.find()) {
-                            classifier = matcher.group(1)
-                        } else {
-                            classifier = null
-                        }
-                        extension = 'jar.asc'
+                    pom.withXml {
+                        def root = asNode()
+                        
+                        // Add name element properly
+                        def nameNode = root.appendNode('name')
+                        nameNode.setValue(publishArtifactName)
+                        
+                        // Add description
+                        def descNode = root.appendNode('description')
+                        descNode.setValue(publishDescription)
+                        
+                        // Add URL
+                        def urlNode = root.appendNode('url')
+                        urlNode.setValue(githubUrl)
+                        
+                        // Add licenses
+                        def licensesNode = root.appendNode('licenses')
+                        def licenseNode = licensesNode.appendNode('license')
+                        licenseNode.appendNode('name', 'MIT License')
+                        licenseNode.appendNode('url', 'https://opensource.org/licenses/MIT')
+                        
+                        // Add developers
+                        def developersNode = root.appendNode('developers')
+                        def developerNode = developersNode.appendNode('developer')
+                        developerNode.appendNode('id', 'cloudinary')
+                        developerNode.appendNode('name', 'Cloudinary')
+                        developerNode.appendNode('email', 'info@cloudinary.com')
+                        
+                        // Add SCM
+                        def scmNode = root.appendNode('scm')
+                        scmNode.appendNode('connection', scmConnection)
+                        scmNode.appendNode('developerConnection', scmDeveloperConnection)
+                        scmNode.appendNode('url', githubUrl)
                     }
                 }
-            }
-        }
-
-        nexusPublishing {
-            repositories {
-                sonatype {
-                    username = project.hasProperty("ossrhToken") ? project.ext["ossrhToken"] : ""
-                    password = project.hasProperty("ossrhTokenPassword") ? project.ext["ossrhTokenPassword"] : ""
-                }
-            }
-        }
-
-        model {
-            tasks.generatePomFileForMavenAarPublication {
-                destination = file("$buildDir/generated-pom.xml")
-            }
-            tasks.publishMavenAarPublicationToMavenLocal {
-                dependsOn project.tasks.signArchives
-            }
-            tasks.publishMavenAarPublicationToSonatypeRepository {
-                dependsOn project.tasks.signArchives
             }
         }
     }
-}
-
-task signAar(type: Sign) {
-    def aarFile = file("$buildDir/outputs/aar/$jarFileName-release.aar")
-    if (aarFile.exists()) {
-        sign aarFile
-    } else {
-//        throw new GradleException("The artifact file does not exist: $aarFile")
+    
+    // Ensure Android generates sources and javadoc JARs
+    android {
+        publishing {
+            singleVariant('release') {
+                withSourcesJar()
+                withJavadocJar()
+            }
+        }
     }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier = 'sources'
-}
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    android.libraryVariants.all { var -> classpath += var.javaCompileProvider.get().classpath }
-}
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-tasks.withType(GenerateModuleMetadata) {
-    enabled = false
 }

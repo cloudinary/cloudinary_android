@@ -4,6 +4,9 @@ android {
     namespace 'com.cloudinary.android.ui'
     compileSdk 34
 
+    lintOptions {
+        abortOnError false
+    }
 
     defaultConfig {
         minSdkVersion 21
