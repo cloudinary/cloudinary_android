@@ -61,7 +61,7 @@ dependencies {
     implementation("androidx.room:room-runtime:2.5.1")
     annotationProcessor("androidx.room:room-compiler:2.5.1")
     implementation("com.squareup.picasso:picasso:2.8")
-    implementation("com.facebook.fresco:fresco:2.6.0")
+    implementation("com.facebook.fresco:fresco:3.6.0")
     implementation("androidx.media3:media3-ui:1.1.1")
     implementation("androidx.navigation:navigation-fragment:2.0.0")
     implementation("androidx.navigation:navigation-ui:2.0.0")
