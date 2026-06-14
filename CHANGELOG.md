@@ -1,11 +1,11 @@
-3.1.2 / 2025-20-09
+3.1.2 / 2025-09-20
 ==================
 
 Other Changes
 -------------
 * Bump fresco version
 
-3.1.0 / 2025-19-06
+3.1.0 / 2025-06-19
 ==================
 
 Other Changes
@@ -14,21 +14,21 @@ Other Changes
 * Make utility classes proper utilities 
 * Bump api level to 34
 
-3.0.2 / 2024-25-09
+3.0.2 / 2024-09-25
 ==================
 
 Other Changes
 -------------
 * Fix publish script
 
-3.0.1 / 2024-25-09
+3.0.1 / 2024-09-25
 ==================
 
 Other Changes
 -------------
 * Fix publish script
 
-3.0.0 / 2024-19-09
+3.0.0 / 2024-09-19
 ==================
 
 Other Changes
