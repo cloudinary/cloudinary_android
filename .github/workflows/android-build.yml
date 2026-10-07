@@ -34,7 +34,7 @@ jobs:
           ./sdkmanager "emulator"
           ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
           ./sdkmanager "platforms;android-${TARGET_VERSION}"
-          ./sdkmanager "system-images;android-30;google_apis;x86"
+          ./sdkmanager "system-images;android-30;google_apis;x86_64"
 
       - name: Enable KVM
         run: |
@@ -45,7 +45,7 @@ jobs:
       - name: Create AVD
         run: |
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86" --force
+          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force
 
       - name: List AVDs (debug)
         run: |
@@ -61,15 +61,20 @@ jobs:
           export PATH=$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin
           # Verify AVD exists before starting
           avdmanager list avd
-          emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics -verbose &
+          emulator -avd test -no-audio -no-window -no-boot-anim -no-metrics -no-snapshot -gpu swiftshader_indirect -verbose > emulator.log 2>&1 &
 
       - name: Wait for emulator
+        timeout-minutes: 10
         run: |
           # Wait for the emulator to start up
           echo "Waiting for emulator to boot..."
           adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
           adb devices
           echo "Emulator is ready"
+
+      - name: Emulator log (on failure)
+        if: failure()
+        run: tail -n 200 emulator.log || true
 
       - name: Export CLOUDINARY_URL
         run: |
