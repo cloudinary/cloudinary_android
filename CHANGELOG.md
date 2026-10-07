@@ -1,3 +1,11 @@
+3.1.3 / 2026-10-07
+==================
+
+Other Changes
+-------------
+* Bump Java SDK version to 2.5.0 (forwards `metadata` on signed uploads)
+* Fix CI
+
 3.1.2 / 2025-09-20
 ==================
 
