@@ -14,23 +14,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
 
       - name: Install Android SDK components
         run: |
           cd $ANDROID_HOME/cmdline-tools/latest/bin
           ./sdkmanager "platform-tools"
           ./sdkmanager "emulator"
-          ./sdkmanager "tools"
           ./sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
           ./sdkmanager "platforms;android-${TARGET_VERSION}"
           ./sdkmanager "system-images;android-30;google_apis;x86"
