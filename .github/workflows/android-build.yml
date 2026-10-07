@@ -11,6 +11,7 @@ jobs:
       ANDROID_HOME: /usr/local/android-sdk
       MALLOC_ARENA_MAX: 2
       ADB_INSTALL_TIMEOUT: 20
+      ANDROID_AVD_HOME: /home/runner/.android/avd
 
     steps:
       - name: Checkout code
@@ -45,6 +46,7 @@ jobs:
       - name: Create AVD
         run: |
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+          mkdir -p "$ANDROID_AVD_HOME"
           echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --force
 
       - name: List AVDs (debug)
